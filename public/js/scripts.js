@@ -35,10 +35,16 @@
                         closeModal(modalId);
                     }
                 });
-                
-                // Escape key to close
-                document.addEventListener('keydown', function(e) {
-                    if (e.key === 'Escape' && modal.classList.contains('active')) {
+            }
+        });
+        
+        // Single document-level escape key listener for all modals
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                // Close all active modals
+                Object.keys(modals).forEach(function(modalId) {
+                    const modal = modals[modalId];
+                    if (modal && modal.classList.contains('active')) {
                         closeModal(modalId);
                     }
                 });
