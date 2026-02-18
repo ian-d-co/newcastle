@@ -29,7 +29,7 @@ ob_start();
                     <div class="card-header"><?php echo e($booking['title']); ?></div>
                     <div class="card-body">
                         <p><strong>Day:</strong> <?php echo e($booking['day']); ?></p>
-                        <p><strong>Time:</strong> <?php echo e(date('g:i A', strtotime($booking['start_time']))); ?> - <?php echo e(date('g:i A', strtotime($booking['end_time']))); ?></p>
+                        <p><strong>Time:</strong> <?php echo e(formatDisplayTime($booking['start_time'])); ?> - <?php echo e(formatDisplayTime($booking['end_time'])); ?></p>
                         <?php if ($booking['requires_prepayment']): ?>
                             <p><strong>Price:</strong> £<?php echo number_format($booking['price'], 2); ?></p>
                             <p><strong>Payment:</strong> 
@@ -55,7 +55,7 @@ ob_start();
                     <div class="card-header"><?php echo e($booking['title']); ?></div>
                     <div class="card-body">
                         <p><strong>Day:</strong> <?php echo e($booking['day']); ?></p>
-                        <p><strong>Time:</strong> <?php echo e(date('g:i A', strtotime($booking['start_time']))); ?> - <?php echo e(date('g:i A', strtotime($booking['end_time']))); ?></p>
+                        <p><strong>Time:</strong> <?php echo e(formatDisplayTime($booking['start_time'])); ?> - <?php echo e(formatDisplayTime($booking['end_time'])); ?></p>
                         <?php if ($booking['requires_prepayment']): ?>
                             <p><strong>Price:</strong> £<?php echo number_format($booking['price'], 2); ?></p>
                             <p><strong>Payment:</strong> 
@@ -132,8 +132,8 @@ ob_start();
                 <div class="card mb-3">
                     <div class="card-header"><?php echo e($reservation['hotel_name']); ?> - <?php echo e($reservation['room_type']); ?></div>
                     <div class="card-body">
-                        <p><strong>Check-in:</strong> <?php echo date('F j, Y', strtotime($reservation['check_in'])); ?></p>
-                        <p><strong>Check-out:</strong> <?php echo date('F j, Y', strtotime($reservation['check_out'])); ?></p>
+                        <p><strong>Check-in:</strong> <?php echo formatDisplayDate($reservation['check_in']); ?></p>
+                        <p><strong>Check-out:</strong> <?php echo formatDisplayDate($reservation['check_out']); ?></p>
                         <p><strong>Total price:</strong> £<?php echo number_format($reservation['total_price'], 2); ?></p>
                         <p><strong>Payment:</strong> 
                             <?php if ($reservation['payment_status'] === 'paid'): ?>
@@ -154,7 +154,7 @@ ob_start();
                 <div class="card mb-3">
                     <div class="card-body">
                         <p><strong><?php echo e($poll['question']); ?></strong></p>
-                        <p class="text-muted">Voted on <?php echo date('F j, Y', strtotime($poll['voted_at'])); ?></p>
+                        <p class="text-muted">Voted on <?php echo formatDisplayDate($poll['voted_at']); ?></p>
                     </div>
                 </div>
             <?php endforeach; ?>

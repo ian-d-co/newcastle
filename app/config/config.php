@@ -245,6 +245,12 @@ function initSession() {
  * @return bool True if user is logged in
  */
 function isLoggedIn() {
+    // Check if session is started first
+    if (session_status() !== PHP_SESSION_ACTIVE) {
+        error_log('WARNING: isLoggedIn() called but session not started');
+        return false;
+    }
+    
     return isset($_SESSION['user_id']) && isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true;
 }
 
@@ -263,6 +269,17 @@ function getCurrentUserId() {
  * @return bool True if user is admin
  */
 function isAdmin() {
+    // Check if session is started first
+    if (session_status() !== PHP_SESSION_ACTIVE) {
+        error_log('WARNING: isAdmin() called but session not started');
+        return false;
+    }
+    
+    // Must be logged in first
+    if (!isLoggedIn()) {
+        return false;
+    }
+    
     return isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true;
 }
 
@@ -344,4 +361,24 @@ function e($str) {
  */
 function formatDate($date, $format = 'Y-m-d H:i:s') {
     return date($format, strtotime($date));
+}
+
+/**
+ * Format date as DD MONTH YEAR (e.g., 18 February 2026)
+ * 
+ * @param string $date Date string
+ * @return string Formatted date
+ */
+function formatDisplayDate($date) {
+    return date('d F Y', strtotime($date));
+}
+
+/**
+ * Format time in 24-hour clock (e.g., 14:30)
+ * 
+ * @param string $time Time string
+ * @return string Formatted time
+ */
+function formatDisplayTime($time) {
+    return date('H:i', strtotime($time));
 }

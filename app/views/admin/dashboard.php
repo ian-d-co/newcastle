@@ -123,7 +123,7 @@ ob_start();
                                     <td style="padding: 0.75rem;"><?php echo e($attendee['discord_name']); ?></td>
                                     <td style="padding: 0.75rem;"><?php echo e($attendee['name']); ?></td>
                                     <td style="padding: 0.75rem;"><?php echo implode(', ', $attendee['days_attending']); ?></td>
-                                    <td style="padding: 0.75rem;"><?php echo date('M j, Y', strtotime($attendee['created_at'])); ?></td>
+                                    <td style="padding: 0.75rem;"><?php echo formatDisplayDate($attendee['created_at']); ?></td>
                                 </tr>
                             <?php endforeach; ?>
                         </tbody>

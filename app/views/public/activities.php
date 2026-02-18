@@ -39,7 +39,7 @@ ob_start();
                             
                             <div class="item-meta">
                                 <div class="item-meta-item">
-                                    <strong>Time:</strong> <?php echo e(date('g:i A', strtotime($activity['start_time']))); ?> - <?php echo e(date('g:i A', strtotime($activity['end_time']))); ?>
+                                    <strong>Time:</strong> <?php echo e(formatDisplayTime($activity['start_time'])); ?> - <?php echo e(formatDisplayTime($activity['end_time'])); ?>
                                 </div>
                                 <div class="item-meta-item">
                                     <strong>Capacity:</strong> 

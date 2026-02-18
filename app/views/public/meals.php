@@ -39,7 +39,7 @@ ob_start();
                             
                             <div class="item-meta">
                                 <div class="item-meta-item">
-                                    <strong>Time:</strong> <?php echo e(date('g:i A', strtotime($meal['start_time']))); ?> - <?php echo e(date('g:i A', strtotime($meal['end_time']))); ?>
+                                    <strong>Time:</strong> <?php echo e(formatDisplayTime($meal['start_time'])); ?> - <?php echo e(formatDisplayTime($meal['end_time'])); ?>
                                 </div>
                                 <div class="item-meta-item">
                                     <strong>Capacity:</strong> 

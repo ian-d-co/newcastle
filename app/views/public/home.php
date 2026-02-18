@@ -8,8 +8,10 @@ ob_start();
     <div class="container">
         <div class="hero-content">
             <h1><?php echo e($event['title']); ?></h1>
+            <?php if (!empty($event['description'])): ?>
             <p><?php echo e($event['description']); ?></p>
-            <p><strong><?php echo date('F j, Y', strtotime($event['start_date'])); ?> - <?php echo date('F j, Y', strtotime($event['end_date'])); ?></strong></p>
+            <?php endif; ?>
+            <p><strong><?php echo formatDisplayDate($event['start_date']); ?> - <?php echo formatDisplayDate($event['end_date']); ?></strong></p>
             
             <?php if (!$isAttending): ?>
             <button class="btn btn-accent btn-lg" onclick="modalManager.open('attendance-modal')">

@@ -36,6 +36,13 @@ class AuthController {
         $_SESSION['logged_in'] = true;
         $_SESSION['is_admin'] = (bool)$user['is_admin'];
         
+        // Log successful login
+        error_log('=== LOGIN SUCCESSFUL ===');
+        error_log('User ID: ' . $user['id']);
+        error_log('Discord Name: ' . $user['discord_name']);
+        error_log('Is Admin: ' . ($user['is_admin'] ? 'TRUE' : 'FALSE'));
+        error_log('Session is_admin set to: ' . ($_SESSION['is_admin'] ? 'TRUE' : 'FALSE'));
+        
         redirect('/index.php?page=home');
     }
     

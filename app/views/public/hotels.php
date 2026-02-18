@@ -115,8 +115,8 @@ ob_start();
                         <?php echo e($reservation['hotel_name']); ?> - <?php echo e($reservation['room_type']); ?>
                     </div>
                     <div class="card-body">
-                        <p><strong>Check-in:</strong> <?php echo date('F j, Y', strtotime($reservation['check_in'])); ?></p>
-                        <p><strong>Check-out:</strong> <?php echo date('F j, Y', strtotime($reservation['check_out'])); ?></p>
+                        <p><strong>Check-in:</strong> <?php echo formatDisplayDate($reservation['check_in']); ?></p>
+                        <p><strong>Check-out:</strong> <?php echo formatDisplayDate($reservation['check_out']); ?></p>
                         <p><strong>Nights:</strong> <?php echo e($reservation['total_nights']); ?></p>
                         <p><strong>Total price:</strong> £<?php echo number_format($reservation['total_price'], 2); ?></p>
                         <p><strong>Payment status:</strong> 
