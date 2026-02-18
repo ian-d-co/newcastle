@@ -158,7 +158,7 @@ If SSH is not available:
    cp app/config/.env.example app/config/.env
    ```
    
-   **Note:** The application looks for `.env` in `app/config/` first, then falls back to the root directory. For security and organization, always use `app/config/.env`.
+   **Note:** The application configuration looks for `.env` in `app/config/` first, and falls back to the root directory for backward compatibility. However, for security and organization, **always use `app/config/.env`** as documented in this guide.
 
 2. **Edit .env file** with your database credentials
    ```bash
