@@ -12,8 +12,33 @@ error_log('=== Dicksord Fest 2026 Request Start ===');
 error_log('Request URI: ' . ($_SERVER['REQUEST_URI'] ?? 'N/A'));
 error_log('Request Method: ' . ($_SERVER['REQUEST_METHOD'] ?? 'N/A'));
 
-// Define base path
-define('BASE_PATH', dirname(__DIR__));
+// Define base path - Robust detection for various deployment scenarios
+// This handles both standard repo structure and Hostinger public_html deployment
+$basePath = dirname(__DIR__);
+
+// Verify that app directory exists at the detected location
+// If not found, attempt to locate it (handles document root mismatches)
+if (!is_dir($basePath . '/app')) {
+    error_log('Warning: app directory not found at expected location: ' . $basePath . '/app');
+    
+    // Try parent directory (for Hostinger public_html structure)
+    if (is_dir(__DIR__ . '/../app')) {
+        $basePath = realpath(__DIR__ . '/..');
+        error_log('Found app directory at: ' . $basePath . '/app');
+    } 
+    // Try using DOCUMENT_ROOT as reference
+    elseif (isset($_SERVER['DOCUMENT_ROOT']) && is_dir($_SERVER['DOCUMENT_ROOT'] . '/../app')) {
+        $basePath = realpath($_SERVER['DOCUMENT_ROOT'] . '/..');
+        error_log('Found app directory using DOCUMENT_ROOT: ' . $basePath . '/app');
+    } 
+    else {
+        error_log('FATAL: Could not locate app directory. Checked: ' . 
+                  $basePath . '/app, ' . __DIR__ . '/../app, ' . 
+                  ($_SERVER['DOCUMENT_ROOT'] ?? 'N/A') . '/../app');
+    }
+}
+
+define('BASE_PATH', $basePath);
 
 try {
     // Load configuration and helpers

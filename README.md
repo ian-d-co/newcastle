@@ -47,10 +47,10 @@ A mobile-first, responsive web application for managing the Dicksord Fest 2026 e
 
 2. **Create environment file**:
    ```bash
-   cp .env.example .env
+   cp app/config/.env.example app/config/.env
    ```
 
-3. **Configure database** (edit `.env`):
+3. **Configure database** (edit `app/config/.env`):
    ```
    DB_HOST=localhost
    DB_NAME=u983097270_newc
@@ -123,7 +123,8 @@ A mobile-first, responsive web application for managing the Dicksord Fest 2026 e
    - Use phpMyAdmin or MySQL command line to import `database/schema.sql`
 
 4. **Configure environment**:
-   - Create `.env` file from `.env.example`
+   - Create `.env` file from `app/config/.env.example`
+   - Copy it to `app/config/.env`
    - Update database credentials
 
 5. **Set file permissions**:
@@ -161,6 +162,7 @@ newcastle/
 │       └── poll-vote.php
 ├── app/
 │   ├── config/
+│   │   ├── .env.example   # Environment template
 │   │   └── config.php     # Configuration & database connection
 │   ├── models/            # Database models
 │   │   ├── User.php
@@ -193,7 +195,6 @@ newcastle/
 │           └── login.php
 ├── database/
 │   └── schema.sql         # Database schema
-├── .env.example           # Environment template
 └── README.md
 ```
 
