@@ -8,6 +8,5 @@
  * It simply includes the main application entry point.
  */
 
-// Change to public directory and include the main index
-chdir(__DIR__ . '/public');
+// Include the main index
 require __DIR__ . '/public/index.php';

@@ -33,7 +33,8 @@ class AuthController {
         // Set session
         $_SESSION['user_id'] = $user['id'];
         $_SESSION['discord_name'] = $user['discord_name'];
-        $_SESSION['is_admin'] = $user['is_admin'];
+        $_SESSION['logged_in'] = true;
+        $_SESSION['is_admin'] = (bool)$user['is_admin'];
         
         redirect('/index.php?page=home');
     }
