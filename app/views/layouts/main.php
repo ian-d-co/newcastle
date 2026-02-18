@@ -15,6 +15,11 @@
             <div class="header-content">
                 <a href="/index.php" class="logo">Dicksord Fest 2026</a>
                 
+                <?php if (!isLoggedIn()): ?>
+                <!-- Mobile login button (visible on mobile without toggle) -->
+                <a href="/index.php?page=login" class="btn-login-mobile <?php echo ($currentPage ?? '') === 'login' ? 'active' : ''; ?>">Login</a>
+                <?php endif; ?>
+                
                 <button class="nav-toggle" aria-label="Toggle navigation">☰</button>
                 
                 <?php if (isLoggedIn()): ?>
