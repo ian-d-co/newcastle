@@ -236,13 +236,37 @@ function editPoll(poll) {
         const div = document.createElement('div');
         div.className = 'option-row';
         div.style.cssText = 'display: flex; gap: 0.5rem; margin-bottom: 0.5rem;';
-        div.innerHTML = `
-            <input type="text" class="form-control poll-option" placeholder="Option ${index + 1}" value="${option.option_text}" required>
-            <button type="button" onclick="removeOption(this)" class="btn btn-sm btn-danger" ${index === 0 ? 'style="display: none;"' : ''}>×</button>
-        `;
+        
+        // Create input and set value safely
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.className = 'form-control poll-option';
+        input.placeholder = 'Option ' + (index + 1);
+        input.value = option.option_text;
+        input.required = true;
+        input.disabled = true; // Disable editing of existing options
+        
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'btn btn-sm btn-danger';
+        button.textContent = '×';
+        button.onclick = function() { removeOption(this); };
+        if (index === 0) {
+            button.style.display = 'none';
+        }
+        button.disabled = true; // Disable deletion of existing options
+        
+        div.appendChild(input);
+        div.appendChild(button);
         container.appendChild(div);
     });
     optionCounter = poll.options.length;
+    
+    // Add notice that options cannot be edited
+    const notice = document.createElement('p');
+    notice.style.cssText = 'color: #666; font-size: 0.875rem; margin-top: 0.5rem;';
+    notice.textContent = 'Note: Poll options cannot be edited after creation.';
+    container.appendChild(notice);
     
     modalManager.open('pollModal');
 }
@@ -322,7 +346,7 @@ document.getElementById('pollForm').addEventListener('submit', function(e) {
     if (editingId) {
         formData.id = editingId;
         formData.is_active = this.is_active.checked ? 1 : 0;
-        // Note: Options can't be edited after creation in this simple version
+        // Options cannot be edited after creation - only poll metadata
         delete formData.options;
     }
     
