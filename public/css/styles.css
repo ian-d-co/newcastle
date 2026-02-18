@@ -165,6 +165,9 @@ a:hover {
     line-height: 1.5;
     margin-left: auto;
     margin-right: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .btn-login-mobile:hover {
@@ -173,8 +176,8 @@ a:hover {
 }
 
 .btn-login-mobile.active {
-    background: rgba(255, 255, 255, 0.3);
-    color: var(--white);
+    background: #e5bd1a;
+    color: var(--primary);
 }
 
 /* Hero Section */

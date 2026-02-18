@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Mobile Login Test - Dicksord Fest 2026</title>
+    <link rel="stylesheet" href="http://localhost:8080/css/styles.css">
+</head>
+<body>
+    <!-- Header - Not Logged In (Mobile View Test) -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <a href="/index.php" class="logo">Dicksord Fest 2026</a>
+                
+                <!-- Mobile login button (visible on mobile without toggle) -->
+                <a href="/index.php?page=login" class="btn-login-mobile">Login</a>
+                
+                <button class="nav-toggle" aria-label="Toggle navigation">☰</button>
+                
+                <nav class="nav">
+                    <ul>
+                        <li><a href="/index.php?page=login">Login</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        <div class="container">
+            <h1>Updated Mobile Login Button</h1>
+            <p>Testing the improved button with:</p>
+            <ul>
+                <li>Flexbox for proper centering</li>
+                <li>Consistent active state styling</li>
+                <li>Guaranteed 44px minimum height</li>
+            </ul>
+        </div>
+    </main>
+
+    <script src="http://localhost:8080/js/scripts.js"></script>
+</body>
+</html>
