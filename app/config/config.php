@@ -261,6 +261,16 @@ function escapeHtml($str) {
 }
 
 /**
+ * Short alias for escapeHtml - Sanitize output for HTML display
+ * 
+ * @param string $str String to sanitize
+ * @return string Sanitized string
+ */
+function e($str) {
+    return escapeHtml($str);
+}
+
+/**
  * Format date for display
  * 
  * @param string $date Date string

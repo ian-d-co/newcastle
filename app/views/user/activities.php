@@ -1,0 +1,1 @@
+../public/activities.php

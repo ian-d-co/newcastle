@@ -1,6 +1,9 @@
 # Enable rewriting
 RewriteEngine On
 
+# Set base path for rewrites
+RewriteBase /
+
 # Redirect to HTTPS (uncomment in production)
 # RewriteCond %{HTTPS} off
 # RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
@@ -14,10 +17,17 @@ Options -Indexes
     Deny from all
 </FilesMatch>
 
-# Handle missing files
+# Allow static files (CSS, JS, images) to bypass rewriting
+RewriteCond %{REQUEST_FILENAME} -f
+RewriteRule ^(css|js|images|api)/.*$ - [L]
+
+# Redirect root to home page
+RewriteRule ^$ index.php?page=home [L,QSA]
+
+# Handle all other requests - route to index.php
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^(.*)$ index.php?url=$1 [QSA,L]
+RewriteRule ^(.*)$ index.php [L,QSA]
 
 # Security headers
 <IfModule mod_headers.c>

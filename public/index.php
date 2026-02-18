@@ -58,6 +58,26 @@ if ($action === 'login' && $_SERVER['REQUEST_METHOD'] === 'POST') {
 // PUBLIC ROUTES (No authentication required)
 // ============================================================================
 
+// Home page (public)
+if ($page === 'home') {
+    // Load required models
+    require_once BASE_PATH . '/app/models/Event.php';
+    
+    $eventModel = new Event();
+    $event = $eventModel->getActive();
+    
+    // Check if user is attending (if logged in)
+    $isAttending = false;
+    if (isLoggedIn()) {
+        $userId = getCurrentUserId();
+        $isAttending = $eventModel->getAttendance($userId, $event['id']) !== false;
+    }
+    
+    $pageTitle = 'Home';
+    include BASE_PATH . '/app/views/public/home.php';
+    exit;
+}
+
 // Login page
 if ($page === 'login') {
     require_once BASE_PATH . '/app/controllers/AuthController.php';
@@ -110,36 +130,29 @@ switch ($page) {
     // USER ROUTES
     // ========================================================================
     
-    case 'home':
     case 'dashboard':
-        if ($page === 'home') {
-            $pageTitle = 'Home';
-            $isAttending = $eventModel->getAttendance($userId, $event['id']) !== false;
-            include BASE_PATH . '/app/views/public/home.php';
-        } else {
-            $pageTitle = 'Dashboard';
-            $attendance = $eventModel->getAttendance($userId, $event['id']);
-            $activityBookings = $activityModel->getUserBookings($userId, $event['id']);
-            $mealBookings = $mealModel->getUserBookings($userId, $event['id']);
-            $carshareOffer = $carshareModel->getUserOffer($userId, $event['id']);
-            $carshareBooking = $carshareModel->getUserBooking($userId, $event['id']);
-            $hostingOffer = $hostingModel->getUserOffer($userId, $event['id']);
-            $hostingBooking = $hostingModel->getUserBooking($userId, $event['id']);
-            $hotelReservations = $hotelModel->getUserReservations($userId, $event['id']);
-            
-            // Get polls voted on
-            $db = getDbConnection();
-            $sql = "SELECT DISTINCT p.id, p.question, pv.created_at as voted_at 
-                    FROM polls p
-                    JOIN poll_votes pv ON p.id = pv.poll_id
-                    WHERE pv.user_id = :user_id AND p.event_id = :event_id
-                    ORDER BY pv.created_at DESC";
-            $stmt = $db->prepare($sql);
-            $stmt->execute(['user_id' => $userId, 'event_id' => $event['id']]);
-            $pollsVoted = $stmt->fetchAll();
-            
-            include BASE_PATH . '/app/views/public/dashboard.php';
-        }
+        $pageTitle = 'Dashboard';
+        $attendance = $eventModel->getAttendance($userId, $event['id']);
+        $activityBookings = $activityModel->getUserBookings($userId, $event['id']);
+        $mealBookings = $mealModel->getUserBookings($userId, $event['id']);
+        $carshareOffer = $carshareModel->getUserOffer($userId, $event['id']);
+        $carshareBooking = $carshareModel->getUserBooking($userId, $event['id']);
+        $hostingOffer = $hostingModel->getUserOffer($userId, $event['id']);
+        $hostingBooking = $hostingModel->getUserBooking($userId, $event['id']);
+        $hotelReservations = $hotelModel->getUserReservations($userId, $event['id']);
+        
+        // Get polls voted on
+        $db = getDbConnection();
+        $sql = "SELECT DISTINCT p.id, p.question, pv.created_at as voted_at 
+                FROM polls p
+                JOIN poll_votes pv ON p.id = pv.poll_id
+                WHERE pv.user_id = :user_id AND p.event_id = :event_id
+                ORDER BY pv.created_at DESC";
+        $stmt = $db->prepare($sql);
+        $stmt->execute(['user_id' => $userId, 'event_id' => $event['id']]);
+        $pollsVoted = $stmt->fetchAll();
+        
+        include BASE_PATH . '/app/views/public/dashboard.php';
         break;
 
     case 'activities':
@@ -291,7 +304,8 @@ switch ($page) {
     // ========================================================================
     
     default:
-        // Redirect unknown pages to home
-        redirect('/index.php?page=home');
+        http_response_code(404);
+        $pageTitle = 'Page Not Found';
+        include BASE_PATH . '/app/views/pages/404.php';
         break;
 }

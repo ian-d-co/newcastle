@@ -1,0 +1,1 @@
+../public/hotels.php
