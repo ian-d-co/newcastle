@@ -65,6 +65,30 @@ header('X-XSS-Protection: 1; mode=block');
 // Remove PHP version header for security
 header_remove('X-Powered-By');
 
+/**
+ * Helper function to render error pages
+ * Ensures error responses are never blank and include proper HTML
+ */
+function renderErrorPage($title, $message, $debugInfo = null) {
+    http_response_code(500);
+    $html = '<html><head><title>' . htmlspecialchars($title) . '</title>';
+    $html .= '<style>body { font-family: Arial, sans-serif; padding: 20px; max-width: 800px; margin: 0 auto; }';
+    $html .= 'h1 { color: #d32f2f; } .debug { background: #f5f5f5; padding: 15px; border-left: 3px solid #d32f2f; margin-top: 20px; }';
+    $html .= 'pre { white-space: pre-wrap; word-wrap: break-word; }</style></head><body>';
+    $html .= '<h1>' . htmlspecialchars($title) . '</h1>';
+    $html .= '<p>' . htmlspecialchars($message) . '</p>';
+    
+    if (defined('APP_DEBUG') && APP_DEBUG && $debugInfo) {
+        $html .= '<div class="debug"><strong>Debug Information:</strong><pre>' . htmlspecialchars($debugInfo) . '</pre></div>';
+    }
+    
+    $html .= '<p><a href="/index.php?page=home">Return to Home</a></p>';
+    $html .= '</body></html>';
+    
+    echo $html;
+    exit;
+}
+
 // Start session
 initSession();
 
@@ -171,213 +195,251 @@ if ($page === 'home') {
 // All other pages require authentication
 Auth::check();
 
-// Load required models
-require_once BASE_PATH . '/app/models/Event.php';
-require_once BASE_PATH . '/app/models/Activity.php';
-require_once BASE_PATH . '/app/models/Meal.php';
-require_once BASE_PATH . '/app/models/Poll.php';
-require_once BASE_PATH . '/app/models/CarShare.php';
-require_once BASE_PATH . '/app/models/Hosting.php';
-require_once BASE_PATH . '/app/models/Hotel.php';
+// Wrap authenticated routes in try/catch to prevent blank 500 errors
+try {
+    // Load required models
+    require_once BASE_PATH . '/app/models/Event.php';
+    require_once BASE_PATH . '/app/models/Activity.php';
+    require_once BASE_PATH . '/app/models/Meal.php';
+    require_once BASE_PATH . '/app/models/Poll.php';
+    require_once BASE_PATH . '/app/models/CarShare.php';
+    require_once BASE_PATH . '/app/models/Hosting.php';
+    require_once BASE_PATH . '/app/models/Hotel.php';
 
-// Initialize models
-$eventModel = new Event();
-$activityModel = new Activity();
-$mealModel = new Meal();
-$pollModel = new Poll();
-$carshareModel = new CarShare();
-$hostingModel = new Hosting();
-$hotelModel = new Hotel();
+    // Initialize models
+    $eventModel = new Event();
+    $activityModel = new Activity();
+    $mealModel = new Meal();
+    $pollModel = new Poll();
+    $carshareModel = new CarShare();
+    $hostingModel = new Hosting();
+    $hotelModel = new Hotel();
 
-// Get active event and current user ID
-$event = $eventModel->getActive();
-$userId = getCurrentUserId();
+    // Get active event and current user ID
+    $event = $eventModel->getActive();
+    $userId = getCurrentUserId();
+    
+    // Defensive check: ensure we have an active event
+    if (!$event || !isset($event['id'])) {
+        error_log('Warning: No active event found for authenticated page request: ' . $page);
+        renderErrorPage(
+            'No Active Event',
+            'There is currently no active event. Please check back later or contact an administrator.',
+            'Page requested: ' . $page
+        );
+    }
+} catch (Exception $e) {
+    // Log the error with full details
+    error_log('ERROR loading models or active event: ' . $e->getMessage());
+    error_log('Stack trace: ' . $e->getTraceAsString());
+    
+    // Render error page instead of blank 500
+    renderErrorPage(
+        'Service Error',
+        'We encountered an error loading the requested page. Please try again later.',
+        $e->getMessage() . "\n\nStack trace:\n" . $e->getTraceAsString()
+    );
+}
 
 // ============================================================================
 // ROUTING
 // ============================================================================
 
 // Route requests based on page parameter
-switch ($page) {
-    // ========================================================================
-    // USER ROUTES
-    // ========================================================================
-    
-    case 'dashboard':
-        $pageTitle = 'Dashboard';
-        $attendance = $eventModel->getAttendance($userId, $event['id']);
-        $activityBookings = $activityModel->getUserBookings($userId, $event['id']);
-        $mealBookings = $mealModel->getUserBookings($userId, $event['id']);
-        $carshareOffer = $carshareModel->getUserOffer($userId, $event['id']);
-        $carshareBooking = $carshareModel->getUserBooking($userId, $event['id']);
-        $hostingOffer = $hostingModel->getUserOffer($userId, $event['id']);
-        $hostingBooking = $hostingModel->getUserBooking($userId, $event['id']);
-        $hotelReservations = $hotelModel->getUserReservations($userId, $event['id']);
+// Wrap in try/catch to prevent blank 500 errors during route execution
+try {
+    switch ($page) {
+        // ========================================================================
+        // USER ROUTES
+        // ========================================================================
         
-        // Get polls voted on
-        $db = getDbConnection();
-        $sql = "SELECT DISTINCT p.id, p.question, pv.created_at as voted_at 
-                FROM polls p
-                JOIN poll_votes pv ON p.id = pv.poll_id
-                WHERE pv.user_id = :user_id AND p.event_id = :event_id
-                ORDER BY pv.created_at DESC";
-        $stmt = $db->prepare($sql);
-        $stmt->execute(['user_id' => $userId, 'event_id' => $event['id']]);
-        $pollsVoted = $stmt->fetchAll();
-        
-        include BASE_PATH . '/app/views/public/dashboard.php';
-        break;
-
-    case 'activities':
-        $pageTitle = 'Activities';
-        $activities = $activityModel->getAll($event['id']);
-        
-        // Check which activities user has booked
-        foreach ($activities as &$activity) {
-            $activity['is_booked'] = $activityModel->isBooked($activity['id'], $userId);
+        case 'dashboard':
+            $pageTitle = 'Dashboard';
+            $attendance = $eventModel->getAttendance($userId, $event['id']);
+            $activityBookings = $activityModel->getUserBookings($userId, $event['id']);
+            $mealBookings = $mealModel->getUserBookings($userId, $event['id']);
+            $carshareOffer = $carshareModel->getUserOffer($userId, $event['id']);
+            $carshareBooking = $carshareModel->getUserBooking($userId, $event['id']);
+            $hostingOffer = $hostingModel->getUserOffer($userId, $event['id']);
+            $hostingBooking = $hostingModel->getUserBooking($userId, $event['id']);
+            $hotelReservations = $hotelModel->getUserReservations($userId, $event['id']);
             
-            // Get payment status if booked
-            if ($activity['is_booked']) {
-                $bookings = $activityModel->getUserBookings($userId, $event['id']);
-                foreach ($bookings as $booking) {
-                    if ($booking['activity_id'] == $activity['id']) {
-                        $activity['payment_status'] = $booking['payment_status'];
-                        break;
+            // Get polls voted on
+            $db = getDbConnection();
+            $sql = "SELECT DISTINCT p.id, p.question, pv.created_at as voted_at 
+                    FROM polls p
+                    JOIN poll_votes pv ON p.id = pv.poll_id
+                    WHERE pv.user_id = :user_id AND p.event_id = :event_id
+                    ORDER BY pv.created_at DESC";
+            $stmt = $db->prepare($sql);
+            $stmt->execute(['user_id' => $userId, 'event_id' => $event['id']]);
+            $pollsVoted = $stmt->fetchAll();
+            
+            include BASE_PATH . '/app/views/public/dashboard.php';
+            break;
+
+        case 'activities':
+            $pageTitle = 'Activities';
+            $activities = $activityModel->getAll($event['id']);
+            
+            // Check which activities user has booked
+            foreach ($activities as &$activity) {
+                $activity['is_booked'] = $activityModel->isBooked($activity['id'], $userId);
+                
+                // Get payment status if booked
+                if ($activity['is_booked']) {
+                    $bookings = $activityModel->getUserBookings($userId, $event['id']);
+                    foreach ($bookings as $booking) {
+                        if ($booking['activity_id'] == $activity['id']) {
+                            $activity['payment_status'] = $booking['payment_status'];
+                            break;
+                        }
                     }
                 }
             }
-        }
-        
-        include BASE_PATH . '/app/views/public/activities.php';
-        break;
-
-    case 'meals':
-        $pageTitle = 'Meals';
-        $meals = $mealModel->getAll($event['id']);
-        
-        // Check which meals user has booked
-        foreach ($meals as &$meal) {
-            $meal['is_booked'] = $mealModel->isBooked($meal['id'], $userId);
             
-            // Get payment status if booked
-            if ($meal['is_booked']) {
-                $bookings = $mealModel->getUserBookings($userId, $event['id']);
-                foreach ($bookings as $booking) {
-                    if ($booking['meal_id'] == $meal['id']) {
-                        $meal['payment_status'] = $booking['payment_status'];
-                        break;
+            include BASE_PATH . '/app/views/public/activities.php';
+            break;
+
+        case 'meals':
+            $pageTitle = 'Meals';
+            $meals = $mealModel->getAll($event['id']);
+            
+            // Check which meals user has booked
+            foreach ($meals as &$meal) {
+                $meal['is_booked'] = $mealModel->isBooked($meal['id'], $userId);
+                
+                // Get payment status if booked
+                if ($meal['is_booked']) {
+                    $bookings = $mealModel->getUserBookings($userId, $event['id']);
+                    foreach ($bookings as $booking) {
+                        if ($booking['meal_id'] == $meal['id']) {
+                            $meal['payment_status'] = $booking['payment_status'];
+                            break;
+                        }
                     }
                 }
             }
-        }
-        
-        include BASE_PATH . '/app/views/public/meals.php';
-        break;
+            
+            include BASE_PATH . '/app/views/public/meals.php';
+            break;
 
-    case 'polls':
-        $pageTitle = 'Polls';
-        $polls = $pollModel->getActive($event['id']);
-        
-        // Check which polls user has voted on and get options
-        foreach ($polls as &$poll) {
-            $poll['has_voted'] = $pollModel->hasVoted($poll['id'], $userId);
-            $poll['user_votes'] = $pollModel->getUserVotes($poll['id'], $userId);
-            $poll['options'] = $pollModel->getOptions($poll['id']);
-        }
-        
-        include BASE_PATH . '/app/views/public/polls.php';
-        break;
+        case 'polls':
+            $pageTitle = 'Polls';
+            $polls = $pollModel->getActive($event['id']);
+            
+            // Check which polls user has voted on and get options
+            foreach ($polls as &$poll) {
+                $poll['has_voted'] = $pollModel->hasVoted($poll['id'], $userId);
+                $poll['user_votes'] = $pollModel->getUserVotes($poll['id'], $userId);
+                $poll['options'] = $pollModel->getOptions($poll['id']);
+            }
+            
+            include BASE_PATH . '/app/views/public/polls.php';
+            break;
 
-    case 'carshare':
-        $pageTitle = 'Carshare';
-        $availableOffers = $carshareModel->getAvailable($event['id']);
-        $userOffer = $carshareModel->getUserOffer($userId, $event['id']);
-        $userBooking = $carshareModel->getUserBooking($userId, $event['id']);
-        $offerBookings = $userOffer ? $carshareModel->getOfferBookings($userOffer['id']) : [];
-        
-        include BASE_PATH . '/app/views/public/carshare.php';
-        break;
+        case 'carshare':
+            $pageTitle = 'Carshare';
+            $availableOffers = $carshareModel->getAvailable($event['id']);
+            $userOffer = $carshareModel->getUserOffer($userId, $event['id']);
+            $userBooking = $carshareModel->getUserBooking($userId, $event['id']);
+            $offerBookings = $userOffer ? $carshareModel->getOfferBookings($userOffer['id']) : [];
+            
+            include BASE_PATH . '/app/views/public/carshare.php';
+            break;
 
-    case 'hosting':
-        $pageTitle = 'Hosting';
-        $availableOffers = $hostingModel->getAvailable($event['id']);
-        $userOffer = $hostingModel->getUserOffer($userId, $event['id']);
-        $userBooking = $hostingModel->getUserBooking($userId, $event['id']);
-        $offerBookings = $userOffer ? $hostingModel->getOfferBookings($userOffer['id']) : [];
-        
-        include BASE_PATH . '/app/views/public/hosting.php';
-        break;
+        case 'hosting':
+            $pageTitle = 'Hosting';
+            $availableOffers = $hostingModel->getAvailable($event['id']);
+            $userOffer = $hostingModel->getUserOffer($userId, $event['id']);
+            $userBooking = $hostingModel->getUserBooking($userId, $event['id']);
+            $offerBookings = $userOffer ? $hostingModel->getOfferBookings($userOffer['id']) : [];
+            
+            include BASE_PATH . '/app/views/public/hosting.php';
+            break;
 
-    case 'hotels':
-        $pageTitle = 'Hotels';
-        $hotels = $hotelModel->getAll($event['id']);
-        
-        // Get rooms for each hotel
-        foreach ($hotels as &$hotel) {
-            $hotel['rooms'] = $hotelModel->getRoomsByHotel($hotel['id']);
-        }
-        
-        $userReservations = $hotelModel->getUserReservations($userId, $event['id']);
-        
-        include BASE_PATH . '/app/views/public/hotels.php';
-        break;
+        case 'hotels':
+            $pageTitle = 'Hotels';
+            $hotels = $hotelModel->getAll($event['id']);
+            
+            // Get rooms for each hotel
+            foreach ($hotels as &$hotel) {
+                $hotel['rooms'] = $hotelModel->getRoomsByHotel($hotel['id']);
+            }
+            
+            $userReservations = $hotelModel->getUserReservations($userId, $event['id']);
+            
+            include BASE_PATH . '/app/views/public/hotels.php';
+            break;
 
-    // ========================================================================
-    // ADMIN ROUTES (Require admin privileges)
-    // ========================================================================
+        // ========================================================================
+        // ADMIN ROUTES (Require admin privileges)
+        // ========================================================================
+        
+        case 'admin':
+            AdminAuth::check();
+            $pageTitle = 'Admin Dashboard';
+            
+            // Get statistics
+            $db = getDbConnection();
+            
+            $stats = [];
+            
+            // Total attendees
+            $stmt = $db->prepare("SELECT COUNT(*) as count FROM event_attendees WHERE event_id = :event_id");
+            $stmt->execute(['event_id' => $event['id']]);
+            $stats['total_attendees'] = $stmt->fetch()['count'];
+            
+            // Total activities
+            $stmt = $db->prepare("SELECT COUNT(*) as count FROM activities WHERE event_id = :event_id");
+            $stmt->execute(['event_id' => $event['id']]);
+            $stats['total_activities'] = $stmt->fetch()['count'];
+            
+            // Total meals
+            $stmt = $db->prepare("SELECT COUNT(*) as count FROM meals WHERE event_id = :event_id");
+            $stmt->execute(['event_id' => $event['id']]);
+            $stats['total_meals'] = $stmt->fetch()['count'];
+            
+            // Carshare offers
+            $stmt = $db->prepare("SELECT COUNT(*) as count FROM carshare_offers WHERE event_id = :event_id");
+            $stmt->execute(['event_id' => $event['id']]);
+            $stats['carshare_offers'] = $stmt->fetch()['count'];
+            
+            // Hosting offers
+            $stmt = $db->prepare("SELECT COUNT(*) as count FROM hosting_offers WHERE event_id = :event_id");
+            $stmt->execute(['event_id' => $event['id']]);
+            $stats['hosting_offers'] = $stmt->fetch()['count'];
+            
+            // Active polls
+            $stmt = $db->prepare("SELECT COUNT(*) as count FROM polls WHERE event_id = :event_id AND is_active = 1");
+            $stmt->execute(['event_id' => $event['id']]);
+            $stats['active_polls'] = $stmt->fetch()['count'];
+            
+            // Recent attendees
+            $recentAttendees = $eventModel->getAllAttendees($event['id']);
+            $recentAttendees = array_slice($recentAttendees, 0, 10);
+            
+            include BASE_PATH . '/app/views/admin/dashboard.php';
+            break;
+
+        // ========================================================================
+        // 404 - PAGE NOT FOUND
+        // ========================================================================
+        
+        default:
+            // Redirect unknown pages to home
+            redirect('/index.php?page=home');
+            break;
+    }
+} catch (Exception $e) {
+    // Log the error with full details
+    error_log('ERROR during route execution for page "' . $page . '": ' . $e->getMessage());
+    error_log('Stack trace: ' . $e->getTraceAsString());
     
-    case 'admin':
-        AdminAuth::check();
-        $pageTitle = 'Admin Dashboard';
-        
-        // Get statistics
-        $db = getDbConnection();
-        
-        $stats = [];
-        
-        // Total attendees
-        $stmt = $db->prepare("SELECT COUNT(*) as count FROM event_attendees WHERE event_id = :event_id");
-        $stmt->execute(['event_id' => $event['id']]);
-        $stats['total_attendees'] = $stmt->fetch()['count'];
-        
-        // Total activities
-        $stmt = $db->prepare("SELECT COUNT(*) as count FROM activities WHERE event_id = :event_id");
-        $stmt->execute(['event_id' => $event['id']]);
-        $stats['total_activities'] = $stmt->fetch()['count'];
-        
-        // Total meals
-        $stmt = $db->prepare("SELECT COUNT(*) as count FROM meals WHERE event_id = :event_id");
-        $stmt->execute(['event_id' => $event['id']]);
-        $stats['total_meals'] = $stmt->fetch()['count'];
-        
-        // Carshare offers
-        $stmt = $db->prepare("SELECT COUNT(*) as count FROM carshare_offers WHERE event_id = :event_id");
-        $stmt->execute(['event_id' => $event['id']]);
-        $stats['carshare_offers'] = $stmt->fetch()['count'];
-        
-        // Hosting offers
-        $stmt = $db->prepare("SELECT COUNT(*) as count FROM hosting_offers WHERE event_id = :event_id");
-        $stmt->execute(['event_id' => $event['id']]);
-        $stats['hosting_offers'] = $stmt->fetch()['count'];
-        
-        // Active polls
-        $stmt = $db->prepare("SELECT COUNT(*) as count FROM polls WHERE event_id = :event_id AND is_active = 1");
-        $stmt->execute(['event_id' => $event['id']]);
-        $stats['active_polls'] = $stmt->fetch()['count'];
-        
-        // Recent attendees
-        $recentAttendees = $eventModel->getAllAttendees($event['id']);
-        $recentAttendees = array_slice($recentAttendees, 0, 10);
-        
-        include BASE_PATH . '/app/views/admin/dashboard.php';
-        break;
-
-    // ========================================================================
-    // 404 - PAGE NOT FOUND
-    // ========================================================================
-    
-    default:
-        // Redirect unknown pages to home
-        redirect('/index.php?page=home');
-        break;
+    // Render error page instead of blank 500
+    renderErrorPage(
+        'Page Error',
+        'We encountered an error loading this page. Please try again later.',
+        'Page: ' . $page . "\n" . $e->getMessage() . "\n\nStack trace:\n" . $e->getTraceAsString()
+    );
 }
