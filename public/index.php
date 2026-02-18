@@ -227,6 +227,9 @@ try {
     $event = $eventModel->getActive();
     
     // If no active event found, use fallback data
+    // Note: ID 1 is used as it would be the natural first event in the database.
+    // If this ID doesn't exist, database queries will simply return empty results,
+    // which is the expected behavior when there's no active event.
     if (!$event || !isset($event['id'])) {
         error_log('Warning: No active event found for authenticated page request: ' . $page . ', using fallback data');
         $event = [
