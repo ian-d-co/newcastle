@@ -112,8 +112,6 @@ switch ($page) {
     
     case 'home':
     case 'dashboard':
-    case 'home':
-    case 'dashboard':
         if ($page === 'home') {
             $pageTitle = 'Home';
             $isAttending = $eventModel->getAttendance($userId, $event['id']) !== false;
