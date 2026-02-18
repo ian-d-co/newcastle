@@ -112,29 +112,40 @@ if ($page === 'register') {
 if ($page === 'home') {
     try {
         require_once BASE_PATH . '/app/models/Event.php';
-        $eventModel = new Event();
-        $event = $eventModel->getActive();
         
-        // If no active event exists, create a default one for display
-        if (!$event) {
-            $event = [
-                'id' => 1,
-                'title' => 'Dicksord Fest 2026 - Newcastle',
-                'description' => 'Join us for an epic gaming event in Newcastle!',
-                'start_date' => '2026-11-20',
-                'end_date' => '2026-11-22',
-                'location' => 'Newcastle',
-                'content' => '<p>Welcome to Dicksord Fest 2026! More details coming soon.</p>'
-            ];
-            error_log('Warning: No active event found in database, using default event data');
-        }
-        
-        // Check if user is logged in and attending
+        // Create fallback event data in case of database failure
+        $event = [
+            'id' => 1,
+            'title' => 'Dicksord Fest 2026 - Newcastle',
+            'description' => 'Join us for an epic gaming event in Newcastle!',
+            'start_date' => '2026-11-20',
+            'end_date' => '2026-11-22',
+            'location' => 'Newcastle',
+            'content' => '<p>Welcome to Dicksord Fest 2026! More details coming soon.</p>'
+        ];
         $isAttending = false;
-        if (isLoggedIn()) {
-            $userId = getCurrentUserId();
-            $attendance = $eventModel->getAttendance($userId, $event['id']);
-            $isAttending = $attendance !== false;
+        
+        // Try to fetch real event data from database
+        try {
+            $eventModel = new Event();
+            $activeEvent = $eventModel->getActive();
+            
+            // If active event exists, use it instead of fallback
+            if ($activeEvent) {
+                $event = $activeEvent;
+            } else {
+                error_log('Warning: No active event found in database, using default event data');
+            }
+            
+            // Check if user is logged in and attending
+            if (isLoggedIn()) {
+                $userId = getCurrentUserId();
+                $attendance = $eventModel->getAttendance($userId, $event['id']);
+                $isAttending = $attendance !== false;
+            }
+        } catch (Exception $dbError) {
+            // Database connection failed, but we can still show the page with fallback data
+            error_log('Warning: Database error on homepage, using fallback data: ' . $dbError->getMessage());
         }
         
         $pageTitle = 'Home';

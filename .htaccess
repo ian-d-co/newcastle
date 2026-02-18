@@ -2,6 +2,8 @@
 <IfModule mod_rewrite.c>
     RewriteEngine On
     RewriteBase /
+    # Handle root URL explicitly
+    RewriteRule ^$ public/index.php [L]
     RewriteCond %{REQUEST_URI} !^/public/
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
