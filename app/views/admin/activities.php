@@ -38,8 +38,13 @@ ob_start();
                     <div class="row">
                         <div class="col">
                             <div class="form-group">
-                                <label class="form-label" for="activity_date">Date *</label>
-                                <input type="date" class="form-control" id="activity_date" name="activity_date" required>
+                                <label class="form-label" for="day">Day *</label>
+                                <select class="form-control" id="day" name="day" required>
+                                    <option value="">Select a day...</option>
+                                    <option value="Friday">Friday (Nov 20)</option>
+                                    <option value="Saturday">Saturday (Nov 21)</option>
+                                    <option value="Sunday">Sunday (Nov 22)</option>
+                                </select>
                             </div>
                         </div>
                         <div class="col">
@@ -50,8 +55,8 @@ ob_start();
                         </div>
                         <div class="col">
                             <div class="form-group">
-                                <label class="form-label" for="end_time">End Time</label>
-                                <input type="time" class="form-control" id="end_time" name="end_time">
+                                <label class="form-label" for="end_time">End Time *</label>
+                                <input type="time" class="form-control" id="end_time" name="end_time" required>
                             </div>
                         </div>
                     </div>
@@ -65,8 +70,8 @@ ob_start();
                         </div>
                         <div class="col">
                             <div class="form-group">
-                                <label class="form-label" for="payment_required">Payment Required</label>
-                                <select class="form-control" id="payment_required" name="payment_required" onchange="togglePaymentAmount(this)">
+                                <label class="form-label" for="requires_prepayment">Payment Required</label>
+                                <select class="form-control" id="requires_prepayment" name="requires_prepayment" onchange="togglePaymentAmount(this)">
                                     <option value="0">No</option>
                                     <option value="1">Yes</option>
                                 </select>
@@ -74,8 +79,8 @@ ob_start();
                         </div>
                         <div class="col">
                             <div class="form-group" id="payment-amount-group" style="display: none;">
-                                <label class="form-label" for="payment_amount">Payment Amount (£)</label>
-                                <input type="number" class="form-control" id="payment_amount" name="payment_amount" min="0" step="0.01">
+                                <label class="form-label" for="price">Payment Amount (£)</label>
+                                <input type="number" class="form-control" id="price" name="price" min="0" step="0.01">
                             </div>
                         </div>
                     </div>
@@ -102,11 +107,11 @@ ob_start();
                                         <h4 style="margin: 0 0 0.5rem 0;"><?php echo e($activity['title']); ?></h4>
                                         <p style="margin: 0 0 0.5rem 0; color: #545454;"><?php echo e($activity['description']); ?></p>
                                         <div style="display: flex; flex-wrap: wrap; gap: 1rem; font-size: 0.875rem; color: #545454;">
-                                            <span>📅 <?php echo date('D, M j, Y', strtotime($activity['activity_date'])); ?></span>
-                                            <span>🕐 <?php echo date('g:i A', strtotime($activity['start_time'])); ?><?php echo $activity['end_time'] ? ' - ' . date('g:i A', strtotime($activity['end_time'])) : ''; ?></span>
+                                            <span>📅 <?php echo e($activity['day']); ?> (<?php echo date('M j', strtotime($event['start_date'] . ' + ' . (($activity['day'] === 'Saturday') ? '1' : (($activity['day'] === 'Sunday') ? '2' : '0')) . ' days')); ?>)</span>
+                                            <span>🕐 <?php echo date('g:i A', strtotime($activity['start_time'])); ?> - <?php echo date('g:i A', strtotime($activity['end_time'])); ?></span>
                                             <span>👥 <?php echo $activity['current_bookings']; ?> / <?php echo $activity['max_capacity']; ?></span>
-                                            <?php if ($activity['payment_required']): ?>
-                                                <span>💰 £<?php echo number_format($activity['payment_amount'], 2); ?></span>
+                                            <?php if ($activity['requires_prepayment']): ?>
+                                                <span>💰 £<?php echo number_format($activity['price'], 2); ?></span>
                                             <?php endif; ?>
                                         </div>
                                     </div>
@@ -120,7 +125,7 @@ ob_start();
                                 <!-- Bookings for this activity -->
                                 <div id="bookings-<?php echo $activity['id']; ?>" style="display: none; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #dee2e6;">
                                     <?php 
-                                    $bookings = $activityModel->getBookings($activity['id']);
+                                    $bookings = $activity['bookings'] ?? [];
                                     if (empty($bookings)): 
                                     ?>
                                         <p style="margin: 0;">No bookings yet.</p>
@@ -130,7 +135,7 @@ ob_start();
                                                 <tr style="border-bottom: 1px solid #dee2e6;">
                                                     <th style="padding: 0.5rem; text-align: left;">User</th>
                                                     <th style="padding: 0.5rem; text-align: left;">Booked</th>
-                                                    <?php if ($activity['payment_required']): ?>
+                                                    <?php if ($activity['requires_prepayment']): ?>
                                                         <th style="padding: 0.5rem; text-align: center;">Payment</th>
                                                     <?php endif; ?>
                                                 </tr>
@@ -140,7 +145,7 @@ ob_start();
                                                     <tr style="border-bottom: 1px solid #eee;">
                                                         <td style="padding: 0.5rem;"><?php echo e($booking['discord_name']); ?></td>
                                                         <td style="padding: 0.5rem;"><?php echo date('M j, Y', strtotime($booking['created_at'])); ?></td>
-                                                        <?php if ($activity['payment_required']): ?>
+                                                        <?php if ($activity['requires_prepayment']): ?>
                                                             <td style="padding: 0.5rem; text-align: center;">
                                                                 <form method="POST" action="/index.php?page=admin-activities&action=payment" style="display: inline;">
                                                                     <?php echo CSRF::field(); ?>
@@ -193,8 +198,12 @@ ob_start();
                 <div class="row">
                     <div class="col">
                         <div class="form-group">
-                            <label class="form-label" for="edit-activity-date">Date *</label>
-                            <input type="date" class="form-control" id="edit-activity-date" name="activity_date" required>
+                            <label class="form-label" for="edit-day">Day *</label>
+                            <select class="form-control" id="edit-day" name="day" required>
+                                <option value="Friday">Friday (Nov 20)</option>
+                                <option value="Saturday">Saturday (Nov 21)</option>
+                                <option value="Sunday">Sunday (Nov 22)</option>
+                            </select>
                         </div>
                     </div>
                     <div class="col">
@@ -205,8 +214,8 @@ ob_start();
                     </div>
                     <div class="col">
                         <div class="form-group">
-                            <label class="form-label" for="edit-end-time">End Time</label>
-                            <input type="time" class="form-control" id="edit-end-time" name="end_time">
+                            <label class="form-label" for="edit-end-time">End Time *</label>
+                            <input type="time" class="form-control" id="edit-end-time" name="end_time" required>
                         </div>
                     </div>
                 </div>
@@ -220,8 +229,8 @@ ob_start();
                     </div>
                     <div class="col">
                         <div class="form-group">
-                            <label class="form-label" for="edit-payment-required">Payment Required</label>
-                            <select class="form-control" id="edit-payment-required" name="payment_required" onchange="toggleEditPaymentAmount(this)">
+                            <label class="form-label" for="edit-requires-prepayment">Payment Required</label>
+                            <select class="form-control" id="edit-requires-prepayment" name="requires_prepayment" onchange="toggleEditPaymentAmount(this)">
                                 <option value="0">No</option>
                                 <option value="1">Yes</option>
                             </select>
@@ -229,8 +238,8 @@ ob_start();
                     </div>
                     <div class="col">
                         <div class="form-group" id="edit-payment-amount-group">
-                            <label class="form-label" for="edit-payment-amount">Payment Amount (£)</label>
-                            <input type="number" class="form-control" id="edit-payment-amount" name="payment_amount" min="0" step="0.01">
+                            <label class="form-label" for="edit-price">Payment Amount (£)</label>
+                            <input type="number" class="form-control" id="edit-price" name="price" min="0" step="0.01">
                         </div>
                     </div>
                 </div>
@@ -266,14 +275,14 @@ function editActivity(activityId) {
     document.getElementById('edit-activity-id').value = activity.id;
     document.getElementById('edit-title').value = activity.title;
     document.getElementById('edit-description').value = activity.description;
-    document.getElementById('edit-activity-date').value = activity.activity_date;
+    document.getElementById('edit-day').value = activity.day;
     document.getElementById('edit-start-time').value = activity.start_time;
     document.getElementById('edit-end-time').value = activity.end_time || '';
     document.getElementById('edit-max-capacity').value = activity.max_capacity;
-    document.getElementById('edit-payment-required').value = activity.payment_required;
-    document.getElementById('edit-payment-amount').value = activity.payment_amount || '';
+    document.getElementById('edit-requires-prepayment').value = activity.requires_prepayment;
+    document.getElementById('edit-price').value = activity.price || '';
     
-    toggleEditPaymentAmount(document.getElementById('edit-payment-required'));
+    toggleEditPaymentAmount(document.getElementById('edit-requires-prepayment'));
     
     modalManager.open('edit-activity-modal');
 }

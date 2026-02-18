@@ -36,7 +36,7 @@ ob_start();
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label" for="location">Location *</label>
+                        <label class="form-label" for="location">Address/Location *</label>
                         <input type="text" class="form-control" id="location" name="location" required>
                     </div>
 
@@ -67,7 +67,7 @@ ob_start();
                     <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
                         <div>
                             <strong><?php echo e($hotel['name']); ?></strong>
-                            <span style="margin-left: 1rem; color: #545454;"><?php echo e($hotel['location']); ?></span>
+                            <span style="margin-left: 1rem; color: #545454;"><?php echo e($hotel['address']); ?></span>
                         </div>
                         <div style="display: flex; gap: 0.5rem;">
                             <button class="btn btn-sm btn-primary" onclick="editHotel(<?php echo $hotel['id']; ?>)">Edit</button>
@@ -76,14 +76,14 @@ ob_start();
                     </div>
                     <div class="card-body">
                         <p><?php echo e($hotel['description']); ?></p>
-                        <?php if ($hotel['contact_phone'] || $hotel['contact_email']): ?>
+                        <?php if ($hotel['address'] || $hotel['website']): ?>
                             <p style="font-size: 0.875rem; color: #545454; margin-bottom: 1rem;">
-                                <?php if ($hotel['contact_phone']): ?>
-                                    📞 <?php echo e($hotel['contact_phone']); ?>
+                                <?php if ($hotel['address']): ?>
+                                    📍 <?php echo e($hotel['address']); ?>
                                 <?php endif; ?>
-                                <?php if ($hotel['contact_phone'] && $hotel['contact_email']): ?> | <?php endif; ?>
-                                <?php if ($hotel['contact_email']): ?>
-                                    ✉️ <?php echo e($hotel['contact_email']); ?>
+                                <?php if ($hotel['address'] && $hotel['website']): ?> | <?php endif; ?>
+                                <?php if ($hotel['website']): ?>
+                                    🌐 <a href="<?php echo e($hotel['website']); ?>" target="_blank"><?php echo e($hotel['website']); ?></a>
                                 <?php endif; ?>
                             </p>
                         <?php endif; ?>
@@ -144,8 +144,8 @@ ob_start();
                                                 <td style="padding: 0.75rem;"><?php echo e($room['room_type']); ?></td>
                                                 <td style="padding: 0.75rem; text-align: center;"><?php echo $room['capacity']; ?> guests</td>
                                                 <td style="padding: 0.75rem; text-align: right;">£<?php echo number_format($room['price_per_night'], 2); ?></td>
-                                                <td style="padding: 0.75rem; text-align: center;"><?php echo $room['quantity_available']; ?></td>
-                                                <td style="padding: 0.75rem; text-align: center;"><?php echo $room['quantity_reserved']; ?></td>
+                                                <td style="padding: 0.75rem; text-align: center;"><?php echo $room['available_rooms']; ?></td>
+                                                <td style="padding: 0.75rem; text-align: center;"><?php echo $room['total_rooms'] - $room['available_rooms']; ?></td>
                                                 <td style="padding: 0.75rem; text-align: center;">
                                                     <button class="btn btn-sm btn-secondary" onclick="viewReservations(<?php echo $room['id']; ?>)">Reservations</button>
                                                     <button class="btn btn-sm btn-primary" onclick="editRoom(<?php echo $room['id']; ?>)">Edit</button>
@@ -155,7 +155,7 @@ ob_start();
                                             <tr id="reservations-<?php echo $room['id']; ?>" style="display: none;">
                                                 <td colspan="6" style="padding: 1rem; background: #f8f9fa;">
                                                     <?php
-                                                    $reservations = $hotelModel->getReservationsByRoom($room['id']);
+                                                    $reservations = $room['reservations'] ?? [];
                                                     if (empty($reservations)):
                                                     ?>
                                                         <p style="margin: 0;">No reservations yet.</p>
@@ -242,18 +242,13 @@ ob_start();
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label" for="edit-hotel-location">Location *</label>
+                    <label class="form-label" for="edit-hotel-location">Address/Location *</label>
                     <input type="text" class="form-control" id="edit-hotel-location" name="location" required>
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label" for="edit-hotel-phone">Contact Phone</label>
-                    <input type="tel" class="form-control" id="edit-hotel-phone" name="contact_phone">
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label" for="edit-hotel-email">Contact Email</label>
-                    <input type="email" class="form-control" id="edit-hotel-email" name="contact_email">
+                    <label class="form-label" for="edit-hotel-website">Website</label>
+                    <input type="url" class="form-control" id="edit-hotel-website" name="website">
                 </div>
 
                 <button type="submit" class="btn btn-primary btn-block btn-lg">Save Changes</button>
@@ -290,7 +285,7 @@ ob_start();
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label" for="edit-room-quantity">Quantity Available *</label>
+                    <label class="form-label" for="edit-room-quantity">Total Rooms Available *</label>
                     <input type="number" class="form-control" id="edit-room-quantity" name="quantity_available" min="1" required>
                 </div>
 
@@ -363,7 +358,7 @@ function editRoom(roomId) {
     document.getElementById('edit-room-type').value = room.room_type;
     document.getElementById('edit-room-capacity').value = room.capacity;
     document.getElementById('edit-room-price').value = room.price_per_night;
-    document.getElementById('edit-room-quantity').value = room.quantity_available;
+    document.getElementById('edit-room-quantity').value = room.total_rooms;
     
     modalManager.open('edit-room-modal');
 }

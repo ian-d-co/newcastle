@@ -632,7 +632,8 @@ switch ($page) {
             $data = [
                 'name' => $_POST['name'] ?? '',
                 'address' => $_POST['location'] ?? '', // Map location to address
-                'description' => $_POST['description'] ?? ''
+                'description' => $_POST['description'] ?? '',
+                'website' => $_POST['website'] ?? null
             ];
             
             if ($hotelModel->updateHotel($_POST['hotel_id'], $data)) {
