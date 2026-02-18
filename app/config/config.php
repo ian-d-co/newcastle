@@ -19,28 +19,36 @@ if (!file_exists($envFile)) {
     $envFile = __DIR__ . '/../../.env';
 }
 
+$envFileLoaded = false;
 if (file_exists($envFile)) {
-    $lines = file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-    foreach ($lines as $line) {
-        // Skip comments
-        if (strpos(trim($line), '#') === 0) {
-            continue;
-        }
-        
-        // Parse KEY=VALUE format
-        if (strpos($line, '=') !== false) {
-            list($key, $value) = explode('=', $line, 2);
-            $key = trim($key);
-            $value = trim($value);
+    $lines = @file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    if ($lines !== false) {
+        foreach ($lines as $line) {
+            // Skip comments
+            if (strpos(trim($line), '#') === 0) {
+                continue;
+            }
             
-            // Set environment variable if not already set
-            if (!getenv($key)) {
-                putenv("$key=$value");
-                $_ENV[$key] = $value;
-                $_SERVER[$key] = $value;
+            // Parse KEY=VALUE format
+            if (strpos($line, '=') !== false) {
+                list($key, $value) = explode('=', $line, 2);
+                $key = trim($key);
+                $value = trim($value);
+                
+                // Set environment variable if not already set
+                if (!getenv($key)) {
+                    putenv("$key=$value");
+                    $_ENV[$key] = $value;
+                    $_SERVER[$key] = $value;
+                }
             }
         }
+        $envFileLoaded = true;
+    } else {
+        error_log('Warning: .env file exists but could not be read: ' . $envFile);
     }
+} else {
+    error_log('Warning: .env file not found. Checked: ' . __DIR__ . '/.env and ' . __DIR__ . '/../../.env');
 }
 
 // Database Configuration
@@ -99,11 +107,32 @@ date_default_timezone_set(TIMEZONE);
 if (APP_DEBUG) {
     error_reporting(E_ALL);
     ini_set('display_errors', '1');
+    ini_set('display_startup_errors', '1');
 } else {
-    error_reporting(E_ALL & ~E_NOTICE & ~E_DEPRECATED);
+    error_reporting(E_ALL);
     ini_set('display_errors', '0');
     ini_set('log_errors', '1');
+    // Set error log location if not already set
+    if (!ini_get('error_log')) {
+        ini_set('error_log', __DIR__ . '/../../logs/error.log');
+    }
 }
+
+// Custom error handler to prevent blank pages
+set_error_handler(function($errno, $errstr, $errfile, $errline) {
+    error_log("PHP Error [$errno]: $errstr in $errfile on line $errline");
+    
+    if (APP_DEBUG) {
+        echo "<div style='background: #f8d7da; color: #721c24; padding: 10px; margin: 10px; border: 1px solid #f5c6cb; border-radius: 4px;'>";
+        echo "<strong>Error [$errno]:</strong> $errstr<br>";
+        echo "<strong>File:</strong> $errfile<br>";
+        echo "<strong>Line:</strong> $errline";
+        echo "</div>";
+    }
+    
+    // Don't execute PHP internal error handler
+    return true;
+});
 
 /**
  * Get database connection using PDO
@@ -116,6 +145,15 @@ function getDbConnection() {
     
     if ($pdo === null) {
         try {
+            // Log connection attempt for debugging
+            error_log(sprintf(
+                'Attempting database connection - Host: %s, Port: %s, DB: %s, User: %s',
+                DB_HOST,
+                DB_PORT,
+                DB_NAME,
+                DB_USER
+            ));
+            
             $dsn = sprintf(
                 'mysql:host=%s;port=%s;dbname=%s;charset=%s',
                 DB_HOST,
@@ -128,16 +166,35 @@ function getDbConnection() {
                 PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
                 PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
                 PDO::ATTR_EMULATE_PREPARES => false,
+                PDO::ATTR_TIMEOUT => 5, // 5 second connection timeout
                 PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES " . DB_CHARSET
             ];
             
             $pdo = new PDO($dsn, DB_USER, DB_PASSWORD, $options);
+            
+            // Test connection with a simple query
+            $pdo->query('SELECT 1');
+            
+            error_log('Database connection successful');
         } catch (PDOException $e) {
+            $errorMsg = 'Database connection failed: ' . $e->getMessage();
+            error_log($errorMsg);
+            error_log('DSN: mysql:host=' . DB_HOST . ';port=' . DB_PORT . ';dbname=' . DB_NAME);
+            
             if (APP_DEBUG) {
-                die('Database connection failed: ' . $e->getMessage());
+                // In debug mode, show detailed error
+                die('<html><body style="font-family: Arial; padding: 20px;"><h1>Database Connection Error</h1><p>' . 
+                    htmlspecialchars($errorMsg) . '</p><p>Please check:</p><ul>' .
+                    '<li>.env file exists in app/config/ or root directory</li>' .
+                    '<li>Database credentials are correct</li>' .
+                    '<li>Database server is running</li>' .
+                    '<li>Database ' . htmlspecialchars(DB_NAME) . ' exists</li>' .
+                    '</ul></body></html>');
             } else {
-                error_log('Database connection failed: ' . $e->getMessage());
-                die('Database connection failed. Please contact the administrator.');
+                // In production, show generic message
+                die('<html><body style="font-family: Arial; padding: 20px;"><h1>Service Unavailable</h1>' .
+                    '<p>The website is currently experiencing technical difficulties. ' .
+                    'Please try again later or contact the administrator.</p></body></html>');
             }
         }
     }

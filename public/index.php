@@ -7,18 +7,36 @@
  * handling all routing, authentication, and request dispatching.
  */
 
+// Enable error logging for debugging
+error_log('=== Dicksord Fest 2026 Request Start ===');
+error_log('Request URI: ' . ($_SERVER['REQUEST_URI'] ?? 'N/A'));
+error_log('Request Method: ' . ($_SERVER['REQUEST_METHOD'] ?? 'N/A'));
+
 // Define base path
 define('BASE_PATH', dirname(__DIR__));
 
-// Load configuration and helpers
-require_once BASE_PATH . '/app/config/config.php';
-require_once BASE_PATH . '/app/helpers/Database.php';
-require_once BASE_PATH . '/app/helpers/Auth.php';
-
-// Load middleware
-require_once BASE_PATH . '/app/middleware/Auth.php';
-require_once BASE_PATH . '/app/middleware/AdminAuth.php';
-require_once BASE_PATH . '/app/middleware/CSRF.php';
+try {
+    // Load configuration and helpers
+    require_once BASE_PATH . '/app/config/config.php';
+    require_once BASE_PATH . '/app/helpers/Database.php';
+    require_once BASE_PATH . '/app/helpers/Auth.php';
+    
+    // Load middleware
+    require_once BASE_PATH . '/app/middleware/Auth.php';
+    require_once BASE_PATH . '/app/middleware/AdminAuth.php';
+    require_once BASE_PATH . '/app/middleware/CSRF.php';
+    
+    error_log('All configuration and helper files loaded successfully');
+} catch (Exception $e) {
+    error_log('FATAL: Failed to load required files: ' . $e->getMessage());
+    if (defined('APP_DEBUG') && APP_DEBUG) {
+        die('<html><body style="font-family: Arial; padding: 20px;"><h1>Configuration Error</h1><p>' . 
+            htmlspecialchars($e->getMessage()) . '</p></body></html>');
+    } else {
+        die('<html><body style="font-family: Arial; padding: 20px;"><h1>Service Unavailable</h1>' .
+            '<p>The website is currently being configured. Please try again later.</p></body></html>');
+    }
+}
 
 // Set security headers
 header('X-Content-Type-Options: nosniff');
@@ -73,20 +91,47 @@ if ($page === 'register') {
 
 // Homepage (PUBLIC - No authentication required)
 if ($page === 'home') {
-    require_once BASE_PATH . '/app/models/Event.php';
-    $eventModel = new Event();
-    $event = $eventModel->getActive();
-    
-    // Check if user is logged in and attending
-    $isAttending = false;
-    if (isLoggedIn()) {
-        $userId = getCurrentUserId();
-        $isAttending = $eventModel->getAttendance($userId, $event['id']) !== false;
+    try {
+        require_once BASE_PATH . '/app/models/Event.php';
+        $eventModel = new Event();
+        $event = $eventModel->getActive();
+        
+        // If no active event exists, create a default one for display
+        if (!$event) {
+            $event = [
+                'id' => 1,
+                'title' => 'Dicksord Fest 2026 - Newcastle',
+                'description' => 'Join us for an epic gaming event in Newcastle!',
+                'start_date' => '2026-11-20',
+                'end_date' => '2026-11-22',
+                'location' => 'Newcastle',
+                'content' => '<p>Welcome to Dicksord Fest 2026! More details coming soon.</p>'
+            ];
+            error_log('Warning: No active event found in database, using default event data');
+        }
+        
+        // Check if user is logged in and attending
+        $isAttending = false;
+        if (isLoggedIn()) {
+            $userId = getCurrentUserId();
+            $attendance = $eventModel->getAttendance($userId, $event['id']);
+            $isAttending = $attendance !== false;
+        }
+        
+        $pageTitle = 'Home';
+        include BASE_PATH . '/app/views/public/home.php';
+        exit;
+    } catch (Exception $e) {
+        error_log('Error loading homepage: ' . $e->getMessage());
+        if (APP_DEBUG) {
+            die('<html><body style="font-family: Arial; padding: 20px;"><h1>Error Loading Homepage</h1><p>' . 
+                htmlspecialchars($e->getMessage()) . '</p><p><strong>Trace:</strong></p><pre>' . 
+                htmlspecialchars($e->getTraceAsString()) . '</pre></body></html>');
+        } else {
+            die('<html><body style="font-family: Arial; padding: 20px;"><h1>Service Unavailable</h1>' .
+                '<p>The website is currently experiencing technical difficulties.</p></body></html>');
+        }
     }
-    
-    $pageTitle = 'Home';
-    include BASE_PATH . '/app/views/public/home.php';
-    exit;
 }
 
 // ============================================================================
