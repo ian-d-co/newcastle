@@ -784,11 +784,11 @@ switch ($page) {
         // Get activity bookings
         $activityBookings = [];
         if ($typeFilter === 'all' || $typeFilter === 'activity') {
-            $sql = "SELECT ab.*, u.discord_name, a.title as activity_title, a.activity_date, a.payment_amount
+            $sql = "SELECT ab.*, u.discord_name, a.title as activity_title, a.day, a.price as payment_amount
                     FROM activity_bookings ab
                     JOIN users u ON ab.user_id = u.id
                     JOIN activities a ON ab.activity_id = a.id
-                    WHERE a.event_id = :event_id AND a.payment_required = 1 $statusCondition
+                    WHERE a.event_id = :event_id AND a.requires_prepayment = 1 $statusCondition
                     ORDER BY ab.created_at DESC";
             $stmt = $db->prepare($sql);
             $stmt->execute(['event_id' => $event['id']]);
@@ -798,11 +798,11 @@ switch ($page) {
         // Get meal bookings
         $mealBookings = [];
         if ($typeFilter === 'all' || $typeFilter === 'meal') {
-            $sql = "SELECT mb.*, u.discord_name, m.title as meal_title, m.meal_date, m.payment_amount
+            $sql = "SELECT mb.*, u.discord_name, m.title as meal_title, m.day, m.price as payment_amount
                     FROM meal_bookings mb
                     JOIN users u ON mb.user_id = u.id
                     JOIN meals m ON mb.meal_id = m.id
-                    WHERE m.event_id = :event_id AND m.payment_required = 1 $statusCondition
+                    WHERE m.event_id = :event_id AND m.requires_prepayment = 1 $statusCondition
                     ORDER BY mb.created_at DESC";
             $stmt = $db->prepare($sql);
             $stmt->execute(['event_id' => $event['id']]);
@@ -812,13 +812,13 @@ switch ($page) {
         // Get hotel reservations
         $hotelReservations = [];
         if ($typeFilter === 'all' || $typeFilter === 'hotel') {
-            $sql = "SELECT hr.*, u.discord_name, h.name as hotel_name, htr.room_type, hr.total_price
-                    FROM hotel_reservations hr
-                    JOIN users u ON hr.user_id = u.id
-                    JOIN hotel_rooms htr ON hr.hotel_room_id = htr.id
-                    JOIN hotels h ON htr.hotel_id = h.id
+            $sql = "SELECT rr.*, u.discord_name, h.name as hotel_name, hr.room_type, rr.total_price
+                    FROM room_reservations rr
+                    JOIN users u ON rr.user_id = u.id
+                    JOIN hotel_rooms hr ON rr.hotel_room_id = hr.id
+                    JOIN hotels h ON hr.hotel_id = h.id
                     WHERE h.event_id = :event_id $statusCondition
-                    ORDER BY hr.created_at DESC";
+                    ORDER BY rr.created_at DESC";
             $stmt = $db->prepare($sql);
             $stmt->execute(['event_id' => $event['id']]);
             $hotelReservations = $stmt->fetchAll();

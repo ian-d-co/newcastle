@@ -96,7 +96,7 @@ ob_start();
                                     <tr style="border-bottom: 1px solid #dee2e6;">
                                         <td style="padding: 0.75rem;"><?php echo e($booking['discord_name']); ?></td>
                                         <td style="padding: 0.75rem;"><?php echo e($booking['activity_title']); ?></td>
-                                        <td style="padding: 0.75rem;"><?php echo date('M j, Y', strtotime($booking['activity_date'])); ?></td>
+                                        <td style="padding: 0.75rem;"><?php echo e($booking['day']); ?></td>
                                         <td style="padding: 0.75rem; text-align: right;">£<?php echo number_format($booking['payment_amount'], 2); ?></td>
                                         <td style="padding: 0.75rem; text-align: center;">
                                             <?php if ($booking['payment_status'] === 'received'): ?>
@@ -147,7 +147,7 @@ ob_start();
                                     <tr style="border-bottom: 1px solid #dee2e6;">
                                         <td style="padding: 0.75rem;"><?php echo e($booking['discord_name']); ?></td>
                                         <td style="padding: 0.75rem;"><?php echo e($booking['meal_title']); ?></td>
-                                        <td style="padding: 0.75rem;"><?php echo date('M j, Y', strtotime($booking['meal_date'])); ?></td>
+                                        <td style="padding: 0.75rem;"><?php echo e($booking['day']); ?></td>
                                         <td style="padding: 0.75rem; text-align: right;">£<?php echo number_format($booking['payment_amount'], 2); ?></td>
                                         <td style="padding: 0.75rem; text-align: center;">
                                             <?php if ($booking['payment_status'] === 'received'): ?>
