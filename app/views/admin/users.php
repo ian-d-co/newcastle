@@ -24,7 +24,6 @@ ob_start();
                             <tr style="border-bottom: 2px solid #dee2e6;">
                                 <th style="padding: 0.75rem; text-align: left;">Discord Name</th>
                                 <th style="padding: 0.75rem; text-align: left;">Real Name</th>
-                                <th style="padding: 0.75rem; text-align: left;">Email</th>
                                 <th style="padding: 0.75rem; text-align: center;">Admin</th>
                                 <th style="padding: 0.75rem; text-align: center;">Attending</th>
                                 <th style="padding: 0.75rem; text-align: left;">Registered</th>
@@ -39,9 +38,6 @@ ob_start();
                                     </td>
                                     <td style="padding: 0.75rem;">
                                         <?php echo e($user['name']); ?>
-                                    </td>
-                                    <td style="padding: 0.75rem;">
-                                        <?php echo e($user['email']); ?>
                                     </td>
                                     <td style="padding: 0.75rem; text-align: center;">
                                         <?php if ($user['is_admin']): ?>

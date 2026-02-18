@@ -68,6 +68,7 @@
             const data = {
                 discord_name: formData.get('discord_name'),
                 name: formData.get('name'),
+                pin: formData.get('pin'),
                 days_attending: formData.getAll('days_attending[]'),
                 travel_method: formData.getAll('travel_method[]'),
                 csrf_token: formData.get('csrf_token')
