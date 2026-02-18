@@ -778,8 +778,14 @@ switch ($page) {
         $statusFilter = $_GET['status'] ?? 'all';
         $typeFilter = $_GET['type'] ?? 'all';
         
-        // Build SQL conditions
-        $statusCondition = ($statusFilter !== 'all') ? "AND payment_status = '$statusFilter'" : '';
+        // Build SQL conditions with parameterized values
+        $statusCondition = '';
+        $params = ['event_id' => $event['id']];
+        
+        if ($statusFilter !== 'all') {
+            $statusCondition = 'AND ab.payment_status = :status_filter';
+            $params['status_filter'] = $statusFilter;
+        }
         
         // Get activity bookings
         $activityBookings = [];
@@ -791,36 +797,38 @@ switch ($page) {
                     WHERE a.event_id = :event_id AND a.requires_prepayment = 1 $statusCondition
                     ORDER BY ab.created_at DESC";
             $stmt = $db->prepare($sql);
-            $stmt->execute(['event_id' => $event['id']]);
+            $stmt->execute($params);
             $activityBookings = $stmt->fetchAll();
         }
         
         // Get meal bookings
         $mealBookings = [];
         if ($typeFilter === 'all' || $typeFilter === 'meal') {
+            $mealCondition = $statusFilter !== 'all' ? 'AND mb.payment_status = :status_filter' : '';
             $sql = "SELECT mb.*, u.discord_name, m.title as meal_title, m.day, m.price as payment_amount
                     FROM meal_bookings mb
                     JOIN users u ON mb.user_id = u.id
                     JOIN meals m ON mb.meal_id = m.id
-                    WHERE m.event_id = :event_id AND m.requires_prepayment = 1 $statusCondition
+                    WHERE m.event_id = :event_id AND m.requires_prepayment = 1 $mealCondition
                     ORDER BY mb.created_at DESC";
             $stmt = $db->prepare($sql);
-            $stmt->execute(['event_id' => $event['id']]);
+            $stmt->execute($params);
             $mealBookings = $stmt->fetchAll();
         }
         
         // Get hotel reservations
         $hotelReservations = [];
         if ($typeFilter === 'all' || $typeFilter === 'hotel') {
+            $hotelCondition = $statusFilter !== 'all' ? 'AND rr.payment_status = :status_filter' : '';
             $sql = "SELECT rr.*, u.discord_name, h.name as hotel_name, hr.room_type, rr.total_price
                     FROM room_reservations rr
                     JOIN users u ON rr.user_id = u.id
                     JOIN hotel_rooms hr ON rr.hotel_room_id = hr.id
                     JOIN hotels h ON hr.hotel_id = h.id
-                    WHERE h.event_id = :event_id $statusCondition
+                    WHERE h.event_id = :event_id $hotelCondition
                     ORDER BY rr.created_at DESC";
             $stmt = $db->prepare($sql);
-            $stmt->execute(['event_id' => $event['id']]);
+            $stmt->execute($params);
             $hotelReservations = $stmt->fetchAll();
         }
         

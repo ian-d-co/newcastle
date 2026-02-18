@@ -318,9 +318,8 @@ function editHotel(hotelId) {
     document.getElementById('edit-hotel-id').value = hotel.id;
     document.getElementById('edit-hotel-name').value = hotel.name;
     document.getElementById('edit-hotel-description').value = hotel.description;
-    document.getElementById('edit-hotel-location').value = hotel.location;
-    document.getElementById('edit-hotel-phone').value = hotel.contact_phone || '';
-    document.getElementById('edit-hotel-email').value = hotel.contact_email || '';
+    document.getElementById('edit-hotel-location').value = hotel.address || '';
+    document.getElementById('edit-hotel-website').value = hotel.website || '';
     
     modalManager.open('edit-hotel-modal');
 }

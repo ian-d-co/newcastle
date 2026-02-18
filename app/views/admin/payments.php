@@ -201,8 +201,8 @@ ob_start();
                                         <td style="padding: 0.75rem;"><?php echo e($reservation['discord_name']); ?></td>
                                         <td style="padding: 0.75rem;"><?php echo e($reservation['hotel_name']); ?></td>
                                         <td style="padding: 0.75rem;"><?php echo e($reservation['room_type']); ?></td>
-                                        <td style="padding: 0.75rem;"><?php echo date('M j, Y', strtotime($reservation['check_in_date'])); ?></td>
-                                        <td style="padding: 0.75rem;"><?php echo date('M j, Y', strtotime($reservation['check_out_date'])); ?></td>
+                                        <td style="padding: 0.75rem;"><?php echo date('M j, Y', strtotime($reservation['check_in'])); ?></td>
+                                        <td style="padding: 0.75rem;"><?php echo date('M j, Y', strtotime($reservation['check_out'])); ?></td>
                                         <td style="padding: 0.75rem; text-align: right;">£<?php echo number_format($reservation['total_price'], 2); ?></td>
                                         <td style="padding: 0.75rem; text-align: center;">
                                             <?php if ($reservation['payment_status'] === 'received'): ?>
