@@ -1,52 +1,93 @@
 <?php
-// Dicksord Fest 2026 - Newcastle - Main Entry Point
-require_once __DIR__ . '/../app/config/config.php';
-require_once __DIR__ . '/../app/middleware/Auth.php';
-require_once __DIR__ . '/../app/middleware/AdminAuth.php';
-require_once __DIR__ . '/../app/middleware/CSRF.php';
+/**
+ * Dicksord Fest 2026 - Newcastle Event Management System
+ * Main Entry Point
+ * 
+ * This file serves as the front controller for the application,
+ * handling all routing, authentication, and request dispatching.
+ */
+
+// Define base path
+define('BASE_PATH', dirname(__DIR__));
+
+// Load configuration and helpers
+require_once BASE_PATH . '/app/config/config.php';
+require_once BASE_PATH . '/app/helpers/Database.php';
+require_once BASE_PATH . '/app/helpers/Auth.php';
+
+// Load middleware
+require_once BASE_PATH . '/app/middleware/Auth.php';
+require_once BASE_PATH . '/app/middleware/AdminAuth.php';
+require_once BASE_PATH . '/app/middleware/CSRF.php';
+
+// Set security headers
+header('X-Content-Type-Options: nosniff');
+header('X-Frame-Options: SAMEORIGIN');
+header('X-XSS-Protection: 1; mode=block');
+
+// Remove PHP version header for security
+header_remove('X-Powered-By');
 
 // Start session
 initSession();
 
-// Get page and action
+// Get page and action from query parameters
 $page = $_GET['page'] ?? 'home';
 $action = $_GET['action'] ?? null;
 
+// ============================================================================
+// AUTHENTICATION ACTIONS
+// ============================================================================
+
 // Handle logout action
 if ($action === 'logout') {
-    require_once __DIR__ . '/../app/controllers/AuthController.php';
+    require_once BASE_PATH . '/app/controllers/AuthController.php';
     $authController = new AuthController();
     $authController->logout();
 }
 
-// Handle login action
+// Handle login POST request
 if ($action === 'login' && $_SERVER['REQUEST_METHOD'] === 'POST') {
-    require_once __DIR__ . '/../app/controllers/AuthController.php';
+    require_once BASE_PATH . '/app/controllers/AuthController.php';
     $authController = new AuthController();
     echo $authController->login();
     exit;
 }
 
-// Public pages (no auth required)
+// ============================================================================
+// PUBLIC ROUTES (No authentication required)
+// ============================================================================
+
+// Login page
 if ($page === 'login') {
-    require_once __DIR__ . '/../app/controllers/AuthController.php';
+    require_once BASE_PATH . '/app/controllers/AuthController.php';
     $authController = new AuthController();
     echo $authController->showLogin();
     exit;
 }
 
+// Register page (handled within home page)
+if ($page === 'register') {
+    $page = 'home'; // Registration is handled on home page
+}
+
+// ============================================================================
+// AUTHENTICATED ROUTES (Require login)
+// ============================================================================
+
 // All other pages require authentication
 Auth::check();
 
-// Load models
-require_once __DIR__ . '/../app/models/Event.php';
-require_once __DIR__ . '/../app/models/Activity.php';
-require_once __DIR__ . '/../app/models/Meal.php';
-require_once __DIR__ . '/../app/models/Poll.php';
-require_once __DIR__ . '/../app/models/CarShare.php';
-require_once __DIR__ . '/../app/models/Hosting.php';
-require_once __DIR__ . '/../app/models/Hotel.php';
+// Load required models
+require_once BASE_PATH . '/app/models/Event.php';
+require_once BASE_PATH . '/app/models/Activity.php';
+require_once BASE_PATH . '/app/models/Meal.php';
+require_once BASE_PATH . '/app/models/Poll.php';
+require_once BASE_PATH . '/app/models/CarShare.php';
+require_once BASE_PATH . '/app/models/Hosting.php';
+require_once BASE_PATH . '/app/models/Hotel.php';
 
+// Initialize models
 $eventModel = new Event();
 $activityModel = new Activity();
 $mealModel = new Meal();
@@ -55,15 +96,52 @@ $carshareModel = new CarShare();
 $hostingModel = new Hosting();
 $hotelModel = new Hotel();
 
+// Get active event and current user ID
 $event = $eventModel->getActive();
 $userId = getCurrentUserId();
 
-// Route pages
+// ============================================================================
+// ROUTING
+// ============================================================================
+
+// Route requests based on page parameter
 switch ($page) {
+    // ========================================================================
+    // USER ROUTES
+    // ========================================================================
+    
     case 'home':
-        $pageTitle = 'Home';
-        $isAttending = $eventModel->getAttendance($userId, $event['id']) !== false;
-        include __DIR__ . '/../app/views/public/home.php';
+    case 'dashboard':
+    case 'home':
+    case 'dashboard':
+        if ($page === 'home') {
+            $pageTitle = 'Home';
+            $isAttending = $eventModel->getAttendance($userId, $event['id']) !== false;
+            include BASE_PATH . '/app/views/public/home.php';
+        } else {
+            $pageTitle = 'Dashboard';
+            $attendance = $eventModel->getAttendance($userId, $event['id']);
+            $activityBookings = $activityModel->getUserBookings($userId, $event['id']);
+            $mealBookings = $mealModel->getUserBookings($userId, $event['id']);
+            $carshareOffer = $carshareModel->getUserOffer($userId, $event['id']);
+            $carshareBooking = $carshareModel->getUserBooking($userId, $event['id']);
+            $hostingOffer = $hostingModel->getUserOffer($userId, $event['id']);
+            $hostingBooking = $hostingModel->getUserBooking($userId, $event['id']);
+            $hotelReservations = $hotelModel->getUserReservations($userId, $event['id']);
+            
+            // Get polls voted on
+            $db = getDbConnection();
+            $sql = "SELECT DISTINCT p.id, p.question, pv.created_at as voted_at 
+                    FROM polls p
+                    JOIN poll_votes pv ON p.id = pv.poll_id
+                    WHERE pv.user_id = :user_id AND p.event_id = :event_id
+                    ORDER BY pv.created_at DESC";
+            $stmt = $db->prepare($sql);
+            $stmt->execute(['user_id' => $userId, 'event_id' => $event['id']]);
+            $pollsVoted = $stmt->fetchAll();
+            
+            include BASE_PATH . '/app/views/public/dashboard.php';
+        }
         break;
 
     case 'activities':
@@ -86,7 +164,7 @@ switch ($page) {
             }
         }
         
-        include __DIR__ . '/../app/views/public/activities.php';
+        include BASE_PATH . '/app/views/public/activities.php';
         break;
 
     case 'meals':
@@ -109,7 +187,7 @@ switch ($page) {
             }
         }
         
-        include __DIR__ . '/../app/views/public/meals.php';
+        include BASE_PATH . '/app/views/public/meals.php';
         break;
 
     case 'polls':
@@ -123,7 +201,7 @@ switch ($page) {
             $poll['options'] = $pollModel->getOptions($poll['id']);
         }
         
-        include __DIR__ . '/../app/views/public/polls.php';
+        include BASE_PATH . '/app/views/public/polls.php';
         break;
 
     case 'carshare':
@@ -133,7 +211,7 @@ switch ($page) {
         $userBooking = $carshareModel->getUserBooking($userId, $event['id']);
         $offerBookings = $userOffer ? $carshareModel->getOfferBookings($userOffer['id']) : [];
         
-        include __DIR__ . '/../app/views/public/carshare.php';
+        include BASE_PATH . '/app/views/public/carshare.php';
         break;
 
     case 'hosting':
@@ -143,7 +221,7 @@ switch ($page) {
         $userBooking = $hostingModel->getUserBooking($userId, $event['id']);
         $offerBookings = $userOffer ? $hostingModel->getOfferBookings($userOffer['id']) : [];
         
-        include __DIR__ . '/../app/views/public/hosting.php';
+        include BASE_PATH . '/app/views/public/hosting.php';
         break;
 
     case 'hotels':
@@ -157,34 +235,13 @@ switch ($page) {
         
         $userReservations = $hotelModel->getUserReservations($userId, $event['id']);
         
-        include __DIR__ . '/../app/views/public/hotels.php';
+        include BASE_PATH . '/app/views/public/hotels.php';
         break;
 
-    case 'dashboard':
-        $pageTitle = 'Dashboard';
-        $attendance = $eventModel->getAttendance($userId, $event['id']);
-        $activityBookings = $activityModel->getUserBookings($userId, $event['id']);
-        $mealBookings = $mealModel->getUserBookings($userId, $event['id']);
-        $carshareOffer = $carshareModel->getUserOffer($userId, $event['id']);
-        $carshareBooking = $carshareModel->getUserBooking($userId, $event['id']);
-        $hostingOffer = $hostingModel->getUserOffer($userId, $event['id']);
-        $hostingBooking = $hostingModel->getUserBooking($userId, $event['id']);
-        $hotelReservations = $hotelModel->getUserReservations($userId, $event['id']);
-        
-        // Get polls voted on
-        $db = getDbConnection();
-        $sql = "SELECT DISTINCT p.id, p.question, pv.created_at as voted_at 
-                FROM polls p
-                JOIN poll_votes pv ON p.id = pv.poll_id
-                WHERE pv.user_id = :user_id AND p.event_id = :event_id
-                ORDER BY pv.created_at DESC";
-        $stmt = $db->prepare($sql);
-        $stmt->execute(['user_id' => $userId, 'event_id' => $event['id']]);
-        $pollsVoted = $stmt->fetchAll();
-        
-        include __DIR__ . '/../app/views/public/dashboard.php';
-        break;
-
+    // ========================================================================
+    // ADMIN ROUTES (Require admin privileges)
+    // ========================================================================
+    
     case 'admin':
         AdminAuth::check();
         $pageTitle = 'Admin Dashboard';
@@ -228,10 +285,15 @@ switch ($page) {
         $recentAttendees = $eventModel->getAllAttendees($event['id']);
         $recentAttendees = array_slice($recentAttendees, 0, 10);
         
-        include __DIR__ . '/../app/views/admin/dashboard.php';
+        include BASE_PATH . '/app/views/admin/dashboard.php';
         break;
 
+    // ========================================================================
+    // 404 - PAGE NOT FOUND
+    // ========================================================================
+    
     default:
+        // Redirect unknown pages to home
         redirect('/index.php?page=home');
         break;
 }
