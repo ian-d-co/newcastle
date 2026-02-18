@@ -30,27 +30,35 @@
 
 ### Step 3: Configure Environment
 
-1. **Create `.env` file** from `.env.example`:
-   ```
-   DB_HOST=localhost
-   DB_NAME=u983097270_newc
-   DB_USER=your_database_user
-   DB_PASS=your_secure_password
+1. **Create `.env` file** from `.env.example` in `app/config/` directory:
+   ```bash
+   # Location: app/config/.env
    
+   # Application
    APP_ENV=production
    APP_DEBUG=false
    APP_URL=https://yourdomain.com
+   TIMEZONE=Europe/London
    
-   SESSION_LIFETIME=7200
-   SESSION_NAME=DICKSORD_FEST_SESSION
+   # Database (from Hostinger MySQL Databases)
+   DB_HOST=localhost
+   DB_PORT=3306
+   DB_NAME=u983097270_newc
+   DB_USER=u983097270_newc
+   DB_PASSWORD=your_secure_password_here
    
+   # Session
+   SESSION_NAME=dicksord_fest_2026
+   SESSION_LIFETIME=3600
+   
+   # Security
    CSRF_TOKEN_NAME=csrf_token
    ```
 
 2. **Set file permissions**:
    - Files: 644
    - Directories: 755
-   - `.env`: 600 (more restrictive)
+   - `app/config/.env`: 600 (more restrictive for security)
 
 ### Step 4: Import Database
 
