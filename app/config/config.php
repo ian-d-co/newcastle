@@ -13,7 +13,12 @@
  */
 
 // Load environment variables from .env file if it exists
-$envFile = __DIR__ . '/../../.env';
+// Look for .env in app/config directory first, then fall back to root
+$envFile = __DIR__ . '/.env';
+if (!file_exists($envFile)) {
+    $envFile = __DIR__ . '/../../.env';
+}
+
 if (file_exists($envFile)) {
     $lines = file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
     foreach ($lines as $line) {
@@ -40,6 +45,7 @@ if (file_exists($envFile)) {
 
 // Database Configuration
 define('DB_HOST', getenv('DB_HOST') ?: 'localhost');
+define('DB_PORT', getenv('DB_PORT') ?: '3306');
 define('DB_NAME', getenv('DB_NAME') ?: 'u983097270_newc');
 define('DB_USER', getenv('DB_USER') ?: 'root');
 define('DB_PASSWORD', getenv('DB_PASSWORD') ?: '');
@@ -111,8 +117,9 @@ function getDbConnection() {
     if ($pdo === null) {
         try {
             $dsn = sprintf(
-                'mysql:host=%s;dbname=%s;charset=%s',
+                'mysql:host=%s;port=%s;dbname=%s;charset=%s',
                 DB_HOST,
+                DB_PORT,
                 DB_NAME,
                 DB_CHARSET
             );

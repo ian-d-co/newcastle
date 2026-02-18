@@ -1,5 +1,6 @@
 # Environment files
 .env
+app/config/.env
 
 # IDE files
 .vscode/
