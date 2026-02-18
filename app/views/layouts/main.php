@@ -59,6 +59,7 @@
     </footer>
 
     <script src="/js/app.js"></script>
+    <script src="/js/scripts.js"></script>
     <script src="/js/modals.js"></script>
     <script src="/js/forms.js"></script>
     <script src="/js/charts.js"></script>
