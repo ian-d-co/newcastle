@@ -121,7 +121,7 @@ ob_start();
 
                         <!-- Rooms List -->
                         <?php
-                        $rooms = $hotelModel->getRoomsByHotel($hotel['id']);
+                        $rooms = $hotel['rooms'] ?? [];
                         if (empty($rooms)):
                         ?>
                             <p style="text-align: center; color: #545454; padding: 1rem;">No rooms added yet.</p>
@@ -176,8 +176,8 @@ ob_start();
                                                                 <?php foreach ($reservations as $reservation): ?>
                                                                     <tr style="border-bottom: 1px solid #eee;">
                                                                         <td style="padding: 0.5rem;"><?php echo e($reservation['discord_name']); ?></td>
-                                                                        <td style="padding: 0.5rem;"><?php echo date('M j', strtotime($reservation['check_in_date'])); ?></td>
-                                                                        <td style="padding: 0.5rem;"><?php echo date('M j', strtotime($reservation['check_out_date'])); ?></td>
+                                                                        <td style="padding: 0.5rem;"><?php echo date('M j', strtotime($reservation['check_in'])); ?></td>
+                                                                        <td style="padding: 0.5rem;"><?php echo date('M j', strtotime($reservation['check_out'])); ?></td>
                                                                         <td style="padding: 0.5rem; text-align: center;"><?php echo $reservation['num_guests']; ?></td>
                                                                         <td style="padding: 0.5rem; text-align: right;">£<?php echo number_format($reservation['total_price'], 2); ?></td>
                                                                         <td style="padding: 0.5rem; text-align: center;">
@@ -300,8 +300,9 @@ const hotelsData = <?php echo json_encode($hotels); ?>;
 const roomsData = <?php
 $allRooms = [];
 foreach ($hotels as $hotel) {
-    $rooms = $hotelModel->getRoomsByHotel($hotel['id']);
-    $allRooms = array_merge($allRooms, $rooms);
+    if (isset($hotel['rooms'])) {
+        $allRooms = array_merge($allRooms, $hotel['rooms']);
+    }
 }
 echo json_encode($allRooms);
 ?>;
