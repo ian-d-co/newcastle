@@ -12,12 +12,11 @@ error_log('=== Dicksord Fest 2026 Request Start ===');
 error_log('Request URI: ' . ($_SERVER['REQUEST_URI'] ?? 'N/A'));
 error_log('Request Method: ' . ($_SERVER['REQUEST_METHOD'] ?? 'N/A'));
 
-// Define base path
-define('BASE_PATH', dirname(__DIR__));
-
 try {
-    // Load configuration and helpers
-    require_once BASE_PATH . '/app/config/config.php';
+    // Load bootstrap - handles all path resolution and configuration
+    require_once __DIR__ . '/../app/bootstrap.php';
+    
+    // Load helpers
     require_once BASE_PATH . '/app/helpers/Database.php';
     require_once BASE_PATH . '/app/helpers/Auth.php';
     
