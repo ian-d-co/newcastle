@@ -182,20 +182,20 @@ switch ($page) {
         $carshareBooking = $carshareModel->getUserBooking($userId, $event['id']);
         $hostingOffer = $hostingModel->getUserOffer($userId, $event['id']);
         $hostingBooking = $hostingModel->getUserBooking($userId, $event['id']);
-            $hotelReservations = $hotelModel->getUserReservations($userId, $event['id']);
-            
-            // Get polls voted on
-            $db = getDbConnection();
-            $sql = "SELECT DISTINCT p.id, p.question, pv.created_at as voted_at 
-                    FROM polls p
-                    JOIN poll_votes pv ON p.id = pv.poll_id
-                    WHERE pv.user_id = :user_id AND p.event_id = :event_id
-                    ORDER BY pv.created_at DESC";
-            $stmt = $db->prepare($sql);
-            $stmt->execute(['user_id' => $userId, 'event_id' => $event['id']]);
-            $pollsVoted = $stmt->fetchAll();
-            
-            include BASE_PATH . '/app/views/public/dashboard.php';
+        $hotelReservations = $hotelModel->getUserReservations($userId, $event['id']);
+        
+        // Get polls voted on
+        $db = getDbConnection();
+        $sql = "SELECT DISTINCT p.id, p.question, pv.created_at as voted_at 
+                FROM polls p
+                JOIN poll_votes pv ON p.id = pv.poll_id
+                WHERE pv.user_id = :user_id AND p.event_id = :event_id
+                ORDER BY pv.created_at DESC";
+        $stmt = $db->prepare($sql);
+        $stmt->execute(['user_id' => $userId, 'event_id' => $event['id']]);
+        $pollsVoted = $stmt->fetchAll();
+        
+        include BASE_PATH . '/app/views/public/dashboard.php';
         break;
 
     case 'activities':
