@@ -11,6 +11,7 @@
     // ========================================================================
     
     const modals = {};
+    let escapeListenerAdded = false;
 
     // Initialize modals
     function initModals() {
@@ -38,18 +39,21 @@
             }
         });
         
-        // Single document-level escape key listener for all modals
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                // Close all active modals
-                Object.keys(modals).forEach(function(modalId) {
-                    const modal = modals[modalId];
-                    if (modal && modal.classList.contains('active')) {
-                        closeModal(modalId);
-                    }
-                });
-            }
-        });
+        // Single document-level escape key listener for all modals (add only once)
+        if (!escapeListenerAdded) {
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    // Close all active modals
+                    Object.keys(modals).forEach(function(modalId) {
+                        const modal = modals[modalId];
+                        if (modal && modal.classList.contains('active')) {
+                            closeModal(modalId);
+                        }
+                    });
+                }
+            });
+            escapeListenerAdded = true;
+        }
     }
 
     // Open modal
@@ -168,7 +172,7 @@
                         const response = JSON.parse(xhr.responseText);
                         callback(null, response);
                     } catch (e) {
-                        callback(null, {success: true});
+                        callback({message: 'Invalid response format', error: e.message});
                     }
                 } else {
                     try {
