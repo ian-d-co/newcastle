@@ -440,6 +440,108 @@ try {
             
             include BASE_PATH . '/app/views/admin/dashboard.php';
             break;
+            
+        // Admin Event Management
+        case 'admin_event':
+            AdminAuth::check();
+            require_once BASE_PATH . '/app/controllers/AdminController.php';
+            $adminController = new AdminController();
+            
+            if ($action === 'update') {
+                $adminController->updateEvent();
+            } else {
+                $adminController->showEventEditor();
+            }
+            break;
+            
+        // Admin Activity Management
+        case 'admin_activities':
+            AdminAuth::check();
+            require_once BASE_PATH . '/app/controllers/AdminController.php';
+            $adminController = new AdminController();
+            
+            if ($action === 'create') {
+                $adminController->createActivity();
+            } elseif ($action === 'update') {
+                $adminController->updateActivity();
+            } elseif ($action === 'delete') {
+                $adminController->deleteActivity();
+            } else {
+                $adminController->showActivityManager();
+            }
+            break;
+            
+        // Admin Meal Management
+        case 'admin_meals':
+            AdminAuth::check();
+            require_once BASE_PATH . '/app/controllers/AdminController.php';
+            $adminController = new AdminController();
+            
+            if ($action === 'create') {
+                $adminController->createMeal();
+            } elseif ($action === 'update') {
+                $adminController->updateMeal();
+            } elseif ($action === 'delete') {
+                $adminController->deleteMeal();
+            } else {
+                $adminController->showMealManager();
+            }
+            break;
+            
+        // Admin Poll Management
+        case 'admin_polls':
+            AdminAuth::check();
+            require_once BASE_PATH . '/app/controllers/AdminController.php';
+            $adminController = new AdminController();
+            
+            if ($action === 'create') {
+                $adminController->createPoll();
+            } elseif ($action === 'update') {
+                $adminController->updatePoll();
+            } elseif ($action === 'delete') {
+                $adminController->deletePoll();
+            } else {
+                $adminController->showPollManager();
+            }
+            break;
+            
+        // Admin Hotel Management
+        case 'admin_hotels':
+            AdminAuth::check();
+            require_once BASE_PATH . '/app/controllers/AdminController.php';
+            $adminController = new AdminController();
+            
+            if ($action === 'create_hotel') {
+                $adminController->createHotel();
+            } elseif ($action === 'update_hotel') {
+                $adminController->updateHotel();
+            } elseif ($action === 'delete_hotel') {
+                $adminController->deleteHotel();
+            } elseif ($action === 'create_room') {
+                $adminController->createRoom();
+            } elseif ($action === 'update_room') {
+                $adminController->updateRoom();
+            } elseif ($action === 'delete_room') {
+                $adminController->deleteRoom();
+            } else {
+                $adminController->showHotelManager();
+            }
+            break;
+            
+        // Admin User Management
+        case 'admin_users':
+            AdminAuth::check();
+            require_once BASE_PATH . '/app/controllers/AdminController.php';
+            $adminController = new AdminController();
+            
+            if ($action === 'toggle_admin') {
+                $adminController->toggleAdmin();
+            } elseif ($action === 'delete') {
+                $adminController->deleteUser();
+            } else {
+                $adminController->showUserManager();
+            }
+            break;
 
         // ========================================================================
         // 404 - PAGE NOT FOUND
