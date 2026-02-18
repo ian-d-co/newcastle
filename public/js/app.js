@@ -5,7 +5,6 @@
     // Initialize app
     document.addEventListener('DOMContentLoaded', function() {
         initNavigation();
-        initModals();
         initAlerts();
         
         // Auto-close expired polls
