@@ -208,6 +208,12 @@ function deleteActivity(id) {
 document.getElementById('activityForm').addEventListener('submit', function(e) {
     e.preventDefault();
     
+    // Disable submit button to prevent double submission
+    const submitBtn = this.querySelector('button[type="submit"]');
+    const originalText = submitBtn.textContent;
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Saving...';
+    
     const formData = {
         title: this.title.value,
         description: this.description.value,
@@ -232,6 +238,9 @@ document.getElementById('activityForm').addEventListener('submit', function(e) {
     })
     .then(response => response.json())
     .then(data => {
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalText;
+        
         if (data.success) {
             showAlert(data.message, 'success');
             modalManager.close('activityModal');
@@ -241,6 +250,9 @@ document.getElementById('activityForm').addEventListener('submit', function(e) {
         }
     })
     .catch(error => {
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalText;
+        
         console.error('Error:', error);
         showAlert('An error occurred', 'danger');
     });

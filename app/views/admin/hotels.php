@@ -249,6 +249,12 @@ function deleteHotel(id) {
 document.getElementById('hotelForm').addEventListener('submit', function(e) {
     e.preventDefault();
     
+    // Disable submit button to prevent double submission
+    const submitBtn = this.querySelector('button[type="submit"]');
+    const originalText = submitBtn.textContent;
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Saving...';
+    
     const formData = {
         name: this.hotel_name.value,
         address: this.hotel_address.value,
@@ -270,6 +276,9 @@ document.getElementById('hotelForm').addEventListener('submit', function(e) {
     })
     .then(response => response.json())
     .then(data => {
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalText;
+        
         if (data.success) {
             showAlert(data.message, 'success');
             modalManager.close('hotelModal');
@@ -279,6 +288,9 @@ document.getElementById('hotelForm').addEventListener('submit', function(e) {
         }
     })
     .catch(error => {
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalText;
+        
         console.error('Error:', error);
         showAlert('An error occurred', 'danger');
     });
@@ -334,6 +346,12 @@ function deleteRoom(id) {
 document.getElementById('roomForm').addEventListener('submit', function(e) {
     e.preventDefault();
     
+    // Disable submit button to prevent double submission
+    const submitBtn = this.querySelector('button[type="submit"]');
+    const originalText = submitBtn.textContent;
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Saving...';
+    
     const formData = {
         hotel_id: this.room_hotel_id.value,
         room_type: this.room_type.value,
@@ -355,6 +373,9 @@ document.getElementById('roomForm').addEventListener('submit', function(e) {
     })
     .then(response => response.json())
     .then(data => {
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalText;
+        
         if (data.success) {
             showAlert(data.message, 'success');
             modalManager.close('roomModal');
@@ -364,6 +385,9 @@ document.getElementById('roomForm').addEventListener('submit', function(e) {
         }
     })
     .catch(error => {
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalText;
+        
         console.error('Error:', error);
         showAlert('An error occurred', 'danger');
     });

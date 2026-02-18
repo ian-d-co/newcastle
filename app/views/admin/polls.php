@@ -335,6 +335,12 @@ document.getElementById('pollForm').addEventListener('submit', function(e) {
         return;
     }
     
+    // Disable submit button to prevent double submission
+    const submitBtn = this.querySelector('button[type="submit"]');
+    const originalText = submitBtn.textContent;
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Saving...';
+    
     const formData = {
         question: this.question.value,
         is_multiple_choice: this.is_multiple_choice.checked ? 1 : 0,
@@ -359,6 +365,9 @@ document.getElementById('pollForm').addEventListener('submit', function(e) {
     })
     .then(response => response.json())
     .then(data => {
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalText;
+        
         if (data.success) {
             showAlert(data.message, 'success');
             modalManager.close('pollModal');
@@ -368,6 +377,9 @@ document.getElementById('pollForm').addEventListener('submit', function(e) {
         }
     })
     .catch(error => {
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalText;
+        
         console.error('Error:', error);
         showAlert('An error occurred', 'danger');
     });
