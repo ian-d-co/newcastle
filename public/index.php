@@ -187,8 +187,48 @@ switch ($page) {
 
     case 'admin':
         AdminAuth::check();
-        // For now, redirect to home - admin panel would be implemented here
-        redirect('/index.php?page=home');
+        $pageTitle = 'Admin Dashboard';
+        
+        // Get statistics
+        $db = getDbConnection();
+        
+        $stats = [];
+        
+        // Total attendees
+        $stmt = $db->prepare("SELECT COUNT(*) as count FROM event_attendees WHERE event_id = :event_id");
+        $stmt->execute(['event_id' => $event['id']]);
+        $stats['total_attendees'] = $stmt->fetch()['count'];
+        
+        // Total activities
+        $stmt = $db->prepare("SELECT COUNT(*) as count FROM activities WHERE event_id = :event_id");
+        $stmt->execute(['event_id' => $event['id']]);
+        $stats['total_activities'] = $stmt->fetch()['count'];
+        
+        // Total meals
+        $stmt = $db->prepare("SELECT COUNT(*) as count FROM meals WHERE event_id = :event_id");
+        $stmt->execute(['event_id' => $event['id']]);
+        $stats['total_meals'] = $stmt->fetch()['count'];
+        
+        // Carshare offers
+        $stmt = $db->prepare("SELECT COUNT(*) as count FROM carshare_offers WHERE event_id = :event_id");
+        $stmt->execute(['event_id' => $event['id']]);
+        $stats['carshare_offers'] = $stmt->fetch()['count'];
+        
+        // Hosting offers
+        $stmt = $db->prepare("SELECT COUNT(*) as count FROM hosting_offers WHERE event_id = :event_id");
+        $stmt->execute(['event_id' => $event['id']]);
+        $stats['hosting_offers'] = $stmt->fetch()['count'];
+        
+        // Active polls
+        $stmt = $db->prepare("SELECT COUNT(*) as count FROM polls WHERE event_id = :event_id AND is_active = 1");
+        $stmt->execute(['event_id' => $event['id']]);
+        $stats['active_polls'] = $stmt->fetch()['count'];
+        
+        // Recent attendees
+        $recentAttendees = $eventModel->getAllAttendees($event['id']);
+        $recentAttendees = array_slice($recentAttendees, 0, 10);
+        
+        include __DIR__ . '/../app/views/admin/dashboard.php';
         break;
 
     default:
