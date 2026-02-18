@@ -192,8 +192,13 @@ class AdminController {
             // Validate required fields
             $requiredFields = ['id', 'title', 'day', 'start_time', 'end_time'];
             foreach ($requiredFields as $field) {
-                if (!isset($data[$field]) || trim($data[$field]) === '') {
+                if (!isset($data[$field])) {
                     error_log("AdminController::updateActivity() - Missing required field: $field");
+                    jsonResponse(['success' => false, 'message' => "Missing required field: $field"], 400);
+                }
+                // For string fields, also check they're not empty after trimming
+                if ($field !== 'id' && trim($data[$field]) === '') {
+                    error_log("AdminController::updateActivity() - Empty required field: $field");
                     jsonResponse(['success' => false, 'message' => "Missing required field: $field"], 400);
                 }
             }
@@ -405,8 +410,13 @@ class AdminController {
             // Validate required fields
             $requiredFields = ['id', 'title', 'day', 'start_time', 'end_time'];
             foreach ($requiredFields as $field) {
-                if (!isset($data[$field]) || trim($data[$field]) === '') {
+                if (!isset($data[$field])) {
                     error_log("AdminController::updateMeal() - Missing required field: $field");
+                    jsonResponse(['success' => false, 'message' => "Missing required field: $field"], 400);
+                }
+                // For string fields, also check they're not empty after trimming
+                if ($field !== 'id' && trim($data[$field]) === '') {
+                    error_log("AdminController::updateMeal() - Empty required field: $field");
                     jsonResponse(['success' => false, 'message' => "Missing required field: $field"], 400);
                 }
             }
@@ -637,8 +647,13 @@ class AdminController {
             // Validate required fields
             $requiredFields = ['id', 'question'];
             foreach ($requiredFields as $field) {
-                if (!isset($data[$field]) || trim($data[$field]) === '') {
+                if (!isset($data[$field])) {
                     error_log("AdminController::updatePoll() - Missing required field: $field");
+                    jsonResponse(['success' => false, 'message' => "Missing required field: $field"], 400);
+                }
+                // For string fields, also check they're not empty after trimming
+                if ($field !== 'id' && trim($data[$field]) === '') {
+                    error_log("AdminController::updatePoll() - Empty required field: $field");
                     jsonResponse(['success' => false, 'message' => "Missing required field: $field"], 400);
                 }
             }
@@ -847,8 +862,13 @@ class AdminController {
             // Validate required fields
             $requiredFields = ['id', 'name'];
             foreach ($requiredFields as $field) {
-                if (!isset($data[$field]) || trim($data[$field]) === '') {
+                if (!isset($data[$field])) {
                     error_log("AdminController::updateHotel() - Missing required field: $field");
+                    jsonResponse(['success' => false, 'message' => "Missing required field: $field"], 400);
+                }
+                // For string fields, also check they're not empty after trimming
+                if ($field !== 'id' && trim($data[$field]) === '') {
+                    error_log("AdminController::updateHotel() - Empty required field: $field");
                     jsonResponse(['success' => false, 'message' => "Missing required field: $field"], 400);
                 }
             }
@@ -969,8 +989,13 @@ class AdminController {
             // Validate required fields
             $requiredFields = ['hotel_id', 'room_type', 'price_per_night'];
             foreach ($requiredFields as $field) {
-                if (!isset($data[$field]) || trim($data[$field]) === '') {
+                if (!isset($data[$field])) {
                     error_log("AdminController::createRoom() - Missing required field: $field");
+                    jsonResponse(['success' => false, 'message' => "Missing required field: $field"], 400);
+                }
+                // For string fields, also check they're not empty after trimming
+                if ($field === 'room_type' && trim($data[$field]) === '') {
+                    error_log("AdminController::createRoom() - Empty required field: $field");
                     jsonResponse(['success' => false, 'message' => "Missing required field: $field"], 400);
                 }
             }
@@ -1026,8 +1051,13 @@ class AdminController {
             // Validate required fields
             $requiredFields = ['id', 'room_type', 'price_per_night'];
             foreach ($requiredFields as $field) {
-                if (!isset($data[$field]) || trim($data[$field]) === '') {
+                if (!isset($data[$field])) {
                     error_log("AdminController::updateRoom() - Missing required field: $field");
+                    jsonResponse(['success' => false, 'message' => "Missing required field: $field"], 400);
+                }
+                // For string fields, also check they're not empty after trimming
+                if ($field === 'room_type' && trim($data[$field]) === '') {
+                    error_log("AdminController::updateRoom() - Empty required field: $field");
                     jsonResponse(['success' => false, 'message' => "Missing required field: $field"], 400);
                 }
             }
