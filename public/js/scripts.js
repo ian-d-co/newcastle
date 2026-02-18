@@ -157,6 +157,9 @@
     // ========================================================================
     
     // Utility function for API calls
+    // Callback signature: (error, response)
+    // - On success: callback(null, responseData)
+    // - On error: callback(errorData, null)
     window.apiCall = function(url, method, data, callback) {
         const xhr = new XMLHttpRequest();
         xhr.open(method, url, true);
@@ -172,14 +175,14 @@
                         const response = JSON.parse(xhr.responseText);
                         callback(null, response);
                     } catch (e) {
-                        callback({message: 'Invalid response format', error: e.message});
+                        callback({message: 'Invalid response format', error: e.message}, null);
                     }
                 } else {
                     try {
                         const error = JSON.parse(xhr.responseText);
-                        callback(error);
+                        callback(error, null);
                     } catch (e) {
-                        callback({message: 'Request failed'});
+                        callback({message: 'Request failed', status: xhr.status}, null);
                     }
                 }
             }

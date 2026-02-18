@@ -160,30 +160,42 @@ function e($str) {
  * 
  * @param string $date Date string
  * @param string $format Date format
- * @return string Formatted date
+ * @return string Formatted date or empty string if invalid
  */
 function formatDate($date, $format = 'Y-m-d H:i:s') {
-    return date($format, strtotime($date));
+    $timestamp = strtotime($date);
+    if ($timestamp === false) {
+        return '';
+    }
+    return date($format, $timestamp);
 }
 
 /**
  * Format date as DD MONTH YEAR (e.g., 18 February 2026)
  * 
  * @param string $date Date string
- * @return string Formatted date
+ * @return string Formatted date or empty string if invalid
  */
 function formatDisplayDate($date) {
-    return date('d F Y', strtotime($date));
+    $timestamp = strtotime($date);
+    if ($timestamp === false) {
+        return '';
+    }
+    return date('d F Y', $timestamp);
 }
 
 /**
  * Format time in 24-hour clock (e.g., 14:30)
  * 
  * @param string $time Time string
- * @return string Formatted time
+ * @return string Formatted time or empty string if invalid
  */
 function formatDisplayTime($time) {
-    return date('H:i', strtotime($time));
+    $timestamp = strtotime($time);
+    if ($timestamp === false) {
+        return '';
+    }
+    return date('H:i', $timestamp);
 }
 
 /**
