@@ -78,15 +78,37 @@ If your Hostinger plan includes SSH access:
    # Move app, database folders to parent (outside web root for security)
    mv app ../../
    mv database ../../
-   mv .env.example ../../
    
    # Clean up
    cd ..
    rm -rf temp_newcastle
    ```
+   
+   **Expected File Structure:**
+   ```
+   domains/your-domain.com/
+   ├── app/                    # Application code (secure, outside web root)
+   │   ├── config/
+   │   │   ├── .env.example   # Environment template
+   │   │   └── config.php
+   │   ├── controllers/
+   │   ├── models/
+   │   └── views/
+   ├── database/               # Database schemas (secure, outside web root)
+   └── public_html/           # Web root (publicly accessible)
+       ├── index.php          # Main entry point with auto-detection
+       ├── .htaccess
+       ├── css/
+       ├── js/
+       └── api/
+   ```
 
-5. **Adjust paths in configuration**
-   The application is designed to work with `public/` as web root. If you moved files, you may need to adjust paths in `index.php`.
+5. **Automatic Path Detection**
+   The application now includes intelligent path detection in `index.php`. It will automatically locate the `app` directory whether you're using:
+   - Standard repo structure: `repo_root/public/` as web root
+   - Hostinger structure: `public_html/` as web root with `app/` in parent
+   
+   No manual configuration needed! The system checks multiple locations and logs the detected path.
 
 ### Option 2: Using FTP/SFTP
 
@@ -107,14 +129,14 @@ If SSH is not available:
    - Upload `public/` folder contents to `public_html/`
    - Upload `app/` folder to parent of `public_html/` (e.g., `domains/your-domain.com/`)
    - Upload `database/` folder to same location as `app/`
-   - Upload `.env.example` to same location
+   
+   **Important:** The application will automatically detect the `app` directory location, so no manual path configuration is needed.
 
 4. **Verify structure**
    ```
    domains/your-domain.com/
    ├── app/
    ├── database/
-   ├── .env.example
    └── public_html/
        ├── index.php
        ├── .htaccess
@@ -127,11 +149,16 @@ If SSH is not available:
 
 ## Environment Configuration
 
-1. **Copy environment template to app/config/**
+1. **Copy environment template**
+   
+   The `.env` file should be placed in `app/config/.env` (this is the recommended and primary location):
+   
    ```bash
    cd /path/to/domains/your-domain.com/
    cp app/config/.env.example app/config/.env
    ```
+   
+   **Note:** The application configuration looks for `.env` in `app/config/` first, and falls back to the root directory for backward compatibility. However, for security and organization, **always use `app/config/.env`** as documented in this guide.
 
 2. **Edit .env file** with your database credentials
    ```bash
