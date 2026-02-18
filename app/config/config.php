@@ -166,8 +166,9 @@ function getDbConnection() {
                 PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
                 PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
                 PDO::ATTR_EMULATE_PREPARES => false,
-                PDO::ATTR_TIMEOUT => 5, // 5 second connection timeout
-                PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES " . DB_CHARSET
+                PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES " . DB_CHARSET,
+                // Set connection timeout for MySQL (in seconds)
+                PDO::ATTR_TIMEOUT => 5
             ];
             
             $pdo = new PDO($dsn, DB_USER, DB_PASSWORD, $options);
