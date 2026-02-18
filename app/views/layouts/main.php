@@ -39,13 +39,8 @@
                         <li><a href="/index.php?action=logout">Logout</a></li>
                     </ul>
                 </nav>
-                <?php else: ?>
-                <nav class="nav">
-                    <ul>
-                        <li><a href="/index.php?page=login" class="<?php echo ($currentPage ?? '') === 'login' ? 'active' : ''; ?>">Login</a></li>
-                    </ul>
-                </nav>
                 <?php endif; ?>
+                <!-- Login button already shown via btn-login-mobile above -->
             </div>
         </div>
     </header>

@@ -223,19 +223,25 @@ try {
     $hostingModel = new Hosting();
     $hotelModel = new Hotel();
 
-    // Get active event and current user ID
+    // Get active event with fallback
     $event = $eventModel->getActive();
-    $userId = getCurrentUserId();
     
-    // Defensive check: ensure we have an active event
+    // If no active event found, use fallback data
     if (!$event || !isset($event['id'])) {
-        error_log('Warning: No active event found for authenticated page request: ' . $page);
-        renderErrorPage(
-            'No Active Event',
-            'There is currently no active event. Please check back later or contact an administrator.',
-            'Page requested: ' . $page
-        );
+        error_log('Warning: No active event found for authenticated page request: ' . $page . ', using fallback data');
+        $event = [
+            'id' => 1,
+            'title' => 'Dicksord Fest 2026 - Newcastle',
+            'description' => '',
+            'start_date' => '2026-11-20',
+            'end_date' => '2026-11-22',
+            'location' => 'Newcastle',
+            'content' => '<p>Welcome to Dicksord Fest 2026! More details coming soon.</p>'
+        ];
     }
+    
+    // Get current user ID for authenticated routes
+    $userId = getCurrentUserId();
 } catch (Exception $e) {
     // Log DETAILED error with full context
     error_log('===========================================');
