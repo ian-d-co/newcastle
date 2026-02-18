@@ -37,7 +37,7 @@
    # Application
    APP_ENV=production
    APP_DEBUG=false
-   APP_URL=https://dbnewcastle.nwboundbear.xyz
+   APP_URL=https://yourdomain.com
    TIMEZONE=Europe/London
    
    # Database (from Hostinger MySQL Databases)

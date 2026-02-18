@@ -144,7 +144,7 @@ If SSH is not available:
    # Application Configuration
    APP_ENV=production
    APP_DEBUG=false
-   APP_URL=https://dbnewcastle.nwboundbear.xyz
+   APP_URL=https://your-domain.com
    TIMEZONE=Europe/London
    
    # Database Configuration (from Hostinger control panel)
