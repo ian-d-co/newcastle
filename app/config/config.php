@@ -362,3 +362,23 @@ function e($str) {
 function formatDate($date, $format = 'Y-m-d H:i:s') {
     return date($format, strtotime($date));
 }
+
+/**
+ * Format date as DD MONTH YEAR (e.g., 18 February 2026)
+ * 
+ * @param string $date Date string
+ * @return string Formatted date
+ */
+function formatDisplayDate($date) {
+    return date('d F Y', strtotime($date));
+}
+
+/**
+ * Format time in 24-hour clock (e.g., 14:30)
+ * 
+ * @param string $time Time string
+ * @return string Formatted time
+ */
+function formatDisplayTime($time) {
+    return date('H:i', strtotime($time));
+}

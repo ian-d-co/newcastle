@@ -68,7 +68,7 @@ ob_start();
                                 <?php if ($isExpired): ?>
                                     <span class="badge badge-danger">Expired</span>
                                 <?php else: ?>
-                                    <span>Expires: <?php echo date('M j, Y g:i A', strtotime($poll['expires_at'])); ?></span>
+                                    <span>Expires: <?php echo formatDisplayDate($poll['expires_at']); ?> <?php echo formatDisplayTime($poll['expires_at']); ?></span>
                                 <?php endif; ?>
                             </div>
                         <?php endif; ?>

@@ -141,7 +141,7 @@ if ($page === 'home') {
         $event = [
             'id' => 1,
             'title' => 'Dicksord Fest 2026 - Newcastle',
-            'description' => 'Join us for an epic gaming event in Newcastle!',
+            'description' => '',
             'start_date' => '2026-11-20',
             'end_date' => '2026-11-22',
             'location' => 'Newcastle',
