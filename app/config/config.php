@@ -261,6 +261,16 @@ function escapeHtml($str) {
 }
 
 /**
+ * Short alias for escapeHtml() function
+ * 
+ * @param string $str String to escape
+ * @return string Escaped string
+ */
+function e($str) {
+    return escapeHtml($str);
+}
+
+/**
  * Format date for display
  * 
  * @param string $date Date string

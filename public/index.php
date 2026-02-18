@@ -71,6 +71,24 @@ if ($page === 'register') {
     $page = 'home'; // Registration is handled on home page
 }
 
+// Homepage (PUBLIC - No authentication required)
+if ($page === 'home') {
+    require_once BASE_PATH . '/app/models/Event.php';
+    $eventModel = new Event();
+    $event = $eventModel->getActive();
+    
+    // Check if user is logged in and attending
+    $isAttending = false;
+    if (isLoggedIn()) {
+        $userId = getCurrentUserId();
+        $isAttending = $eventModel->getAttendance($userId, $event['id']) !== false;
+    }
+    
+    $pageTitle = 'Home';
+    include BASE_PATH . '/app/views/public/home.php';
+    exit;
+}
+
 // ============================================================================
 // AUTHENTICATED ROUTES (Require login)
 // ============================================================================
@@ -110,21 +128,15 @@ switch ($page) {
     // USER ROUTES
     // ========================================================================
     
-    case 'home':
     case 'dashboard':
-        if ($page === 'home') {
-            $pageTitle = 'Home';
-            $isAttending = $eventModel->getAttendance($userId, $event['id']) !== false;
-            include BASE_PATH . '/app/views/public/home.php';
-        } else {
-            $pageTitle = 'Dashboard';
-            $attendance = $eventModel->getAttendance($userId, $event['id']);
-            $activityBookings = $activityModel->getUserBookings($userId, $event['id']);
-            $mealBookings = $mealModel->getUserBookings($userId, $event['id']);
-            $carshareOffer = $carshareModel->getUserOffer($userId, $event['id']);
-            $carshareBooking = $carshareModel->getUserBooking($userId, $event['id']);
-            $hostingOffer = $hostingModel->getUserOffer($userId, $event['id']);
-            $hostingBooking = $hostingModel->getUserBooking($userId, $event['id']);
+        $pageTitle = 'Dashboard';
+        $attendance = $eventModel->getAttendance($userId, $event['id']);
+        $activityBookings = $activityModel->getUserBookings($userId, $event['id']);
+        $mealBookings = $mealModel->getUserBookings($userId, $event['id']);
+        $carshareOffer = $carshareModel->getUserOffer($userId, $event['id']);
+        $carshareBooking = $carshareModel->getUserBooking($userId, $event['id']);
+        $hostingOffer = $hostingModel->getUserOffer($userId, $event['id']);
+        $hostingBooking = $hostingModel->getUserBooking($userId, $event['id']);
             $hotelReservations = $hotelModel->getUserReservations($userId, $event['id']);
             
             // Get polls voted on
@@ -139,7 +151,6 @@ switch ($page) {
             $pollsVoted = $stmt->fetchAll();
             
             include BASE_PATH . '/app/views/public/dashboard.php';
-        }
         break;
 
     case 'activities':
