@@ -47,7 +47,7 @@ ob_start();
                     <div class="card-header">Event Management</div>
                     <div class="card-body">
                         <p>Edit event information, manage dates, and update content.</p>
-                        <button class="btn btn-primary btn-block" onclick="alert('Event editor coming soon!')">Edit Event</button>
+                        <a href="/index.php?page=admin_event" class="btn btn-primary btn-block">Edit Event</a>
                     </div>
                 </div>
             </div>
@@ -57,7 +57,7 @@ ob_start();
                     <div class="card-header">Activities</div>
                     <div class="card-body">
                         <p>Create, edit, and manage activities for the event.</p>
-                        <button class="btn btn-primary btn-block" onclick="alert('Activity manager coming soon!')">Manage Activities</button>
+                        <a href="/index.php?page=admin_activities" class="btn btn-primary btn-block">Manage Activities</a>
                     </div>
                 </div>
             </div>
@@ -67,7 +67,7 @@ ob_start();
                     <div class="card-header">Meals</div>
                     <div class="card-body">
                         <p>Create, edit, and manage meals for the event.</p>
-                        <button class="btn btn-primary btn-block" onclick="alert('Meal manager coming soon!')">Manage Meals</button>
+                        <a href="/index.php?page=admin_meals" class="btn btn-primary btn-block">Manage Meals</a>
                     </div>
                 </div>
             </div>
@@ -77,7 +77,7 @@ ob_start();
                     <div class="card-header">Polls</div>
                     <div class="card-body">
                         <p>Create and manage polls with various options.</p>
-                        <button class="btn btn-primary btn-block" onclick="alert('Poll manager coming soon!')">Manage Polls</button>
+                        <a href="/index.php?page=admin_polls" class="btn btn-primary btn-block">Manage Polls</a>
                     </div>
                 </div>
             </div>
@@ -87,7 +87,7 @@ ob_start();
                     <div class="card-header">Hotels</div>
                     <div class="card-body">
                         <p>Add hotels, manage rooms, and track reservations.</p>
-                        <button class="btn btn-primary btn-block" onclick="alert('Hotel manager coming soon!')">Manage Hotels</button>
+                        <a href="/index.php?page=admin_hotels" class="btn btn-primary btn-block">Manage Hotels</a>
                     </div>
                 </div>
             </div>
@@ -97,7 +97,7 @@ ob_start();
                     <div class="card-header">Users</div>
                     <div class="card-body">
                         <p>View and manage registered users.</p>
-                        <button class="btn btn-primary btn-block" onclick="alert('User manager coming soon!')">Manage Users</button>
+                        <a href="/index.php?page=admin_users" class="btn btn-primary btn-block">Manage Users</a>
                     </div>
                 </div>
             </div>
