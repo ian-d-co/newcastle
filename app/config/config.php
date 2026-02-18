@@ -245,6 +245,12 @@ function initSession() {
  * @return bool True if user is logged in
  */
 function isLoggedIn() {
+    // Check if session is started first
+    if (session_status() !== PHP_SESSION_ACTIVE) {
+        error_log('WARNING: isLoggedIn() called but session not started');
+        return false;
+    }
+    
     return isset($_SESSION['user_id']) && isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true;
 }
 
@@ -263,6 +269,17 @@ function getCurrentUserId() {
  * @return bool True if user is admin
  */
 function isAdmin() {
+    // Check if session is started first
+    if (session_status() !== PHP_SESSION_ACTIVE) {
+        error_log('WARNING: isAdmin() called but session not started');
+        return false;
+    }
+    
+    // Must be logged in first
+    if (!isLoggedIn()) {
+        return false;
+    }
+    
     return isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true;
 }
 

@@ -195,6 +195,13 @@ if ($page === 'home') {
 // All other pages require authentication
 Auth::check();
 
+// Log request details for debugging
+error_log('=== AUTHENTICATED ROUTE REQUEST ===');
+error_log('Page: ' . $page);
+error_log('User ID: ' . ($_SESSION['user_id'] ?? 'NOT SET'));
+error_log('Is Admin: ' . (isset($_SESSION['is_admin']) ? ($_SESSION['is_admin'] ? 'TRUE' : 'FALSE') : 'NOT SET'));
+error_log('Is Logged In: ' . (isLoggedIn() ? 'TRUE' : 'FALSE'));
+
 // Wrap authenticated routes in try/catch to prevent blank 500 errors
 try {
     // Load required models
@@ -229,11 +236,22 @@ try {
         );
     }
 } catch (Exception $e) {
-    // Log the error with full details
-    error_log('ERROR loading models or active event: ' . $e->getMessage());
+    // Log DETAILED error with full context
+    error_log('===========================================');
+    error_log('FATAL ERROR loading models or active event');
+    error_log('Error: ' . $e->getMessage());
+    error_log('File: ' . $e->getFile() . ':' . $e->getLine());
+    error_log('Page requested: ' . ($page ?? 'UNKNOWN'));
     error_log('Stack trace: ' . $e->getTraceAsString());
+    error_log('===========================================');
     
-    // Render error page instead of blank 500
+    // If debug mode, show the actual error
+    if (APP_DEBUG) {
+        die('<pre>' . htmlspecialchars($e->getMessage()) . "\n\n" . 
+            htmlspecialchars($e->getTraceAsString()) . '</pre>');
+    }
+    
+    // Render error page
     renderErrorPage(
         'Service Error',
         'We encountered an error loading the requested page. Please try again later.',
@@ -432,11 +450,23 @@ try {
             break;
     }
 } catch (Exception $e) {
-    // Log the error with full details
-    error_log('ERROR during route execution for page "' . $page . '": ' . $e->getMessage());
+    // Log DETAILED error with full context
+    error_log('===========================================');
+    error_log('FATAL ERROR during route execution');
+    error_log('Error: ' . $e->getMessage());
+    error_log('File: ' . $e->getFile() . ':' . $e->getLine());
+    error_log('Page: ' . $page);
     error_log('Stack trace: ' . $e->getTraceAsString());
+    error_log('===========================================');
     
-    // Render error page instead of blank 500
+    // If debug mode, show the actual error
+    if (APP_DEBUG) {
+        die('<pre>Route: ' . htmlspecialchars($page) . "\n\n" .
+            htmlspecialchars($e->getMessage()) . "\n\n" . 
+            htmlspecialchars($e->getTraceAsString()) . '</pre>');
+    }
+    
+    // Render error page
     renderErrorPage(
         'Page Error',
         'We encountered an error loading this page. Please try again later.',
