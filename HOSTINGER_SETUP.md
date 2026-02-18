@@ -127,15 +127,15 @@ If SSH is not available:
 
 ## Environment Configuration
 
-1. **Copy environment template**
+1. **Copy environment template to app/config/**
    ```bash
    cd /path/to/domains/your-domain.com/
-   cp .env.example .env
+   cp app/config/.env.example app/config/.env
    ```
 
 2. **Edit .env file** with your database credentials
    ```bash
-   nano .env
+   nano app/config/.env
    # or use File Manager in Hostinger control panel
    ```
 
@@ -144,11 +144,12 @@ If SSH is not available:
    # Application Configuration
    APP_ENV=production
    APP_DEBUG=false
-   APP_URL=https://your-domain.com
+   APP_URL=https://dbnewcastle.nwboundbear.xyz
    TIMEZONE=Europe/London
    
    # Database Configuration (from Hostinger control panel)
    DB_HOST=localhost
+   DB_PORT=3306
    DB_NAME=u983097270_newc
    DB_USER=u983097270_newc
    DB_PASSWORD=your_secure_password_here
@@ -249,7 +250,7 @@ find . -type d -exec chmod 755 {} \;
 find . -type f -exec chmod 644 {} \;
 
 # Restrict .env file (more secure)
-chmod 600 .env
+chmod 600 app/config/.env
 
 # Make .htaccess readable
 chmod 644 public_html/.htaccess
@@ -259,18 +260,17 @@ chmod 644 public_html/.htaccess
 
 - **Directories**: 755
 - **PHP files**: 644
-- **`.env` file**: 600
+- **`app/config/.env` file**: 600
 - **`.htaccess` file**: 644
 
 ### Verify Permissions
 
 ```bash
-ls -la
+ls -la app/config/
 # Should show:
-# drwxr-xr-x  app/
-# drwxr-xr-x  database/
 # -rw-------  .env
-# drwxr-xr-x  public_html/
+# -rw-r--r--  .env.example
+# -rw-r--r--  config.php
 ```
 
 ---
@@ -636,7 +636,7 @@ find "$APP_DIR" -type d -exec chmod 755 {} \;
 find "$APP_DIR" -type f -exec chmod 644 {} \;
 find "$WEB_ROOT" -type d -exec chmod 755 {} \;
 find "$WEB_ROOT" -type f -exec chmod 644 {} \;
-chmod 600 "$DEPLOY_DIR/.env"
+chmod 600 "$APP_DIR/config/.env"
 
 echo "Deployment complete!"
 ```
@@ -749,7 +749,7 @@ mysqldump -u u983097270_newc -p u983097270_newc > backup-$(date +%Y%m%d).sql
 **Files**:
 ```bash
 # Weekly backup
-tar -czf backup-files-$(date +%Y%m%d).tar.gz app/ public_html/ .env
+tar -czf backup-files-$(date +%Y%m%d).tar.gz app/ public_html/
 ```
 
 ### Backup Schedule
