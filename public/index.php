@@ -37,6 +37,7 @@ define('BASE_PATH', $basePath);
 try {
     // Load configuration and helpers
     require_once BASE_PATH . '/app/config/config.php';
+    require_once BASE_PATH . '/app/helpers/functions.php';
     require_once BASE_PATH . '/app/helpers/Database.php';
     require_once BASE_PATH . '/app/helpers/Auth.php';
     
