@@ -206,8 +206,8 @@ a:hover {
 /* Buttons - Mobile-First (min 44px × 44px) */
 .btn {
     display: inline-block;
-    padding: 0.875rem 1.5rem;
-    font-size: 1rem;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
     font-weight: 600;
     text-align: center;
     text-decoration: none;

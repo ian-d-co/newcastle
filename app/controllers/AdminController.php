@@ -776,7 +776,9 @@ class AdminController {
             
             include BASE_PATH . '/app/views/admin/poll-categories.php';
         } catch (Exception $e) {
-            error_log('Error loading poll categories: ' . $e->getMessage());
+            error_log('AdminController::showPollCategoryManager() - Exception: ' . $e->getMessage());
+            error_log('AdminController::showPollCategoryManager() - File: ' . $e->getFile() . ':' . $e->getLine());
+            error_log('AdminController::showPollCategoryManager() - Trace: ' . $e->getTraceAsString());
             renderErrorPage('Error', 'Failed to load poll categories');
         }
     }
