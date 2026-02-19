@@ -104,6 +104,7 @@ CREATE TABLE IF NOT EXISTS activities (
     event_id INT NOT NULL,
     title VARCHAR(255) NOT NULL,
     description TEXT,
+    link VARCHAR(500) NULL,
     day ENUM('Friday', 'Saturday', 'Sunday') NOT NULL,
     start_time TIME NOT NULL,
     end_time TIME NOT NULL,
@@ -137,6 +138,7 @@ CREATE TABLE IF NOT EXISTS meals (
     event_id INT NOT NULL,
     title VARCHAR(255) NOT NULL,
     description TEXT,
+    link VARCHAR(500) NULL,
     day ENUM('Friday', 'Saturday', 'Sunday') NOT NULL,
     start_time TIME NOT NULL,
     end_time TIME NOT NULL,
@@ -232,6 +234,7 @@ CREATE TABLE IF NOT EXISTS hotels (
     address TEXT,
     description TEXT,
     website VARCHAR(255),
+    link VARCHAR(500) NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE
