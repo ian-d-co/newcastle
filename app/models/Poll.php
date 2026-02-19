@@ -47,11 +47,20 @@ class Poll {
     }
     
     public function getActive($eventId) {
-        $sql = "SELECT * FROM polls 
-                WHERE event_id = :event_id 
-                AND is_active = 1 
-                AND (expires_at IS NULL OR expires_at > NOW())
-                ORDER BY created_at DESC";
+        $sql = "SELECT p.*, 
+                       pc.name as category_name,
+                       pc.display_order as category_display_order
+                FROM polls p
+                LEFT JOIN poll_categories pc ON p.category_id = pc.id
+                WHERE p.event_id = :event_id 
+                AND p.is_active = 1 
+                AND (p.expires_at IS NULL OR p.expires_at > NOW())
+                ORDER BY 
+                    COALESCE(pc.display_order, 999), -- 999 = sort uncategorized polls last
+                    pc.name ASC,
+                    CASE WHEN p.expires_at IS NULL THEN 1 ELSE 0 END,
+                    p.expires_at ASC,
+                    p.created_at DESC";
         $stmt = $this->db->prepare($sql);
         $stmt->execute(['event_id' => $eventId]);
         return $stmt->fetchAll();

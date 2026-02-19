@@ -10,13 +10,14 @@ ob_start();
         <!-- Section 1: Attendance -->
         <div class="dashboard-section">
             <div class="dashboard-section-header" onclick="toggleSection(this)">
-                <span class="toggle-icon">▶</span>
-                <h3>Attendance</h3>
-                <?php if ($isAttending): ?>
-                    <span class="badge badge-success">✓ Attending</span>
-                <?php else: ?>
-                    <button class="btn btn-primary btn-sm" onclick="event.stopPropagation(); modalManager.open('attendance-modal')">Register Now</button>
-                <?php endif; ?>
+                <h3><span class="toggle-icon">▶</span>Attendance</h3>
+                <div class="section-action">
+                    <?php if ($isAttending): ?>
+                        <span class="badge badge-success">✓ Attending</span>
+                    <?php else: ?>
+                        <button class="btn btn-primary btn-sm" onclick="event.stopPropagation(); modalManager.open('attendance-modal')">Register Now</button>
+                    <?php endif; ?>
+                </div>
             </div>
             <div class="dashboard-section-content" style="display: none;">
                 <?php if ($isAttending): ?>
@@ -33,8 +34,7 @@ ob_start();
         <!-- Section 2: Activities -->
         <div class="dashboard-section">
             <div class="dashboard-section-header" onclick="toggleSection(this)">
-                <span class="toggle-icon">▶</span>
-                <h3>Activities<?php if (!empty($activityBookings)): ?> (<?php echo count($activityBookings); ?>)<?php endif; ?></h3>
+                <h3><span class="toggle-icon">▶</span>Activities<?php if (!empty($activityBookings)): ?> (<?php echo count($activityBookings); ?>)<?php endif; ?></h3>
             </div>
             <div class="dashboard-section-content" style="display: none;">
                 <?php if (!empty($activityBookings)): ?>
@@ -64,8 +64,7 @@ ob_start();
         <!-- Section 3: Meals -->
         <div class="dashboard-section">
             <div class="dashboard-section-header" onclick="toggleSection(this)">
-                <span class="toggle-icon">▶</span>
-                <h3>Meals<?php if (!empty($mealBookings)): ?> (<?php echo count($mealBookings); ?>)<?php endif; ?></h3>
+                <h3><span class="toggle-icon">▶</span>Meals<?php if (!empty($mealBookings)): ?> (<?php echo count($mealBookings); ?>)<?php endif; ?></h3>
             </div>
             <div class="dashboard-section-content" style="display: none;">
                 <?php if (!empty($mealBookings)): ?>
@@ -95,8 +94,7 @@ ob_start();
         <!-- Section 4: Travel & Accommodation -->
         <div class="dashboard-section">
             <div class="dashboard-section-header" onclick="toggleSection(this)">
-                <span class="toggle-icon">▶</span>
-                <h3>Travel &amp; Accommodation</h3>
+                <h3><span class="toggle-icon">▶</span>Travel &amp; Accommodation</h3>
             </div>
             <div class="dashboard-section-content" style="display: none;">
                 <?php if ($isAttending): ?>

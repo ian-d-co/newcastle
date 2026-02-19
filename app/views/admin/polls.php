@@ -9,6 +9,7 @@ ob_start();
             <h1 class="section-title">Manage Polls</h1>
             <div>
                 <button onclick="openCreateModal()" class="btn btn-primary" style="margin-right: 1rem;">Add Poll</button>
+                <a href="/index.php?page=admin_poll_categories" class="btn btn-secondary" style="margin-right: 1rem;">Manage Categories</a>
                 <a href="/index.php?page=admin" class="btn btn-secondary">Back to Dashboard</a>
             </div>
         </div>
@@ -106,6 +107,20 @@ ob_start();
             </div>
             
             <div class="form-group">
+                <label for="category_id">Category</label>
+                <select id="category_id" name="category_id" class="form-control">
+                    <option value="">No category</option>
+                    <?php if (!empty($categories)): ?>
+                        <?php foreach ($categories as $category): ?>
+                            <option value="<?php echo (int)$category['id']; ?>">
+                                <?php echo e($category['name']); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </select>
+            </div>
+            
+            <div class="form-group">
                 <label>Poll Options</label>
                 <div id="optionsContainer">
                     <div class="option-row" style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
@@ -191,6 +206,7 @@ function openCreateModal() {
     document.getElementById('modalTitle').textContent = 'Add Poll';
     document.getElementById('pollForm').reset();
     document.getElementById('poll_id').value = '';
+    document.getElementById('category_id').value = '';
     document.getElementById('activeStatusGroup').style.display = 'none';
     
     // Reset to 2 options
@@ -215,6 +231,7 @@ function editPoll(poll) {
     document.getElementById('modalTitle').textContent = 'Edit Poll';
     document.getElementById('poll_id').value = poll.id;
     document.getElementById('question').value = poll.question;
+    document.getElementById('category_id').value = poll.category_id || '';
     document.getElementById('is_multiple_choice').checked = poll.is_multiple_choice == 1;
     document.getElementById('is_anonymous').checked = poll.is_anonymous == 1;
     document.getElementById('is_active').checked = poll.is_active == 1;
@@ -343,6 +360,7 @@ document.getElementById('pollForm').addEventListener('submit', function(e) {
     
     const formData = {
         question: this.question.value,
+        category_id: this.category_id.value ? parseInt(this.category_id.value, 10) : null,
         is_multiple_choice: this.is_multiple_choice.checked ? 1 : 0,
         is_anonymous: this.is_anonymous.checked ? 1 : 0,
         expires_at: this.expires_at.value || null,

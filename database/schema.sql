@@ -160,6 +160,7 @@ CREATE TABLE IF NOT EXISTS meal_bookings (
 CREATE TABLE IF NOT EXISTS polls (
     id INT PRIMARY KEY AUTO_INCREMENT,
     event_id INT NOT NULL,
+    category_id INT DEFAULT NULL,
     question TEXT NOT NULL,
     is_anonymous TINYINT(1) DEFAULT 0,
     is_multiple_choice TINYINT(1) DEFAULT 0,
@@ -171,6 +172,26 @@ CREATE TABLE IF NOT EXISTS polls (
     FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE,
     FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Poll categories table
+CREATE TABLE IF NOT EXISTS poll_categories (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(100) NOT NULL,
+    display_order INT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY unique_name (name)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Default poll categories
+INSERT INTO poll_categories (name, display_order) VALUES 
+('Activities', 1),
+('Meals', 2),
+('Other', 3);
+
+-- Add foreign key from polls to poll_categories (created after poll_categories table)
+ALTER TABLE polls ADD CONSTRAINT fk_polls_category 
+    FOREIGN KEY (category_id) REFERENCES poll_categories(id) ON DELETE SET NULL;
 
 -- Poll options table
 CREATE TABLE IF NOT EXISTS poll_options (

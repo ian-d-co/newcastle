@@ -515,6 +515,23 @@ try {
             }
             break;
             
+        // Admin Poll Category Management
+        case 'admin_poll_categories':
+            AdminAuth::check();
+            require_once BASE_PATH . '/app/controllers/AdminController.php';
+            $adminController = new AdminController();
+            
+            if ($action === 'create') {
+                $adminController->createPollCategory();
+            } elseif ($action === 'update') {
+                $adminController->updatePollCategory();
+            } elseif ($action === 'delete') {
+                $adminController->deletePollCategory();
+            } else {
+                $adminController->showPollCategoryManager();
+            }
+            break;
+            
         // Admin Hotel Management
         case 'admin_hotels':
             AdminAuth::check();
