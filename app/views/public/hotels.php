@@ -1,6 +1,34 @@
 <?php
 $currentPage = 'hotels';
 ob_start();
+
+// Get user's interests for hotel rooms
+$db = getDbConnection();
+$userInterestsMap = [];
+$interestStatsMap = [];
+
+$allRoomIds = [];
+foreach ($hotels as $hotel) {
+    foreach ($hotel['rooms'] as $room) {
+        $allRoomIds[] = $room['id'];
+    }
+}
+
+if (!empty($allRoomIds)) {
+    $placeholders = implode(',', array_fill(0, count($allRoomIds), '?'));
+
+    $stmt = $db->prepare("SELECT item_id, interest_level FROM user_interests WHERE user_id = ? AND item_type = 'hotel_room' AND item_id IN ($placeholders)");
+    $stmt->execute(array_merge([$userId], $allRoomIds));
+    foreach ($stmt->fetchAll() as $row) {
+        $userInterestsMap[$row['item_id']] = $row['interest_level'];
+    }
+
+    $stmt = $db->prepare("SELECT item_id, interest_level, COUNT(*) as cnt FROM user_interests WHERE item_type = 'hotel_room' AND item_id IN ($placeholders) GROUP BY item_id, interest_level");
+    $stmt->execute($allRoomIds);
+    foreach ($stmt->fetchAll() as $row) {
+        $interestStatsMap[$row['item_id']][$row['interest_level']] = $row['cnt'];
+    }
+}
 ?>
 
 <div class="section">
@@ -64,6 +92,43 @@ ob_start();
                                         <div class="item-description">
                                             <?php echo nl2br(e($room['description'])); ?>
                                         </div>
+                                    <?php endif; ?>
+
+                                    <?php if (!empty($room['confirmation_deadline'])): ?>
+                                        <div class="deadline-warning" style="margin: 0.5rem 0; padding: 0.5rem; background: #fff3cd; border-radius: 4px; font-size: 0.875rem;">
+                                            <strong>⏰ Confirmation Deadline:</strong>
+                                            <?php echo e(date('F j, Y g:i A', strtotime($room['confirmation_deadline']))); ?>
+                                        </div>
+                                    <?php endif; ?>
+                                    <?php if (!empty($room['payment_deadline'])): ?>
+                                        <div class="deadline-warning" style="margin: 0.5rem 0; padding: 0.5rem; background: #fff3cd; border-radius: 4px; font-size: 0.875rem;">
+                                            <strong>⏰ Payment Deadline:</strong>
+                                            <?php echo e(date('F j, Y g:i A', strtotime($room['payment_deadline']))); ?>
+                                        </div>
+                                    <?php endif; ?>
+
+                                    <?php if (!isGuestMode()): ?>
+                                    <div class="interest-selector" data-item-type="hotel_room" data-item-id="<?php echo $room['id']; ?>" style="margin: 0.75rem 0;">
+                                        <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+                                            <small style="color: #666;">Your interest:</small>
+                                            <?php
+                                            $userLevel = $userInterestsMap[$room['id']] ?? null;
+                                            $stats = $interestStatsMap[$room['id']] ?? [];
+                                            ?>
+                                            <button class="btn-interest btn-sm <?php echo $userLevel === 'interested' ? 'btn-success' : 'btn-outline-secondary'; ?>"
+                                                    data-level="interested" style="font-size:0.75rem; padding: 0.2rem 0.5rem;">
+                                                👍 <?php echo $stats['interested'] ?? 0; ?>
+                                            </button>
+                                            <button class="btn-interest btn-sm <?php echo $userLevel === 'maybe' ? 'btn-warning' : 'btn-outline-secondary'; ?>"
+                                                    data-level="maybe" style="font-size:0.75rem; padding: 0.2rem 0.5rem;">
+                                                🤔 <?php echo $stats['maybe'] ?? 0; ?>
+                                            </button>
+                                            <button class="btn-interest btn-sm <?php echo $userLevel === 'not_interested' ? 'btn-danger' : 'btn-outline-secondary'; ?>"
+                                                    data-level="not_interested" style="font-size:0.75rem; padding: 0.2rem 0.5rem;">
+                                                👎 <?php echo $stats['not_interested'] ?? 0; ?>
+                                            </button>
+                                        </div>
+                                    </div>
                                     <?php endif; ?>
                                     
                                     <div class="item-footer">
@@ -157,6 +222,32 @@ function submitReservation(roomId) {
     
     reserveRoom(roomId, checkIn, checkOut);
 }
+
+document.querySelectorAll('.interest-selector').forEach(function(container) {
+    container.querySelectorAll('.btn-interest').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var itemType = container.dataset.itemType;
+            var itemId = container.dataset.itemId;
+            var level = this.dataset.level;
+
+            fetch('/api/interest.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ item_type: itemType, item_id: itemId, interest_level: level })
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.success) {
+                    showAlert('Interest updated!', 'success');
+                    setTimeout(function() { location.reload(); }, 800);
+                } else {
+                    showAlert(data.message || 'Failed to update interest', 'danger');
+                }
+            })
+            .catch(function() { showAlert('An error occurred', 'danger'); });
+        });
+    });
+});
 </script>
 
 <?php

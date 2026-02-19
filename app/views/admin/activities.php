@@ -151,6 +151,18 @@ ob_start();
                 </label>
                 <small class="form-text">Check this if attendees must pay before booking</small>
             </div>
+
+            <div class="form-group">
+                <label for="confirmation_deadline">Confirmation Deadline (Optional)</label>
+                <input type="datetime-local" id="confirmation_deadline" name="confirmation_deadline" class="form-control">
+                <small class="form-text">Last date to confirm booking</small>
+            </div>
+
+            <div class="form-group">
+                <label for="payment_deadline">Payment Deadline (Optional)</label>
+                <input type="datetime-local" id="payment_deadline" name="payment_deadline" class="form-control">
+                <small class="form-text">Last date to complete payment</small>
+            </div>
             
             <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
                 <button type="submit" class="btn btn-primary">Save Activity</button>
@@ -183,6 +195,8 @@ function editActivity(activity) {
     document.getElementById('max_capacity').value = activity.max_capacity;
     document.getElementById('price').value = activity.price;
     document.getElementById('requires_prepayment').checked = activity.requires_prepayment == 1;
+    document.getElementById('confirmation_deadline').value = activity.confirmation_deadline ? activity.confirmation_deadline.replace(' ', 'T').substring(0, 16) : '';
+    document.getElementById('payment_deadline').value = activity.payment_deadline ? activity.payment_deadline.replace(' ', 'T').substring(0, 16) : '';
     modalManager.open('activityModal');
 }
 
@@ -228,7 +242,9 @@ document.getElementById('activityForm').addEventListener('submit', function(e) {
         end_time: this.end_time.value,
         max_capacity: parseInt(this.max_capacity.value),
         price: parseFloat(this.price.value),
-        requires_prepayment: this.requires_prepayment.checked ? 1 : 0
+        requires_prepayment: this.requires_prepayment.checked ? 1 : 0,
+        confirmation_deadline: this.confirmation_deadline.value || null,
+        payment_deadline: this.payment_deadline.value || null
     };
     
     if (editingId) {

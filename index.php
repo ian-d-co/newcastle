@@ -623,6 +623,9 @@ try {
                 $adminController->rejectUser();
             } elseif ($action === 'pending') {
                 $adminController->showPendingApprovals();
+            } elseif ($action === 'reset_pin') {
+                $adminController->resetUserPin();
+                exit;
             } else {
                 $adminController->showUserManager();
             }

@@ -70,6 +70,8 @@ ob_start();
                                                     class="btn btn-sm btn-warning" style="margin-right: 0.5rem;">
                                                 <?php echo $user['is_admin'] ? 'Remove Admin' : 'Make Admin'; ?>
                                             </button>
+                                            <button onclick="resetUserPin(<?php echo $user['id']; ?>, '<?php echo e($user['discord_name']); ?>')"
+                                                    class="btn btn-sm btn-warning" style="margin-right: 0.5rem;">Reset PIN</button>
                                             <button onclick="deleteUser(<?php echo $user['id']; ?>, '<?php echo e($user['discord_name']); ?>')" 
                                                     class="btn btn-sm btn-danger">Delete</button>
                                         <?php else: ?>
@@ -129,6 +131,31 @@ function toggleAdmin(userId, makeAdmin) {
         console.error('Error:', error);
         showAlert('An error occurred', 'danger');
     });
+}
+
+function resetUserPin(userId, userName) {
+    const newPin = prompt(`Enter new PIN for ${userName} (minimum 4 digits):`);
+    if (!newPin || newPin.length < 4) {
+        showAlert('PIN must be at least 4 digits', 'danger');
+        return;
+    }
+
+    if (!confirm(`Set PIN to "${newPin}" for ${userName}?`)) return;
+
+    fetch('/index.php?page=admin_users&action=reset_pin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: userId, new_pin: newPin })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showAlert('PIN reset successfully!', 'success');
+        } else {
+            showAlert(data.message || 'Failed to reset PIN', 'danger');
+        }
+    })
+    .catch(() => showAlert('An error occurred', 'danger'));
 }
 
 function deleteUser(userId, userName) {

@@ -796,6 +796,13 @@ select.form-control {
 .capacity-amber { color: #ffc107; font-weight: 600; }
 .capacity-red   { color: #dc3545; font-weight: 600; }
 
+.btn-interest { cursor: pointer; border: 1px solid #dee2e6; border-radius: 4px; background: #f8f9fa; transition: background 0.15s, border-color 0.15s; }
+.btn-interest.btn-success { background: #28a745; color: #fff; border-color: #28a745; }
+.btn-interest.btn-warning { background: #ffc107; color: #212529; border-color: #ffc107; }
+.btn-interest.btn-danger  { background: #dc3545; color: #fff; border-color: #dc3545; }
+.btn-interest.btn-outline-secondary { background: #f8f9fa; color: #6c757d; border-color: #dee2e6; }
+.btn-interest:hover { opacity: 0.85; }
+
 .bg-primary { background-color: var(--primary); }
 .bg-secondary { background-color: var(--secondary); }
 .bg-accent { background-color: var(--accent); }
