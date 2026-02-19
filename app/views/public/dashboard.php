@@ -165,7 +165,7 @@ ob_start();
     <div class="modal-content">
         <div class="modal-header">
             <h3 class="modal-title">Register Your Attendance</h3>
-            <button class="modal-close" aria-label="Close">&times;</button>
+            <button class="modal-close" onclick="modalManager.close('attendance-modal')" aria-label="Close">&times;</button>
         </div>
         <div class="modal-body">
             <form id="attendance-form">
