@@ -47,7 +47,13 @@ ob_start();
                                     </td>
                                     <td style="padding: 0.75rem; text-align: center;"><?php echo e($activity['max_capacity']); ?></td>
                                     <td style="padding: 0.75rem; text-align: center;">
-                                        <?php echo e($activity['booking_count']); ?> / <?php echo e($activity['max_capacity']); ?>
+                                        <?php
+                                        $pct = $activity['max_capacity'] > 0 ? ($activity['booking_count'] / $activity['max_capacity']) * 100 : 100;
+                                        $capClass = $pct >= 95 ? 'capacity-red' : ($pct >= 71 ? 'capacity-amber' : 'capacity-green');
+                                        ?>
+                                        <span class="<?php echo $capClass; ?>">
+                                            <?php echo e($activity['booking_count']); ?> / <?php echo e($activity['max_capacity']); ?>
+                                        </span>
                                     </td>
                                     <td style="padding: 0.75rem; text-align: center;">£<?php echo number_format($activity['price'], 2); ?></td>
                                     <td style="padding: 0.75rem; text-align: center;">

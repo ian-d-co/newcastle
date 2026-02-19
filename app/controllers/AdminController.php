@@ -1309,7 +1309,7 @@ class AdminController {
             $sql = "SELECT u.*, 
                     ea.id as attendance_id,
                     ea.days_attending,
-                    ea.dietary_requirements,
+                    ea.travel_method,
                     ea.created_at as registered_at
                     FROM users u
                     LEFT JOIN event_attendees ea ON u.id = ea.user_id AND ea.event_id = :event_id

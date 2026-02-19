@@ -555,6 +555,15 @@ select.form-control {
     max-height: calc(100vh - 2rem);
     overflow-y: auto;
     animation: slideIn 0.3s ease;
+    padding: 2rem;
+}
+
+.modal-content:has(.modal-header) {
+    padding: 0;
+}
+
+.modal-content h2 {
+    margin-bottom: 1.5rem;
 }
 
 @keyframes slideIn {
@@ -782,6 +791,10 @@ select.form-control {
 .text-success { color: var(--success); }
 .text-danger { color: var(--danger); }
 .text-warning { color: var(--warning); }
+
+.capacity-green { color: #28a745; font-weight: 600; }
+.capacity-amber { color: #ffc107; font-weight: 600; }
+.capacity-red   { color: #dc3545; font-weight: 600; }
 
 .bg-primary { background-color: var(--primary); }
 .bg-secondary { background-color: var(--secondary); }

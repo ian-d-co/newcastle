@@ -47,7 +47,13 @@ ob_start();
                                     </td>
                                     <td style="padding: 0.75rem; text-align: center;"><?php echo e($meal['max_capacity']); ?></td>
                                     <td style="padding: 0.75rem; text-align: center;">
-                                        <?php echo e($meal['booking_count']); ?> / <?php echo e($meal['max_capacity']); ?>
+                                        <?php
+                                        $pct = $meal['max_capacity'] > 0 ? ($meal['booking_count'] / $meal['max_capacity']) * 100 : 100;
+                                        $capClass = $pct >= 95 ? 'capacity-red' : ($pct >= 71 ? 'capacity-amber' : 'capacity-green');
+                                        ?>
+                                        <span class="<?php echo $capClass; ?>">
+                                            <?php echo e($meal['booking_count']); ?> / <?php echo e($meal['max_capacity']); ?>
+                                        </span>
                                     </td>
                                     <td style="padding: 0.75rem; text-align: center;">£<?php echo number_format($meal['price'], 2); ?></td>
                                     <td style="padding: 0.75rem; text-align: center;">
