@@ -101,12 +101,12 @@ class Poll {
             
             // Add new votes
             foreach ($optionIds as $optionId) {
-                $sql = "INSERT INTO poll_votes (poll_id, poll_option_id, user_id) 
-                        VALUES (:poll_id, :poll_option_id, :user_id)";
+                $sql = "INSERT INTO poll_votes (poll_id, option_id, user_id) 
+                        VALUES (:poll_id, :option_id, :user_id)";
                 $stmt = $this->db->prepare($sql);
                 $stmt->execute([
                     'poll_id' => $pollId,
-                    'poll_option_id' => $optionId,
+                    'option_id' => $optionId,
                     'user_id' => $userId
                 ]);
                 

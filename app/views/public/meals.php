@@ -75,6 +75,8 @@ ob_start();
                                 <?php else: ?>
                                     <?php if ($isFull): ?>
                                         <span class="badge badge-danger">Full</span>
+                                    <?php elseif (isGuestMode()): ?>
+                                        <button class="btn btn-primary" disabled>Book (Login Required)</button>
                                     <?php else: ?>
                                         <button class="btn btn-primary" onclick="bookMeal(<?php echo $meal['id']; ?>)">Book Meal</button>
                                     <?php endif; ?>

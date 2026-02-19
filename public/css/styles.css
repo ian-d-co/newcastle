@@ -821,8 +821,8 @@ select.form-control {
 }
 
 .dashboard-section-header {
-    background: #2c3e50 !important;
-    color: #ffffff !important;
+    background: #D46300 !important;
+    color: #FDE5B7 !important;
     padding: 1rem 1.5rem;
     cursor: pointer;
     display: flex;
@@ -834,7 +834,7 @@ select.form-control {
 }
 
 .dashboard-section-header:hover {
-    background: #34495e !important;
+    background: #b85500 !important;
 }
 
 .dashboard-section-header h3,
@@ -842,7 +842,7 @@ select.form-control {
     margin: 0;
     display: inline-flex;
     align-items: center;
-    color: #ffffff !important;
+    color: #FDE5B7 !important;
     font-size: 1.1rem;
 }
 
@@ -850,7 +850,7 @@ select.form-control {
     margin-right: 0.75rem;
     font-size: 0.875rem;
     transition: transform 0.2s;
-    color: #ffffff;
+    color: #FDE5B7;
 }
 
 .dashboard-section-header .section-action {
