@@ -6,7 +6,7 @@
     <meta name="csrf-token" content="<?php echo e(generateCsrfToken()); ?>">
     <title><?php echo isset($pageTitle) ? e($pageTitle) . ' - ' : ''; ?>Dicksord Fest 2026 - Newcastle</title>
     <meta name="description" content="Dicksord Fest 2026 - Newcastle event management platform">
-    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="/css/styles.css?v=<?php echo time(); ?>">
 </head>
 <body>
     <!-- Header -->
