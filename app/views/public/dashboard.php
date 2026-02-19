@@ -210,22 +210,6 @@ ob_start();
                 <?php echo CSRF::field(); ?>
 
                 <div class="form-group">
-                    <label class="form-label" for="discord_name">Discord Name *</label>
-                    <input type="text" class="form-control" id="discord_name" name="discord_name" required>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label" for="name">Name *</label>
-                    <input type="text" class="form-control" id="name" name="name" required>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label" for="pin">Create a PIN (for future logins) *</label>
-                    <input type="password" class="form-control" id="pin" name="pin" minlength="4" required>
-                    <small>Minimum 4 digits</small>
-                </div>
-
-                <div class="form-group">
                     <label class="form-label">Days Attending *</label>
                     <div class="form-check">
                         <input class="form-check-input" type="checkbox" id="day-friday" name="days_attending[]" value="Friday">
@@ -332,6 +316,91 @@ function toggleSection(header) {
         icon.textContent = '▶';
     }
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+    var attendanceForm = document.getElementById('attendance-form');
+    if (!attendanceForm) return;
+
+    var travelCar = document.getElementById('travel-car');
+    if (travelCar) {
+        travelCar.addEventListener('change', function() {
+            document.getElementById('carshare-section').style.display = this.checked ? 'block' : 'none';
+        });
+    }
+
+    var canCarshareYes = document.getElementById('can-carshare-yes');
+    var canCarshareNo = document.getElementById('can-carshare-no');
+    if (canCarshareYes) {
+        canCarshareYes.addEventListener('change', function() {
+            document.getElementById('carshare-details').style.display = this.checked ? 'block' : 'none';
+        });
+    }
+    if (canCarshareNo) {
+        canCarshareNo.addEventListener('change', function() {
+            document.getElementById('carshare-details').style.display = 'none';
+        });
+    }
+
+    var canHostYes = document.getElementById('can-host-yes');
+    var canHostNo = document.getElementById('can-host-no');
+    if (canHostYes) {
+        canHostYes.addEventListener('change', function() {
+            document.getElementById('hosting-details').style.display = this.checked ? 'block' : 'none';
+        });
+    }
+    if (canHostNo) {
+        canHostNo.addEventListener('change', function() {
+            document.getElementById('hosting-details').style.display = 'none';
+        });
+    }
+
+    attendanceForm.addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    var csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+    var form = this;
+    var days = Array.from(form.querySelectorAll('input[name="days_attending[]"]:checked')).map(function(el) { return el.value; });
+    var travel = Array.from(form.querySelectorAll('input[name="travel_method[]"]:checked')).map(function(el) { return el.value; });
+
+    if (days.length === 0) {
+        showAlert('Please select at least one day', 'danger');
+        return;
+    }
+
+    if (travel.length === 0) {
+        showAlert('Please select at least one travel method', 'danger');
+        return;
+    }
+
+    var canCarshare = form.querySelector('input[name="can_carshare"]:checked');
+    var canHost = form.querySelector('input[name="can_host"]:checked');
+
+    var data = {
+        csrf_token: csrfToken,
+        days_attending: days,
+        travel_method: travel
+    };
+
+    if (canCarshare && canCarshare.value === 'yes') {
+        data.carshare_origin = form.carshare_origin.value;
+        data.carshare_capacity = form.carshare_capacity.value;
+    }
+
+    if (canHost && canHost.value === 'yes') {
+        data.hosting_capacity = form.hosting_capacity.value;
+        data.hosting_notes = form.hosting_notes.value;
+    }
+
+    apiCall('/api/attendance-update.php', 'POST', data, function(err, response) {
+        if (err) {
+            showAlert(err.message || 'Failed to register attendance', 'danger');
+        } else {
+            showAlert('Attendance registered successfully!', 'success');
+            setTimeout(function() { location.reload(); }, 1000);
+        }
+    });
+});
+}); // end DOMContentLoaded
 
 function cancelAttendance() {
     confirmAction('Are you sure you want to cancel your attendance? This will also cancel all your bookings for activities, meals, and accommodations.', function() {

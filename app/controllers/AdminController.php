@@ -139,13 +139,14 @@ class AdminController {
             
             $db = getDbConnection();
             
-            $sql = "INSERT INTO activities (event_id, title, description, day, start_time, end_time, max_capacity, requires_prepayment, price, confirmation_deadline, payment_deadline)
-                    VALUES (:event_id, :title, :description, :day, :start_time, :end_time, :max_capacity, :requires_prepayment, :price, :confirmation_deadline, :payment_deadline)";
+            $sql = "INSERT INTO activities (event_id, title, description, link, day, start_time, end_time, max_capacity, requires_prepayment, price, confirmation_deadline, payment_deadline)
+                    VALUES (:event_id, :title, :description, :link, :day, :start_time, :end_time, :max_capacity, :requires_prepayment, :price, :confirmation_deadline, :payment_deadline)";
             
             $params = [
                 'event_id' => $event['id'],
                 'title' => $data['title'],
                 'description' => $data['description'] ?? '',
+                'link' => $data['link'] ?? null,
                 'day' => $data['day'],
                 'start_time' => $data['start_time'],
                 'end_time' => $data['end_time'],
@@ -210,6 +211,7 @@ class AdminController {
             $sql = "UPDATE activities SET 
                     title = :title,
                     description = :description,
+                    link = :link,
                     day = :day,
                     start_time = :start_time,
                     end_time = :end_time,
@@ -224,6 +226,7 @@ class AdminController {
                 'id' => $data['id'],
                 'title' => $data['title'],
                 'description' => $data['description'] ?? '',
+                'link' => $data['link'] ?? null,
                 'day' => $data['day'],
                 'start_time' => $data['start_time'],
                 'end_time' => $data['end_time'],
@@ -363,13 +366,14 @@ class AdminController {
             
             $db = getDbConnection();
             
-            $sql = "INSERT INTO meals (event_id, title, description, day, start_time, end_time, max_capacity, requires_prepayment, price, confirmation_deadline, payment_deadline)
-                    VALUES (:event_id, :title, :description, :day, :start_time, :end_time, :max_capacity, :requires_prepayment, :price, :confirmation_deadline, :payment_deadline)";
+            $sql = "INSERT INTO meals (event_id, title, description, link, day, start_time, end_time, max_capacity, requires_prepayment, price, confirmation_deadline, payment_deadline)
+                    VALUES (:event_id, :title, :description, :link, :day, :start_time, :end_time, :max_capacity, :requires_prepayment, :price, :confirmation_deadline, :payment_deadline)";
             
             $params = [
                 'event_id' => $event['id'],
                 'title' => $data['title'],
                 'description' => $data['description'] ?? '',
+                'link' => $data['link'] ?? null,
                 'day' => $data['day'],
                 'start_time' => $data['start_time'],
                 'end_time' => $data['end_time'],
@@ -434,6 +438,7 @@ class AdminController {
             $sql = "UPDATE meals SET 
                     title = :title,
                     description = :description,
+                    link = :link,
                     day = :day,
                     start_time = :start_time,
                     end_time = :end_time,
@@ -448,6 +453,7 @@ class AdminController {
                 'id' => $data['id'],
                 'title' => $data['title'],
                 'description' => $data['description'] ?? '',
+                'link' => $data['link'] ?? null,
                 'day' => $data['day'],
                 'start_time' => $data['start_time'],
                 'end_time' => $data['end_time'],
@@ -973,16 +979,16 @@ class AdminController {
             
             $db = getDbConnection();
             
-            $sql = "INSERT INTO hotels (event_id, name, address, phone, website, description, created_at, updated_at)
-                    VALUES (:event_id, :name, :address, :phone, :website, :description, NOW(), NOW())";
+            $sql = "INSERT INTO hotels (event_id, name, address, website, description, link, created_at, updated_at)
+                    VALUES (:event_id, :name, :address, :website, :description, :link, NOW(), NOW())";
             
             $params = [
                 'event_id' => $event['id'],
                 'name' => $data['name'],
                 'address' => $data['address'] ?? '',
-                'phone' => $data['phone'] ?? '',
                 'website' => $data['website'] ?? '',
-                'description' => $data['description'] ?? ''
+                'description' => $data['description'] ?? '',
+                'link' => $data['link'] ?? null
             ];
             error_log('AdminController::createHotel() - SQL params: ' . json_encode($params));
             
@@ -1039,9 +1045,9 @@ class AdminController {
             $sql = "UPDATE hotels SET 
                     name = :name,
                     address = :address,
-                    phone = :phone,
                     website = :website,
                     description = :description,
+                    link = :link,
                     updated_at = NOW()
                     WHERE id = :id";
             
@@ -1049,9 +1055,9 @@ class AdminController {
                 'id' => $data['id'],
                 'name' => $data['name'],
                 'address' => $data['address'] ?? '',
-                'phone' => $data['phone'] ?? '',
                 'website' => $data['website'] ?? '',
-                'description' => $data['description'] ?? ''
+                'description' => $data['description'] ?? '',
+                'link' => $data['link'] ?? null
             ];
             error_log('AdminController::updateHotel() - SQL params: ' . json_encode($params));
             
@@ -1331,6 +1337,7 @@ class AdminController {
                     ea.created_at as registered_at
                     FROM users u
                     LEFT JOIN event_attendees ea ON u.id = ea.user_id AND ea.event_id = :event_id
+                    GROUP BY u.id
                     ORDER BY u.created_at DESC";
             
             $stmt = $db->prepare($sql);

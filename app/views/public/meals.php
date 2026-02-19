@@ -53,7 +53,7 @@ if (!empty($meals)) {
                         $isBooked = $meal['is_booked'] ?? false;
                         $spotsLeft = $meal['max_capacity'] - $meal['current_bookings'];
                         $occupancyPct = $meal['max_capacity'] > 0 ? ($meal['current_bookings'] / $meal['max_capacity']) * 100 : 100;
-                        $capacityClass = $occupancyPct >= 95 ? 'text-danger' : ($occupancyPct >= 71 ? 'text-warning' : 'text-success');
+                        $capacityClass = $occupancyPct >= 95 ? 'capacity-red' : ($occupancyPct >= 71 ? 'capacity-amber' : 'capacity-green');
                         ?>
                         
                         <div class="item">
@@ -87,16 +87,22 @@ if (!empty($meals)) {
                                 </div>
                             <?php endif; ?>
 
+                            <?php if (!empty($meal['link'])): ?>
+                                <div style="margin: 0.5rem 0;">
+                                    <a href="<?php echo e($meal['link']); ?>" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-secondary">More Info 🔗</a>
+                                </div>
+                            <?php endif; ?>
+
                             <?php if (!empty($meal['confirmation_deadline'])): ?>
                                 <div class="deadline-warning" style="margin: 0.5rem 0; padding: 0.5rem; background: #fff3cd; border-radius: 4px; font-size: 0.875rem;">
                                     <strong>⏰ Confirmation Deadline:</strong>
-                                    <?php echo e(date('F j, Y g:i A', strtotime($meal['confirmation_deadline']))); ?>
+                                    <?php echo e(formatDisplayDate($meal['confirmation_deadline']) . ' ' . formatDisplayTime($meal['confirmation_deadline'])); ?>
                                 </div>
                             <?php endif; ?>
                             <?php if (!empty($meal['payment_deadline'])): ?>
                                 <div class="deadline-warning" style="margin: 0.5rem 0; padding: 0.5rem; background: #fff3cd; border-radius: 4px; font-size: 0.875rem;">
                                     <strong>⏰ Payment Deadline:</strong>
-                                    <?php echo e(date('F j, Y g:i A', strtotime($meal['payment_deadline']))); ?>
+                                    <?php echo e(formatDisplayDate($meal['payment_deadline']) . ' ' . formatDisplayTime($meal['payment_deadline'])); ?>
                                 </div>
                             <?php endif; ?>
 

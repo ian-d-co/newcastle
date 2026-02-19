@@ -60,6 +60,10 @@ if (!empty($allRoomIds)) {
                             <p><strong>Website:</strong> <a href="<?php echo e($hotel['website']); ?>" target="_blank"><?php echo e($hotel['website']); ?></a></p>
                         <?php endif; ?>
 
+                        <?php if (!empty($hotel['link'])): ?>
+                            <p><a href="<?php echo e($hotel['link']); ?>" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-secondary">More Info 🔗</a></p>
+                        <?php endif; ?>
+
                         <?php if (!empty($hotel['rooms'])): ?>
                             <h4 class="mt-3 mb-2">Available Rooms</h4>
                             
@@ -81,7 +85,7 @@ if (!empty($allRoomIds)) {
                                             <?php
                                             $totalRooms = $room['quantity_available'] + ($room['quantity_reserved'] ?? 0);
                                             $occupancyPct = $totalRooms > 0 ? (($room['quantity_reserved'] ?? 0) / $totalRooms) * 100 : 0;
-                                            $capacityClass = $occupancyPct >= 95 ? 'text-danger' : ($occupancyPct >= 71 ? 'text-warning' : 'text-success');
+                                            $capacityClass = $occupancyPct >= 95 ? 'capacity-red' : ($occupancyPct >= 71 ? 'capacity-amber' : 'capacity-green');
                                             ?>
                                             <span class="<?php echo $capacityClass; ?>">
                                                 <?php echo e($room['quantity_available']); ?> available
@@ -96,13 +100,13 @@ if (!empty($allRoomIds)) {
                                     <?php if (!empty($room['confirmation_deadline'])): ?>
                                         <div class="deadline-warning" style="margin: 0.5rem 0; padding: 0.5rem; background: #fff3cd; border-radius: 4px; font-size: 0.875rem;">
                                             <strong>⏰ Confirmation Deadline:</strong>
-                                            <?php echo e(date('F j, Y g:i A', strtotime($room['confirmation_deadline']))); ?>
+                                            <?php echo e(formatDisplayDate($room['confirmation_deadline']) . ' ' . formatDisplayTime($room['confirmation_deadline'])); ?>
                                         </div>
                                     <?php endif; ?>
                                     <?php if (!empty($room['payment_deadline'])): ?>
                                         <div class="deadline-warning" style="margin: 0.5rem 0; padding: 0.5rem; background: #fff3cd; border-radius: 4px; font-size: 0.875rem;">
                                             <strong>⏰ Payment Deadline:</strong>
-                                            <?php echo e(date('F j, Y g:i A', strtotime($room['payment_deadline']))); ?>
+                                            <?php echo e(formatDisplayDate($room['payment_deadline']) . ' ' . formatDisplayTime($room['payment_deadline'])); ?>
                                         </div>
                                     <?php endif; ?>
 

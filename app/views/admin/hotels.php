@@ -139,6 +139,12 @@ ob_start();
                 <label for="hotel_description">Description</label>
                 <textarea id="hotel_description" name="description" class="form-control" rows="3"></textarea>
             </div>
+
+            <div class="form-group">
+                <label for="hotel_link">Link (Optional)</label>
+                <input type="url" id="hotel_link" name="link" class="form-control" placeholder="https://example.com">
+                <small class="form-text">External link for more information</small>
+            </div>
             
             <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
                 <button type="submit" class="btn btn-primary">Save Hotel</button>
@@ -230,6 +236,7 @@ function editHotel(hotel) {
     document.getElementById('hotel_phone').value = hotel.phone || '';
     document.getElementById('hotel_website').value = hotel.website || '';
     document.getElementById('hotel_description').value = hotel.description || '';
+    document.getElementById('hotel_link').value = hotel.link || '';
     modalManager.open('hotelModal');
 }
 
@@ -272,7 +279,8 @@ document.getElementById('hotelForm').addEventListener('submit', function(e) {
         address: this.hotel_address.value,
         phone: this.hotel_phone.value,
         website: this.hotel_website.value,
-        description: this.hotel_description.value
+        description: this.hotel_description.value,
+        link: this.hotel_link.value || null
     };
     
     if (editingHotelId) {

@@ -97,6 +97,12 @@ ob_start();
                 <label for="description">Description</label>
                 <textarea id="description" name="description" class="form-control" rows="3"></textarea>
             </div>
+
+            <div class="form-group">
+                <label for="link">Link (Optional)</label>
+                <input type="url" id="link" name="link" class="form-control" placeholder="https://example.com">
+                <small class="form-text">External link for more information</small>
+            </div>
             
             <div class="row">
                 <div class="col">
@@ -189,6 +195,7 @@ function editActivity(activity) {
     document.getElementById('activity_id').value = activity.id;
     document.getElementById('title').value = activity.title;
     document.getElementById('description').value = activity.description || '';
+    document.getElementById('link').value = activity.link || '';
     document.getElementById('day').value = activity.day;
     document.getElementById('start_time').value = activity.start_time;
     document.getElementById('end_time').value = activity.end_time;
@@ -237,6 +244,7 @@ document.getElementById('activityForm').addEventListener('submit', function(e) {
     const formData = {
         title: this.title.value,
         description: this.description.value,
+        link: this.link.value || null,
         day: this.day.value,
         start_time: this.start_time.value,
         end_time: this.end_time.value,

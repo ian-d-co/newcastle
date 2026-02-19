@@ -55,7 +55,7 @@ if (!empty($activities)) {
                         $isBooked = $activity['is_booked'] ?? false;
                         $spotsLeft = $activity['max_capacity'] - $activity['current_bookings'];
                         $occupancyPct = $activity['max_capacity'] > 0 ? ($activity['current_bookings'] / $activity['max_capacity']) * 100 : 100;
-                        $capacityClass = $occupancyPct >= 95 ? 'text-danger' : ($occupancyPct >= 71 ? 'text-warning' : 'text-success');
+                        $capacityClass = $occupancyPct >= 95 ? 'capacity-red' : ($occupancyPct >= 71 ? 'capacity-amber' : 'capacity-green');
                         ?>
                         
                         <div class="item">
@@ -89,16 +89,22 @@ if (!empty($activities)) {
                                 </div>
                             <?php endif; ?>
 
+                            <?php if (!empty($activity['link'])): ?>
+                                <div style="margin: 0.5rem 0;">
+                                    <a href="<?php echo e($activity['link']); ?>" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-secondary">More Info 🔗</a>
+                                </div>
+                            <?php endif; ?>
+
                             <?php if (!empty($activity['confirmation_deadline'])): ?>
                                 <div class="deadline-warning" style="margin: 0.5rem 0; padding: 0.5rem; background: #fff3cd; border-radius: 4px; font-size: 0.875rem;">
                                     <strong>⏰ Confirmation Deadline:</strong>
-                                    <?php echo e(date('F j, Y g:i A', strtotime($activity['confirmation_deadline']))); ?>
+                                    <?php echo e(formatDisplayDate($activity['confirmation_deadline']) . ' ' . formatDisplayTime($activity['confirmation_deadline'])); ?>
                                 </div>
                             <?php endif; ?>
                             <?php if (!empty($activity['payment_deadline'])): ?>
                                 <div class="deadline-warning" style="margin: 0.5rem 0; padding: 0.5rem; background: #fff3cd; border-radius: 4px; font-size: 0.875rem;">
                                     <strong>⏰ Payment Deadline:</strong>
-                                    <?php echo e(date('F j, Y g:i A', strtotime($activity['payment_deadline']))); ?>
+                                    <?php echo e(formatDisplayDate($activity['payment_deadline']) . ' ' . formatDisplayTime($activity['payment_deadline'])); ?>
                                 </div>
                             <?php endif; ?>
 
