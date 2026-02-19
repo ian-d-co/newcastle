@@ -1,40 +1,47 @@
-# Redirect all requests to public/ directory
 <IfModule mod_rewrite.c>
     RewriteEngine On
     RewriteBase /
-    # Handle root URL explicitly
-    RewriteRule ^$ public/index.php [L]
-    RewriteCond %{REQUEST_URI} !^/public/
+    
+    # Don't rewrite existing files/directories
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteRule ^(.*)$ public/$1 [L]
+    
+    # Route all requests to index.php
+    RewriteRule ^ index.php [QSA,L]
 </IfModule>
 
 # Prevent directory listing
 Options -Indexes
 
-# Prevent access to sensitive files (Apache 2.4+)
-<IfModule mod_authz_core.c>
-    <FilesMatch "\.(env|sql|md)$">
-        Require all denied
-    </FilesMatch>
-</IfModule>
-
-# Prevent access to sensitive files (Apache 2.2)
-<IfModule !mod_authz_core.c>
-    <FilesMatch "\.(env|sql|md)$">
-        Order allow,deny
-        Deny from all
-    </FilesMatch>
-</IfModule>
-
-# Prevent access to hidden files and directories
-<FilesMatch "^\.">
-    <IfModule mod_authz_core.c>
-        Require all denied
-    </IfModule>
-    <IfModule !mod_authz_core.c>
-        Order allow,deny
-        Deny from all
-    </IfModule>
+# Prevent access to sensitive files
+<FilesMatch "\.(env|sql|md)$">
+    Order allow,deny
+    Deny from all
 </FilesMatch>
+
+# Security headers
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-Frame-Options "SAMEORIGIN"
+    Header set X-XSS-Protection "1; mode=block"
+</IfModule>
+
+# Set default charset
+AddDefaultCharset UTF-8
+
+# Compress output
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript application/javascript application/json
+</IfModule>
+
+# Browser caching
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType image/jpeg "access plus 1 year"
+    ExpiresByType image/gif "access plus 1 year"
+    ExpiresByType image/png "access plus 1 year"
+    ExpiresByType image/webp "access plus 1 year"
+    ExpiresByType image/svg+xml "access plus 1 year"
+    ExpiresByType text/css "access plus 1 month"
+    ExpiresByType application/javascript "access plus 1 month"
+</IfModule>

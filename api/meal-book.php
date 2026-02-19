@@ -1,7 +1,7 @@
 <?php
-require_once __DIR__ . '/../../app/config/config.php';
-require_once __DIR__ . '/../../app/middleware/Auth.php';
-require_once __DIR__ . '/../../app/models/Hotel.php';
+require_once __DIR__ . '/../app/config/config.php';
+require_once __DIR__ . '/../app/middleware/Auth.php';
+require_once __DIR__ . '/../app/models/Meal.php';
 
 initSession();
 Auth::check();
@@ -19,16 +19,16 @@ if (!verifyCsrfToken($input['csrf_token'] ?? '')) {
 }
 
 try {
-    $reservationId = $input['reservation_id'] ?? null;
+    $mealId = $input['meal_id'] ?? null;
     
-    if (!$reservationId) {
-        throw new Exception('Reservation ID is required');
+    if (!$mealId) {
+        throw new Exception('Meal ID is required');
     }
     
-    $hotelModel = new Hotel();
-    $hotelModel->cancelReservation($reservationId);
+    $mealModel = new Meal();
+    $mealModel->book($mealId, getCurrentUserId());
     
-    jsonResponse(['success' => true, 'message' => 'Reservation cancelled successfully']);
+    jsonResponse(['success' => true, 'message' => 'Meal booked successfully']);
 } catch (Exception $e) {
     jsonResponse(['success' => false, 'message' => $e->getMessage()], 400);
 }

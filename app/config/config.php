@@ -80,7 +80,7 @@ define('CSRF_TOKEN_LENGTH', 32);
 // Application Paths
 define('APP_ROOT', dirname(dirname(__DIR__)));
 define('APP_PATH', APP_ROOT . '/app');
-define('PUBLIC_PATH', APP_ROOT . '/public');
+define('PUBLIC_PATH', APP_ROOT);
 define('CONFIG_PATH', APP_PATH . '/config');
 define('VIEWS_PATH', APP_PATH . '/views');
 

@@ -1,7 +1,7 @@
 <?php
-require_once __DIR__ . '/../../app/config/config.php';
-require_once __DIR__ . '/../../app/middleware/Auth.php';
-require_once __DIR__ . '/../../app/models/Activity.php';
+require_once __DIR__ . '/../app/config/config.php';
+require_once __DIR__ . '/../app/middleware/Auth.php';
+require_once __DIR__ . '/../app/models/CarShare.php';
 
 initSession();
 Auth::check();
@@ -19,16 +19,16 @@ if (!verifyCsrfToken($input['csrf_token'] ?? '')) {
 }
 
 try {
-    $activityId = $input['activity_id'] ?? null;
+    $offerId = $input['offer_id'] ?? null;
     
-    if (!$activityId) {
-        throw new Exception('Activity ID is required');
+    if (!$offerId) {
+        throw new Exception('Offer ID is required');
     }
     
-    $activityModel = new Activity();
-    $activityModel->cancelBooking($activityId, getCurrentUserId());
+    $carshareModel = new CarShare();
+    $carshareModel->cancelBooking($offerId, getCurrentUserId());
     
-    jsonResponse(['success' => true, 'message' => 'Activity cancelled successfully']);
+    jsonResponse(['success' => true, 'message' => 'Carshare cancelled successfully']);
 } catch (Exception $e) {
     jsonResponse(['success' => false, 'message' => $e->getMessage()], 400);
 }

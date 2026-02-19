@@ -1,7 +1,7 @@
 <?php
-require_once __DIR__ . '/../../app/config/config.php';
-require_once __DIR__ . '/../../app/middleware/Auth.php';
-require_once __DIR__ . '/../../app/models/Hotel.php';
+require_once __DIR__ . '/../app/config/config.php';
+require_once __DIR__ . '/../app/middleware/Auth.php';
+require_once __DIR__ . '/../app/models/Hotel.php';
 
 initSession();
 Auth::check();
@@ -19,18 +19,16 @@ if (!verifyCsrfToken($input['csrf_token'] ?? '')) {
 }
 
 try {
-    $roomId = $input['room_id'] ?? null;
-    $checkIn = $input['check_in'] ?? null;
-    $checkOut = $input['check_out'] ?? null;
+    $reservationId = $input['reservation_id'] ?? null;
     
-    if (!$roomId || !$checkIn || !$checkOut) {
-        throw new Exception('All fields are required');
+    if (!$reservationId) {
+        throw new Exception('Reservation ID is required');
     }
     
     $hotelModel = new Hotel();
-    $hotelModel->reserveRoom($roomId, getCurrentUserId(), $checkIn, $checkOut);
+    $hotelModel->cancelReservation($reservationId);
     
-    jsonResponse(['success' => true, 'message' => 'Room reserved successfully']);
+    jsonResponse(['success' => true, 'message' => 'Reservation cancelled successfully']);
 } catch (Exception $e) {
     jsonResponse(['success' => false, 'message' => $e->getMessage()], 400);
 }

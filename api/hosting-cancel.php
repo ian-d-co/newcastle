@@ -1,7 +1,7 @@
 <?php
-require_once __DIR__ . '/../../app/config/config.php';
-require_once __DIR__ . '/../../app/middleware/Auth.php';
-require_once __DIR__ . '/../../app/models/CarShare.php';
+require_once __DIR__ . '/../app/config/config.php';
+require_once __DIR__ . '/../app/middleware/Auth.php';
+require_once __DIR__ . '/../app/models/Hosting.php';
 
 initSession();
 Auth::check();
@@ -25,10 +25,10 @@ try {
         throw new Exception('Offer ID is required');
     }
     
-    $carshareModel = new CarShare();
-    $carshareModel->cancelBooking($offerId, getCurrentUserId());
+    $hostingModel = new Hosting();
+    $hostingModel->cancelBooking($offerId, getCurrentUserId());
     
-    jsonResponse(['success' => true, 'message' => 'Carshare cancelled successfully']);
+    jsonResponse(['success' => true, 'message' => 'Hosting cancelled successfully']);
 } catch (Exception $e) {
     jsonResponse(['success' => false, 'message' => $e->getMessage()], 400);
 }
