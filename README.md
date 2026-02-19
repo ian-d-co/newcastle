@@ -65,11 +65,11 @@ A mobile-first, responsive web application for managing the Dicksord Fest 2026 e
 
 5. **Configure web server**:
    
-   Point your document root to the `public/` directory.
+   Point your document root to the repository root directory.
    
    **Apache** (.htaccess already configured):
    ```apache
-   DocumentRoot /path/to/newcastle/public
+   DocumentRoot /path/to/newcastle
    ```
    
    **Nginx**:
@@ -77,7 +77,7 @@ A mobile-first, responsive web application for managing the Dicksord Fest 2026 e
    server {
        listen 80;
        server_name your-domain.com;
-       root /path/to/newcastle/public;
+       root /path/to/newcastle;
        index index.php;
        
        location / {
@@ -95,7 +95,6 @@ A mobile-first, responsive web application for managing the Dicksord Fest 2026 e
 
 6. **Set permissions**:
    ```bash
-   chmod -R 755 public/
    chmod -R 755 app/
    ```
 
@@ -112,28 +111,40 @@ A mobile-first, responsive web application for managing the Dicksord Fest 2026 e
 ## Deployment to Hostinger
 
 1. **Upload files**:
-   - Upload all files to your hosting directory (typically `public_html/`)
-   - Ensure the `public/` folder is your web root
+   - Upload ALL repository files directly to `public_html/`
+   - The repository root becomes your web root
+   - Structure should be:
+     ```
+     public_html/
+     ├── index.php
+     ├── .htaccess
+     ├── css/
+     ├── js/
+     ├── api/
+     ├── app/
+     └── database/
+     ```
 
-2. **Create database**:
+2. **DO NOT** create a subdirectory - files go directly into `public_html/`
+
+3. **Create database**:
    - Create a MySQL database in Hostinger control panel
    - Note the database name, username, and password
 
-3. **Import schema**:
+4. **Import schema**:
    - Use phpMyAdmin or MySQL command line to import `database/schema.sql`
 
-4. **Configure environment**:
+5. **Configure environment**:
    - Create `.env` file from `app/config/.env.example`
    - Copy it to `app/config/.env`
    - Update database credentials
 
-5. **Set file permissions**:
+6. **Set file permissions**:
    ```bash
-   chmod 755 public/
    chmod 755 app/
    ```
 
-6. **Configure .htaccess** (if using subdirectory):
+7. **Configure .htaccess** (if using subdirectory):
    ```apache
    RewriteBase /your-subdirectory/
    ```
@@ -141,25 +152,24 @@ A mobile-first, responsive web application for managing the Dicksord Fest 2026 e
 ## Project Structure
 
 ```
-newcastle/
-├── public/                 # Web root
-│   ├── index.php          # Main entry point & router
-│   ├── css/
-│   │   └── styles.css     # Mobile-first CSS
-│   ├── js/
-│   │   ├── app.js         # Main JavaScript
-│   │   ├── forms.js       # Form handling & conditional logic
-│   │   ├── charts.js      # Poll charts & real-time updates
-│   │   └── modals.js      # Modal management
-│   ├── images/
-│   └── api/               # AJAX API endpoints
-│       ├── attendance.php
-│       ├── activity-book.php
-│       ├── meal-book.php
-│       ├── carshare-book.php
-│       ├── hosting-book.php
-│       ├── hotel-reserve.php
-│       └── poll-vote.php
+newcastle/                  # Web root (maps to public_html/)
+├── index.php              # Main entry point & router
+├── .htaccess              # URL rewriting & security rules
+├── css/
+│   └── styles.css         # Mobile-first CSS
+├── js/
+│   ├── app.js             # Main JavaScript
+│   ├── forms.js           # Form handling & conditional logic
+│   ├── charts.js          # Poll charts & real-time updates
+│   └── modals.js          # Modal management
+├── api/                   # AJAX API endpoints
+│   ├── attendance.php
+│   ├── activity-book.php
+│   ├── meal-book.php
+│   ├── carshare-book.php
+│   ├── hosting-book.php
+│   ├── hotel-reserve.php
+│   └── poll-vote.php
 ├── app/
 │   ├── config/
 │   │   ├── .env.example   # Environment template

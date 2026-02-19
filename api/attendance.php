@@ -1,11 +1,11 @@
 <?php
-require_once __DIR__ . '/../../app/config/config.php';
-require_once __DIR__ . '/../../app/middleware/Auth.php';
-require_once __DIR__ . '/../../app/middleware/CSRF.php';
-require_once __DIR__ . '/../../app/controllers/AuthController.php';
-require_once __DIR__ . '/../../app/models/Event.php';
-require_once __DIR__ . '/../../app/models/CarShare.php';
-require_once __DIR__ . '/../../app/models/Hosting.php';
+require_once __DIR__ . '/../app/config/config.php';
+require_once __DIR__ . '/../app/middleware/Auth.php';
+require_once __DIR__ . '/../app/middleware/CSRF.php';
+require_once __DIR__ . '/../app/controllers/AuthController.php';
+require_once __DIR__ . '/../app/models/Event.php';
+require_once __DIR__ . '/../app/models/CarShare.php';
+require_once __DIR__ . '/../app/models/Hosting.php';
 
 initSession();
 Auth::check();

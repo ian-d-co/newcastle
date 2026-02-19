@@ -25,6 +25,6 @@ error_log
 access_log
 
 # Uploads (if you add user uploads later)
-public/uploads/*
-!public/uploads/.gitkeep
+uploads/*
+!uploads/.gitkeep
 .env

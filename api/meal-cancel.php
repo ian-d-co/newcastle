@@ -1,7 +1,7 @@
 <?php
-require_once __DIR__ . '/../../app/config/config.php';
-require_once __DIR__ . '/../../app/middleware/Auth.php';
-require_once __DIR__ . '/../../app/models/Activity.php';
+require_once __DIR__ . '/../app/config/config.php';
+require_once __DIR__ . '/../app/middleware/Auth.php';
+require_once __DIR__ . '/../app/models/Meal.php';
 
 initSession();
 Auth::check();
@@ -19,16 +19,16 @@ if (!verifyCsrfToken($input['csrf_token'] ?? '')) {
 }
 
 try {
-    $activityId = $input['activity_id'] ?? null;
+    $mealId = $input['meal_id'] ?? null;
     
-    if (!$activityId) {
-        throw new Exception('Activity ID is required');
+    if (!$mealId) {
+        throw new Exception('Meal ID is required');
     }
     
-    $activityModel = new Activity();
-    $activityModel->book($activityId, getCurrentUserId());
+    $mealModel = new Meal();
+    $mealModel->cancelBooking($mealId, getCurrentUserId());
     
-    jsonResponse(['success' => true, 'message' => 'Activity booked successfully']);
+    jsonResponse(['success' => true, 'message' => 'Meal cancelled successfully']);
 } catch (Exception $e) {
     jsonResponse(['success' => false, 'message' => $e->getMessage()], 400);
 }
