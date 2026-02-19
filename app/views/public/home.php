@@ -15,10 +15,15 @@ ob_start();
             <?php if (!isLoggedIn()): ?>
             <div class="hero-actions" style="display: flex; gap: 1rem; justify-content: center; margin-top: 1.5rem; flex-wrap: wrap;">
                 <a href="/index.php?page=login" class="btn btn-primary btn-lg">
-                    Login / Register
+                    Login
                 </a>
-                <a href="/index.php?page=home&view=guest" class="btn btn-secondary btn-lg">
-                    View as Guest
+                <a href="/index.php?page=register" class="btn btn-accent btn-lg">
+                    Register
+                </a>
+            </div>
+            <div style="text-align: center; margin-top: 1rem;">
+                <a href="/index.php?page=home&view=guest" style="color: #FDDC62; text-decoration: underline;">
+                    or continue as guest
                 </a>
             </div>
             <?php endif; ?>
