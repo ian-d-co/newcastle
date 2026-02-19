@@ -831,10 +831,11 @@ select.form-control {
     transition: background 0.2s;
     user-select: none;
     border: none;
+    min-height: 60px;
 }
 
 .dashboard-section-header:hover {
-    background: #613704 !important;
+    background: #7d4a05 !important;
 }
 
 .dashboard-section-header h3,
