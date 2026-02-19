@@ -328,6 +328,11 @@ try {
         // USER ROUTES
         // ========================================================================
         
+        case 'profile':
+            $pageTitle = 'My Profile';
+            include BASE_PATH . '/app/views/public/profile.php';
+            break;
+
         case 'dashboard':
             $pageTitle = 'My Plans';
             $attendance = $eventModel->getAttendance($userId, $event['id']);

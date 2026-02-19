@@ -27,6 +27,7 @@
                     <ul>
                         <li><a href="/index.php?page=home" class="<?php echo ($currentPage ?? '') === 'home' ? 'active' : ''; ?>">Home</a></li>
                         <li><a href="/index.php?page=dashboard" class="<?php echo ($currentPage ?? '') === 'dashboard' ? 'active' : ''; ?>">My Plans</a></li>
+                        <li><a href="/index.php?page=profile" class="<?php echo ($currentPage ?? '') === 'profile' ? 'active' : ''; ?>">My Profile</a></li>
                         <li><a href="/index.php?page=activities" class="<?php echo ($currentPage ?? '') === 'activities' ? 'active' : ''; ?>">Activities</a></li>
                         <li><a href="/index.php?page=meals" class="<?php echo ($currentPage ?? '') === 'meals' ? 'active' : ''; ?>">Meals</a></li>
                         <li><a href="/index.php?page=carshare" class="<?php echo ($currentPage ?? '') === 'carshare' ? 'active' : ''; ?>">Carshare</a></li>
