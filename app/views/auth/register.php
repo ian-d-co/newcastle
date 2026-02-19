@@ -16,16 +16,42 @@
         </div>
     </div>
 
-    <div class="container" style="max-width: 600px; margin-top: 3rem;">
+    <div class="container" style="max-width: 500px; margin-top: 3rem;">
+        <?php if (isset($error)): ?>
+            <div class="alert alert-danger"><?php echo e($error); ?></div>
+        <?php endif; ?>
+
         <div class="card">
-            <div class="card-header">Register for the Event</div>
+            <div class="card-header">Register for Dicksord Fest 2026</div>
             <div class="card-body">
-                <p>To register, please visit the <a href="/index.php">homepage</a> and click "I am attending" to complete your registration.</p>
-                <p>You'll be able to set up your Discord name and create a PIN during the registration process.</p>
-                <div style="margin-top: 2rem;">
-                    <a href="/index.php" class="btn btn-primary btn-lg btn-block">Go to Homepage</a>
-                    <a href="/index.php?page=login" class="btn btn-secondary btn-lg btn-block" style="margin-top: 1rem;">Already have an account? Login</a>
-                </div>
+                <form method="POST" action="/index.php?action=register">
+                    <?php echo CSRF::field(); ?>
+
+                    <div class="form-group">
+                        <label class="form-label" for="discord_name">Discord Name</label>
+                        <input type="text" class="form-control" id="discord_name" name="discord_name" required autofocus>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="name">Your Name</label>
+                        <input type="text" class="form-control" id="name" name="name" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="pin">PIN (4-6 digits)</label>
+                        <input type="password" class="form-control" id="pin" name="pin" pattern="[0-9]{4,6}" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="pin_confirm">Confirm PIN</label>
+                        <input type="password" class="form-control" id="pin_confirm" name="pin_confirm" pattern="[0-9]{4,6}" required>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-block btn-lg">Register</button>
+                </form>
+            </div>
+            <div class="card-footer text-center">
+                <p>Already have an account? <a href="/index.php?page=login">Login</a></p>
             </div>
         </div>
     </div>

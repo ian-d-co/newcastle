@@ -57,7 +57,7 @@ class AuthController {
     
     public function logout() {
         session_destroy();
-        redirect('/index.php?page=login');
+        redirect('/index.php?page=home');
     }
     
     public function register($discordName, $name, $pin) {

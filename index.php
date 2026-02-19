@@ -108,6 +108,39 @@ if ($action === 'logout') {
     $authController->logout();
 }
 
+// Handle register POST request
+if ($action === 'register' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    CSRF::validate();
+    
+    $discordName = trim($_POST['discord_name'] ?? '');
+    $name = trim($_POST['name'] ?? '');
+    $pin = $_POST['pin'] ?? '';
+    $pinConfirm = $_POST['pin_confirm'] ?? '';
+    
+    $error = null;
+    if (empty($discordName) || empty($name) || empty($pin)) {
+        $error = 'Please fill in all fields';
+    } elseif ($pin !== $pinConfirm) {
+        $error = 'PINs do not match';
+    } elseif (!preg_match('/^[0-9]{4,6}$/', $pin)) {
+        $error = 'PIN must be 4-6 digits';
+    } else {
+        try {
+            require_once BASE_PATH . '/app/controllers/AuthController.php';
+            $authController = new AuthController();
+            $authController->register($discordName, $name, $pin);
+            redirect('/index.php?page=pending_approval');
+        } catch (Exception $e) {
+            $error = $e->getMessage();
+        }
+    }
+    
+    // Show register form with error
+    include BASE_PATH . '/app/views/auth/register.php';
+    exit;
+}
+
+
 // Handle login POST request
 if ($action === 'login' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     require_once BASE_PATH . '/app/controllers/AuthController.php';
@@ -128,9 +161,10 @@ if ($page === 'login') {
     exit;
 }
 
-// Register page (handled within home page)
+// Register page
 if ($page === 'register') {
-    $page = 'home'; // Registration is handled on home page
+    include BASE_PATH . '/app/views/auth/register.php';
+    exit;
 }
 
 // Homepage (PUBLIC - No authentication required)

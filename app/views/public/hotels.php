@@ -50,7 +50,11 @@ ob_start();
                                         </div>
                                         <div class="item-meta-item">
                                             <strong>Available:</strong> 
-                                            <span class="<?php echo $room['available_rooms'] > 0 ? 'text-success' : 'text-danger'; ?>">
+                                            <?php
+                                            $occupancyPct = $room['total_rooms'] > 0 ? (($room['total_rooms'] - $room['available_rooms']) / $room['total_rooms']) * 100 : 100;
+                                            $capacityClass = $occupancyPct >= 95 ? 'text-danger' : ($occupancyPct >= 71 ? 'text-warning' : 'text-success');
+                                            ?>
+                                            <span class="<?php echo $capacityClass; ?>">
                                                 <?php echo e($room['available_rooms']); ?> / <?php echo e($room['total_rooms']); ?>
                                             </span>
                                         </div>
