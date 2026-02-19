@@ -69,6 +69,12 @@ class Event {
         return $result;
     }
     
+    public function cancelAttendance($userId, $eventId) {
+        $sql = "DELETE FROM event_attendees WHERE user_id = :user_id AND event_id = :event_id";
+        $stmt = $this->db->prepare($sql);
+        return $stmt->execute(['user_id' => $userId, 'event_id' => $eventId]);
+    }
+    
     public function getAllAttendees($eventId) {
         $sql = "SELECT ea.*, u.discord_name, u.name 
                 FROM event_attendees ea

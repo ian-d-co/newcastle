@@ -282,8 +282,9 @@ try {
         // ========================================================================
         
         case 'dashboard':
-            $pageTitle = 'Dashboard';
+            $pageTitle = 'My Plans';
             $attendance = $eventModel->getAttendance($userId, $event['id']);
+            $isAttending = $attendance !== false;
             $activityBookings = $activityModel->getUserBookings($userId, $event['id']);
             $mealBookings = $mealModel->getUserBookings($userId, $event['id']);
             $carshareOffer = $carshareModel->getUserOffer($userId, $event['id']);
