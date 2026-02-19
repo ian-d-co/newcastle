@@ -44,15 +44,9 @@ ob_start();
                             <p><?php echo e($hotel['description']); ?></p>
                         <?php endif; ?>
                         
-                        <?php if (!empty($hotel['phone']) || !empty($hotel['website'])): ?>
+                        <?php if (!empty($hotel['website'])): ?>
                             <p style="margin: 0.5rem 0;">
-                                <?php if ($hotel['phone']): ?>
-                                    <strong>Phone:</strong> <?php echo e($hotel['phone']); ?>
-                                <?php endif; ?>
-                                <?php if ($hotel['phone'] && $hotel['website']): ?> | <?php endif; ?>
-                                <?php if ($hotel['website']): ?>
-                                    <strong>Website:</strong> <a href="<?php echo e($hotel['website']); ?>" target="_blank"><?php echo e($hotel['website']); ?></a>
-                                <?php endif; ?>
+                                <strong>Website:</strong> <a href="<?php echo e($hotel['website']); ?>" target="_blank"><?php echo e($hotel['website']); ?></a>
                             </p>
                         <?php endif; ?>
                         
@@ -119,21 +113,9 @@ ob_start();
                 <textarea id="hotel_address" name="address" class="form-control" rows="2"></textarea>
             </div>
             
-            <div class="row">
-                <div class="col">
-                    <div class="form-group">
-                        <label for="hotel_phone">Phone</label>
-                        <input type="tel" id="hotel_phone" name="phone" class="form-control">
-                    </div>
-                </div>
-                
-                <div class="col">
-                    <div class="form-group">
-                        <label for="hotel_website">Website</label>
-                        <input type="url" id="hotel_website" name="website" class="form-control" placeholder="https://">
-                    </div>
-                </div>
-            </div>
+            <div class="form-group">
+                <label for="hotel_website">Website</label>
+                <input type="url" id="hotel_website" name="website" class="form-control" placeholder="https://"></div>
             
             <div class="form-group">
                 <label for="hotel_description">Description</label>
@@ -233,7 +215,6 @@ function editHotel(hotel) {
     document.getElementById('hotel_id').value = hotel.id;
     document.getElementById('hotel_name').value = hotel.name;
     document.getElementById('hotel_address').value = hotel.address || '';
-    document.getElementById('hotel_phone').value = hotel.phone || '';
     document.getElementById('hotel_website').value = hotel.website || '';
     document.getElementById('hotel_description').value = hotel.description || '';
     document.getElementById('hotel_link').value = hotel.link || '';
@@ -277,7 +258,6 @@ document.getElementById('hotelForm').addEventListener('submit', function(e) {
     const formData = {
         name: this.hotel_name.value,
         address: this.hotel_address.value,
-        phone: this.hotel_phone.value,
         website: this.hotel_website.value,
         description: this.hotel_description.value,
         link: this.hotel_link.value || null
