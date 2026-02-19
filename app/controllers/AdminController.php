@@ -105,21 +105,44 @@ class AdminController {
      * Create activity
      */
     public function createActivity() {
+        error_log('AdminController::createActivity() - Method called');
+        
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             jsonResponse(['success' => false, 'message' => 'Invalid request method'], 405);
         }
         
-        $data = json_decode(file_get_contents('php://input'), true);
-        $event = $this->getActiveEvent();
-        
         try {
+            // Decode and validate JSON
+            $data = json_decode(file_get_contents('php://input'), true);
+            if ($data === null) {
+                error_log('AdminController::createActivity() - Failed to decode JSON');
+                jsonResponse(['success' => false, 'message' => 'Invalid JSON data'], 400);
+            }
+            error_log('AdminController::createActivity() - JSON decoded successfully');
+            
+            // Get and validate active event
+            $event = $this->getActiveEvent();
+            if (!$event || !isset($event['id'])) {
+                error_log('AdminController::createActivity() - No active event found');
+                jsonResponse(['success' => false, 'message' => 'No active event found'], 400);
+            }
+            error_log('AdminController::createActivity() - Active event ID: ' . $event['id']);
+            
+            // Validate required fields
+            $requiredFields = ['title', 'day', 'start_time', 'end_time'];
+            foreach ($requiredFields as $field) {
+                if (!isset($data[$field]) || trim($data[$field]) === '') {
+                    error_log("AdminController::createActivity() - Missing required field: $field");
+                    jsonResponse(['success' => false, 'message' => "Missing required field: $field"], 400);
+                }
+            }
+            
             $db = getDbConnection();
             
             $sql = "INSERT INTO activities (event_id, title, description, day, start_time, end_time, max_capacity, requires_prepayment, price)
                     VALUES (:event_id, :title, :description, :day, :start_time, :end_time, :max_capacity, :requires_prepayment, :price)";
             
-            $stmt = $db->prepare($sql);
-            $stmt->execute([
+            $params = [
                 'event_id' => $event['id'],
                 'title' => $data['title'],
                 'description' => $data['description'] ?? '',
@@ -129,11 +152,20 @@ class AdminController {
                 'max_capacity' => $data['max_capacity'] ?? 20,
                 'requires_prepayment' => $data['requires_prepayment'] ?? 0,
                 'price' => $data['price'] ?? 0
-            ]);
+            ];
+            error_log('AdminController::createActivity() - SQL params: ' . json_encode($params));
             
-            jsonResponse(['success' => true, 'message' => 'Activity created successfully', 'id' => $db->lastInsertId()]);
+            $stmt = $db->prepare($sql);
+            $stmt->execute($params);
+            
+            $activityId = $db->lastInsertId();
+            error_log('AdminController::createActivity() - Activity created with ID: ' . $activityId);
+            
+            jsonResponse(['success' => true, 'message' => 'Activity created successfully', 'id' => $activityId]);
         } catch (Exception $e) {
-            error_log('Error creating activity: ' . $e->getMessage());
+            error_log('AdminController::createActivity() - Exception: ' . $e->getMessage());
+            error_log('AdminController::createActivity() - File: ' . $e->getFile() . ':' . $e->getLine());
+            error_log('AdminController::createActivity() - Trace: ' . $e->getTraceAsString());
             jsonResponse(['success' => false, 'message' => 'Failed to create activity'], 500);
         }
     }
@@ -142,13 +174,35 @@ class AdminController {
      * Update activity
      */
     public function updateActivity() {
+        error_log('AdminController::updateActivity() - Method called');
+        
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             jsonResponse(['success' => false, 'message' => 'Invalid request method'], 405);
         }
         
-        $data = json_decode(file_get_contents('php://input'), true);
-        
         try {
+            // Decode and validate JSON
+            $data = json_decode(file_get_contents('php://input'), true);
+            if ($data === null) {
+                error_log('AdminController::updateActivity() - Failed to decode JSON');
+                jsonResponse(['success' => false, 'message' => 'Invalid JSON data'], 400);
+            }
+            error_log('AdminController::updateActivity() - JSON decoded successfully');
+            
+            // Validate required fields
+            $requiredFields = ['id', 'title', 'day', 'start_time', 'end_time'];
+            foreach ($requiredFields as $field) {
+                if (!isset($data[$field])) {
+                    error_log("AdminController::updateActivity() - Missing required field: $field");
+                    jsonResponse(['success' => false, 'message' => "Missing required field: $field"], 400);
+                }
+                // For string fields, also check they're not empty after trimming
+                if ($field !== 'id' && trim($data[$field]) === '') {
+                    error_log("AdminController::updateActivity() - Empty required field: $field");
+                    jsonResponse(['success' => false, 'message' => "Missing required field: $field"], 400);
+                }
+            }
+            
             $db = getDbConnection();
             
             $sql = "UPDATE activities SET 
@@ -162,8 +216,7 @@ class AdminController {
                     price = :price
                     WHERE id = :id";
             
-            $stmt = $db->prepare($sql);
-            $stmt->execute([
+            $params = [
                 'id' => $data['id'],
                 'title' => $data['title'],
                 'description' => $data['description'] ?? '',
@@ -173,11 +226,19 @@ class AdminController {
                 'max_capacity' => $data['max_capacity'] ?? 20,
                 'requires_prepayment' => $data['requires_prepayment'] ?? 0,
                 'price' => $data['price'] ?? 0
-            ]);
+            ];
+            error_log('AdminController::updateActivity() - SQL params: ' . json_encode($params));
+            
+            $stmt = $db->prepare($sql);
+            $stmt->execute($params);
+            
+            error_log('AdminController::updateActivity() - Activity updated with ID: ' . $data['id']);
             
             jsonResponse(['success' => true, 'message' => 'Activity updated successfully']);
         } catch (Exception $e) {
-            error_log('Error updating activity: ' . $e->getMessage());
+            error_log('AdminController::updateActivity() - Exception: ' . $e->getMessage());
+            error_log('AdminController::updateActivity() - File: ' . $e->getFile() . ':' . $e->getLine());
+            error_log('AdminController::updateActivity() - Trace: ' . $e->getTraceAsString());
             jsonResponse(['success' => false, 'message' => 'Failed to update activity'], 500);
         }
     }
@@ -186,14 +247,30 @@ class AdminController {
      * Delete activity
      */
     public function deleteActivity() {
+        error_log('AdminController::deleteActivity() - Method called');
+        
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             jsonResponse(['success' => false, 'message' => 'Invalid request method'], 405);
         }
         
-        $data = json_decode(file_get_contents('php://input'), true);
-        
         try {
+            // Decode and validate JSON
+            $data = json_decode(file_get_contents('php://input'), true);
+            if ($data === null) {
+                error_log('AdminController::deleteActivity() - Failed to decode JSON');
+                jsonResponse(['success' => false, 'message' => 'Invalid JSON data'], 400);
+            }
+            error_log('AdminController::deleteActivity() - JSON decoded successfully');
+            
+            // Validate required fields
+            if (!isset($data['id'])) {
+                error_log('AdminController::deleteActivity() - Missing required field: id');
+                jsonResponse(['success' => false, 'message' => 'Missing required field: id'], 400);
+            }
+            
             $db = getDbConnection();
+            
+            error_log('AdminController::deleteActivity() - Deleting activity ID: ' . $data['id']);
             
             // Delete bookings first
             $stmt = $db->prepare("DELETE FROM activity_bookings WHERE activity_id = :id");
@@ -203,9 +280,13 @@ class AdminController {
             $stmt = $db->prepare("DELETE FROM activities WHERE id = :id");
             $stmt->execute(['id' => $data['id']]);
             
+            error_log('AdminController::deleteActivity() - Activity deleted with ID: ' . $data['id']);
+            
             jsonResponse(['success' => true, 'message' => 'Activity deleted successfully']);
         } catch (Exception $e) {
-            error_log('Error deleting activity: ' . $e->getMessage());
+            error_log('AdminController::deleteActivity() - Exception: ' . $e->getMessage());
+            error_log('AdminController::deleteActivity() - File: ' . $e->getFile() . ':' . $e->getLine());
+            error_log('AdminController::deleteActivity() - Trace: ' . $e->getTraceAsString());
             jsonResponse(['success' => false, 'message' => 'Failed to delete activity'], 500);
         }
     }
@@ -242,21 +323,44 @@ class AdminController {
      * Create meal
      */
     public function createMeal() {
+        error_log('AdminController::createMeal() - Method called');
+        
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             jsonResponse(['success' => false, 'message' => 'Invalid request method'], 405);
         }
         
-        $data = json_decode(file_get_contents('php://input'), true);
-        $event = $this->getActiveEvent();
-        
         try {
+            // Decode and validate JSON
+            $data = json_decode(file_get_contents('php://input'), true);
+            if ($data === null) {
+                error_log('AdminController::createMeal() - Failed to decode JSON');
+                jsonResponse(['success' => false, 'message' => 'Invalid JSON data'], 400);
+            }
+            error_log('AdminController::createMeal() - JSON decoded successfully');
+            
+            // Get and validate active event
+            $event = $this->getActiveEvent();
+            if (!$event || !isset($event['id'])) {
+                error_log('AdminController::createMeal() - No active event found');
+                jsonResponse(['success' => false, 'message' => 'No active event found'], 400);
+            }
+            error_log('AdminController::createMeal() - Active event ID: ' . $event['id']);
+            
+            // Validate required fields
+            $requiredFields = ['title', 'day', 'start_time', 'end_time'];
+            foreach ($requiredFields as $field) {
+                if (!isset($data[$field]) || trim($data[$field]) === '') {
+                    error_log("AdminController::createMeal() - Missing required field: $field");
+                    jsonResponse(['success' => false, 'message' => "Missing required field: $field"], 400);
+                }
+            }
+            
             $db = getDbConnection();
             
             $sql = "INSERT INTO meals (event_id, title, description, day, start_time, end_time, max_capacity, requires_prepayment, price)
                     VALUES (:event_id, :title, :description, :day, :start_time, :end_time, :max_capacity, :requires_prepayment, :price)";
             
-            $stmt = $db->prepare($sql);
-            $stmt->execute([
+            $params = [
                 'event_id' => $event['id'],
                 'title' => $data['title'],
                 'description' => $data['description'] ?? '',
@@ -266,11 +370,20 @@ class AdminController {
                 'max_capacity' => $data['max_capacity'] ?? 20,
                 'requires_prepayment' => $data['requires_prepayment'] ?? 0,
                 'price' => $data['price'] ?? 0
-            ]);
+            ];
+            error_log('AdminController::createMeal() - SQL params: ' . json_encode($params));
             
-            jsonResponse(['success' => true, 'message' => 'Meal created successfully', 'id' => $db->lastInsertId()]);
+            $stmt = $db->prepare($sql);
+            $stmt->execute($params);
+            
+            $mealId = $db->lastInsertId();
+            error_log('AdminController::createMeal() - Meal created with ID: ' . $mealId);
+            
+            jsonResponse(['success' => true, 'message' => 'Meal created successfully', 'id' => $mealId]);
         } catch (Exception $e) {
-            error_log('Error creating meal: ' . $e->getMessage());
+            error_log('AdminController::createMeal() - Exception: ' . $e->getMessage());
+            error_log('AdminController::createMeal() - File: ' . $e->getFile() . ':' . $e->getLine());
+            error_log('AdminController::createMeal() - Trace: ' . $e->getTraceAsString());
             jsonResponse(['success' => false, 'message' => 'Failed to create meal'], 500);
         }
     }
@@ -279,13 +392,35 @@ class AdminController {
      * Update meal
      */
     public function updateMeal() {
+        error_log('AdminController::updateMeal() - Method called');
+        
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             jsonResponse(['success' => false, 'message' => 'Invalid request method'], 405);
         }
         
-        $data = json_decode(file_get_contents('php://input'), true);
-        
         try {
+            // Decode and validate JSON
+            $data = json_decode(file_get_contents('php://input'), true);
+            if ($data === null) {
+                error_log('AdminController::updateMeal() - Failed to decode JSON');
+                jsonResponse(['success' => false, 'message' => 'Invalid JSON data'], 400);
+            }
+            error_log('AdminController::updateMeal() - JSON decoded successfully');
+            
+            // Validate required fields
+            $requiredFields = ['id', 'title', 'day', 'start_time', 'end_time'];
+            foreach ($requiredFields as $field) {
+                if (!isset($data[$field])) {
+                    error_log("AdminController::updateMeal() - Missing required field: $field");
+                    jsonResponse(['success' => false, 'message' => "Missing required field: $field"], 400);
+                }
+                // For string fields, also check they're not empty after trimming
+                if ($field !== 'id' && trim($data[$field]) === '') {
+                    error_log("AdminController::updateMeal() - Empty required field: $field");
+                    jsonResponse(['success' => false, 'message' => "Missing required field: $field"], 400);
+                }
+            }
+            
             $db = getDbConnection();
             
             $sql = "UPDATE meals SET 
@@ -299,8 +434,7 @@ class AdminController {
                     price = :price
                     WHERE id = :id";
             
-            $stmt = $db->prepare($sql);
-            $stmt->execute([
+            $params = [
                 'id' => $data['id'],
                 'title' => $data['title'],
                 'description' => $data['description'] ?? '',
@@ -310,11 +444,19 @@ class AdminController {
                 'max_capacity' => $data['max_capacity'] ?? 20,
                 'requires_prepayment' => $data['requires_prepayment'] ?? 0,
                 'price' => $data['price'] ?? 0
-            ]);
+            ];
+            error_log('AdminController::updateMeal() - SQL params: ' . json_encode($params));
+            
+            $stmt = $db->prepare($sql);
+            $stmt->execute($params);
+            
+            error_log('AdminController::updateMeal() - Meal updated with ID: ' . $data['id']);
             
             jsonResponse(['success' => true, 'message' => 'Meal updated successfully']);
         } catch (Exception $e) {
-            error_log('Error updating meal: ' . $e->getMessage());
+            error_log('AdminController::updateMeal() - Exception: ' . $e->getMessage());
+            error_log('AdminController::updateMeal() - File: ' . $e->getFile() . ':' . $e->getLine());
+            error_log('AdminController::updateMeal() - Trace: ' . $e->getTraceAsString());
             jsonResponse(['success' => false, 'message' => 'Failed to update meal'], 500);
         }
     }
@@ -323,14 +465,30 @@ class AdminController {
      * Delete meal
      */
     public function deleteMeal() {
+        error_log('AdminController::deleteMeal() - Method called');
+        
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             jsonResponse(['success' => false, 'message' => 'Invalid request method'], 405);
         }
         
-        $data = json_decode(file_get_contents('php://input'), true);
-        
         try {
+            // Decode and validate JSON
+            $data = json_decode(file_get_contents('php://input'), true);
+            if ($data === null) {
+                error_log('AdminController::deleteMeal() - Failed to decode JSON');
+                jsonResponse(['success' => false, 'message' => 'Invalid JSON data'], 400);
+            }
+            error_log('AdminController::deleteMeal() - JSON decoded successfully');
+            
+            // Validate required fields
+            if (!isset($data['id'])) {
+                error_log('AdminController::deleteMeal() - Missing required field: id');
+                jsonResponse(['success' => false, 'message' => 'Missing required field: id'], 400);
+            }
+            
             $db = getDbConnection();
+            
+            error_log('AdminController::deleteMeal() - Deleting meal ID: ' . $data['id']);
             
             // Delete bookings first
             $stmt = $db->prepare("DELETE FROM meal_bookings WHERE meal_id = :id");
@@ -340,9 +498,13 @@ class AdminController {
             $stmt = $db->prepare("DELETE FROM meals WHERE id = :id");
             $stmt->execute(['id' => $data['id']]);
             
+            error_log('AdminController::deleteMeal() - Meal deleted with ID: ' . $data['id']);
+            
             jsonResponse(['success' => true, 'message' => 'Meal deleted successfully']);
         } catch (Exception $e) {
-            error_log('Error deleting meal: ' . $e->getMessage());
+            error_log('AdminController::deleteMeal() - Exception: ' . $e->getMessage());
+            error_log('AdminController::deleteMeal() - File: ' . $e->getFile() . ':' . $e->getLine());
+            error_log('AdminController::deleteMeal() - Trace: ' . $e->getTraceAsString());
             jsonResponse(['success' => false, 'message' => 'Failed to delete meal'], 500);
         }
     }
@@ -381,14 +543,40 @@ class AdminController {
      * Create poll
      */
     public function createPoll() {
+        error_log('AdminController::createPoll() - Method called');
+        
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             jsonResponse(['success' => false, 'message' => 'Invalid request method'], 405);
         }
         
-        $data = json_decode(file_get_contents('php://input'), true);
-        $event = $this->getActiveEvent();
-        
         try {
+            // Decode and validate JSON
+            $data = json_decode(file_get_contents('php://input'), true);
+            if ($data === null) {
+                error_log('AdminController::createPoll() - Failed to decode JSON');
+                jsonResponse(['success' => false, 'message' => 'Invalid JSON data'], 400);
+            }
+            error_log('AdminController::createPoll() - JSON decoded successfully');
+            
+            // Get and validate active event
+            $event = $this->getActiveEvent();
+            if (!$event || !isset($event['id'])) {
+                error_log('AdminController::createPoll() - No active event found');
+                jsonResponse(['success' => false, 'message' => 'No active event found'], 400);
+            }
+            error_log('AdminController::createPoll() - Active event ID: ' . $event['id']);
+            
+            // Validate required fields
+            if (!isset($data['question']) || trim($data['question']) === '') {
+                error_log('AdminController::createPoll() - Missing required field: question');
+                jsonResponse(['success' => false, 'message' => 'Missing required field: question'], 400);
+            }
+            
+            if (empty($data['options']) || !is_array($data['options'])) {
+                error_log('AdminController::createPoll() - Missing or invalid poll options');
+                jsonResponse(['success' => false, 'message' => 'Poll must have at least one option'], 400);
+            }
+            
             $db = getDbConnection();
             $db->beginTransaction();
             
@@ -396,36 +584,43 @@ class AdminController {
             $sql = "INSERT INTO polls (event_id, question, is_anonymous, is_multiple_choice, expires_at, is_active, created_by)
                     VALUES (:event_id, :question, :is_anonymous, :is_multiple_choice, :expires_at, 1, :created_by)";
             
-            $stmt = $db->prepare($sql);
-            $stmt->execute([
+            $params = [
                 'event_id' => $event['id'],
                 'question' => $data['question'],
                 'is_anonymous' => $data['is_anonymous'] ?? 0,
                 'is_multiple_choice' => $data['is_multiple_choice'] ?? 0,
                 'expires_at' => $data['expires_at'] ?? null,
                 'created_by' => getCurrentUserId()
-            ]);
+            ];
+            error_log('AdminController::createPoll() - SQL params: ' . json_encode($params));
+            
+            $stmt = $db->prepare($sql);
+            $stmt->execute($params);
             
             $pollId = $db->lastInsertId();
+            error_log('AdminController::createPoll() - Poll created with ID: ' . $pollId);
             
             // Create poll options
-            if (!empty($data['options'])) {
-                $sql = "INSERT INTO poll_options (poll_id, option_text) VALUES (:poll_id, :option_text)";
-                $stmt = $db->prepare($sql);
-                
-                foreach ($data['options'] as $option) {
-                    $stmt->execute([
-                        'poll_id' => $pollId,
-                        'option_text' => $option
-                    ]);
-                }
+            $sql = "INSERT INTO poll_options (poll_id, option_text) VALUES (:poll_id, :option_text)";
+            $stmt = $db->prepare($sql);
+            
+            foreach ($data['options'] as $option) {
+                $stmt->execute([
+                    'poll_id' => $pollId,
+                    'option_text' => $option
+                ]);
             }
+            error_log('AdminController::createPoll() - Added ' . count($data['options']) . ' options');
             
             $db->commit();
             jsonResponse(['success' => true, 'message' => 'Poll created successfully', 'id' => $pollId]);
         } catch (Exception $e) {
-            $db->rollBack();
-            error_log('Error creating poll: ' . $e->getMessage());
+            if (isset($db)) {
+                $db->rollBack();
+            }
+            error_log('AdminController::createPoll() - Exception: ' . $e->getMessage());
+            error_log('AdminController::createPoll() - File: ' . $e->getFile() . ':' . $e->getLine());
+            error_log('AdminController::createPoll() - Trace: ' . $e->getTraceAsString());
             jsonResponse(['success' => false, 'message' => 'Failed to create poll'], 500);
         }
     }
@@ -434,13 +629,35 @@ class AdminController {
      * Update poll
      */
     public function updatePoll() {
+        error_log('AdminController::updatePoll() - Method called');
+        
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             jsonResponse(['success' => false, 'message' => 'Invalid request method'], 405);
         }
         
-        $data = json_decode(file_get_contents('php://input'), true);
-        
         try {
+            // Decode and validate JSON
+            $data = json_decode(file_get_contents('php://input'), true);
+            if ($data === null) {
+                error_log('AdminController::updatePoll() - Failed to decode JSON');
+                jsonResponse(['success' => false, 'message' => 'Invalid JSON data'], 400);
+            }
+            error_log('AdminController::updatePoll() - JSON decoded successfully');
+            
+            // Validate required fields
+            $requiredFields = ['id', 'question'];
+            foreach ($requiredFields as $field) {
+                if (!isset($data[$field])) {
+                    error_log("AdminController::updatePoll() - Missing required field: $field");
+                    jsonResponse(['success' => false, 'message' => "Missing required field: $field"], 400);
+                }
+                // For string fields, also check they're not empty after trimming
+                if ($field !== 'id' && trim($data[$field]) === '') {
+                    error_log("AdminController::updatePoll() - Empty required field: $field");
+                    jsonResponse(['success' => false, 'message' => "Missing required field: $field"], 400);
+                }
+            }
+            
             $db = getDbConnection();
             
             $sql = "UPDATE polls SET 
@@ -451,19 +668,26 @@ class AdminController {
                     is_active = :is_active
                     WHERE id = :id";
             
-            $stmt = $db->prepare($sql);
-            $stmt->execute([
+            $params = [
                 'id' => $data['id'],
                 'question' => $data['question'],
                 'is_anonymous' => $data['is_anonymous'] ?? 0,
                 'is_multiple_choice' => $data['is_multiple_choice'] ?? 0,
                 'expires_at' => $data['expires_at'] ?? null,
                 'is_active' => $data['is_active'] ?? 1
-            ]);
+            ];
+            error_log('AdminController::updatePoll() - SQL params: ' . json_encode($params));
+            
+            $stmt = $db->prepare($sql);
+            $stmt->execute($params);
+            
+            error_log('AdminController::updatePoll() - Poll updated with ID: ' . $data['id']);
             
             jsonResponse(['success' => true, 'message' => 'Poll updated successfully']);
         } catch (Exception $e) {
-            error_log('Error updating poll: ' . $e->getMessage());
+            error_log('AdminController::updatePoll() - Exception: ' . $e->getMessage());
+            error_log('AdminController::updatePoll() - File: ' . $e->getFile() . ':' . $e->getLine());
+            error_log('AdminController::updatePoll() - Trace: ' . $e->getTraceAsString());
             jsonResponse(['success' => false, 'message' => 'Failed to update poll'], 500);
         }
     }
@@ -472,14 +696,30 @@ class AdminController {
      * Delete poll
      */
     public function deletePoll() {
+        error_log('AdminController::deletePoll() - Method called');
+        
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             jsonResponse(['success' => false, 'message' => 'Invalid request method'], 405);
         }
         
-        $data = json_decode(file_get_contents('php://input'), true);
-        
         try {
+            // Decode and validate JSON
+            $data = json_decode(file_get_contents('php://input'), true);
+            if ($data === null) {
+                error_log('AdminController::deletePoll() - Failed to decode JSON');
+                jsonResponse(['success' => false, 'message' => 'Invalid JSON data'], 400);
+            }
+            error_log('AdminController::deletePoll() - JSON decoded successfully');
+            
+            // Validate required fields
+            if (!isset($data['id'])) {
+                error_log('AdminController::deletePoll() - Missing required field: id');
+                jsonResponse(['success' => false, 'message' => 'Missing required field: id'], 400);
+            }
+            
             $db = getDbConnection();
+            
+            error_log('AdminController::deletePoll() - Deleting poll ID: ' . $data['id']);
             
             // Delete votes first
             $stmt = $db->prepare("DELETE FROM poll_votes WHERE poll_id = :id");
@@ -493,9 +733,13 @@ class AdminController {
             $stmt = $db->prepare("DELETE FROM polls WHERE id = :id");
             $stmt->execute(['id' => $data['id']]);
             
+            error_log('AdminController::deletePoll() - Poll deleted with ID: ' . $data['id']);
+            
             jsonResponse(['success' => true, 'message' => 'Poll deleted successfully']);
         } catch (Exception $e) {
-            error_log('Error deleting poll: ' . $e->getMessage());
+            error_log('AdminController::deletePoll() - Exception: ' . $e->getMessage());
+            error_log('AdminController::deletePoll() - File: ' . $e->getFile() . ':' . $e->getLine());
+            error_log('AdminController::deletePoll() - Trace: ' . $e->getTraceAsString());
             jsonResponse(['success' => false, 'message' => 'Failed to delete poll'], 500);
         }
     }
@@ -537,32 +781,61 @@ class AdminController {
      * Create hotel
      */
     public function createHotel() {
+        error_log('AdminController::createHotel() - Method called');
+        
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             jsonResponse(['success' => false, 'message' => 'Invalid request method'], 405);
         }
         
-        $data = json_decode(file_get_contents('php://input'), true);
-        $event = $this->getActiveEvent();
-        
         try {
+            // Decode and validate JSON
+            $data = json_decode(file_get_contents('php://input'), true);
+            if ($data === null) {
+                error_log('AdminController::createHotel() - Failed to decode JSON');
+                jsonResponse(['success' => false, 'message' => 'Invalid JSON data'], 400);
+            }
+            error_log('AdminController::createHotel() - JSON decoded successfully');
+            
+            // Get and validate active event
+            $event = $this->getActiveEvent();
+            if (!$event || !isset($event['id'])) {
+                error_log('AdminController::createHotel() - No active event found');
+                jsonResponse(['success' => false, 'message' => 'No active event found'], 400);
+            }
+            error_log('AdminController::createHotel() - Active event ID: ' . $event['id']);
+            
+            // Validate required fields
+            if (!isset($data['name']) || trim($data['name']) === '') {
+                error_log('AdminController::createHotel() - Missing required field: name');
+                jsonResponse(['success' => false, 'message' => 'Missing required field: name'], 400);
+            }
+            
             $db = getDbConnection();
             
             $sql = "INSERT INTO hotels (event_id, name, address, phone, website, description, created_at, updated_at)
                     VALUES (:event_id, :name, :address, :phone, :website, :description, NOW(), NOW())";
             
-            $stmt = $db->prepare($sql);
-            $stmt->execute([
+            $params = [
                 'event_id' => $event['id'],
                 'name' => $data['name'],
                 'address' => $data['address'] ?? '',
                 'phone' => $data['phone'] ?? '',
                 'website' => $data['website'] ?? '',
                 'description' => $data['description'] ?? ''
-            ]);
+            ];
+            error_log('AdminController::createHotel() - SQL params: ' . json_encode($params));
             
-            jsonResponse(['success' => true, 'message' => 'Hotel created successfully', 'id' => $db->lastInsertId()]);
+            $stmt = $db->prepare($sql);
+            $stmt->execute($params);
+            
+            $hotelId = $db->lastInsertId();
+            error_log('AdminController::createHotel() - Hotel created with ID: ' . $hotelId);
+            
+            jsonResponse(['success' => true, 'message' => 'Hotel created successfully', 'id' => $hotelId]);
         } catch (Exception $e) {
-            error_log('Error creating hotel: ' . $e->getMessage());
+            error_log('AdminController::createHotel() - Exception: ' . $e->getMessage());
+            error_log('AdminController::createHotel() - File: ' . $e->getFile() . ':' . $e->getLine());
+            error_log('AdminController::createHotel() - Trace: ' . $e->getTraceAsString());
             jsonResponse(['success' => false, 'message' => 'Failed to create hotel'], 500);
         }
     }
@@ -571,13 +844,35 @@ class AdminController {
      * Update hotel
      */
     public function updateHotel() {
+        error_log('AdminController::updateHotel() - Method called');
+        
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             jsonResponse(['success' => false, 'message' => 'Invalid request method'], 405);
         }
         
-        $data = json_decode(file_get_contents('php://input'), true);
-        
         try {
+            // Decode and validate JSON
+            $data = json_decode(file_get_contents('php://input'), true);
+            if ($data === null) {
+                error_log('AdminController::updateHotel() - Failed to decode JSON');
+                jsonResponse(['success' => false, 'message' => 'Invalid JSON data'], 400);
+            }
+            error_log('AdminController::updateHotel() - JSON decoded successfully');
+            
+            // Validate required fields
+            $requiredFields = ['id', 'name'];
+            foreach ($requiredFields as $field) {
+                if (!isset($data[$field])) {
+                    error_log("AdminController::updateHotel() - Missing required field: $field");
+                    jsonResponse(['success' => false, 'message' => "Missing required field: $field"], 400);
+                }
+                // For string fields, also check they're not empty after trimming
+                if ($field !== 'id' && trim($data[$field]) === '') {
+                    error_log("AdminController::updateHotel() - Empty required field: $field");
+                    jsonResponse(['success' => false, 'message' => "Missing required field: $field"], 400);
+                }
+            }
+            
             $db = getDbConnection();
             
             $sql = "UPDATE hotels SET 
@@ -589,19 +884,26 @@ class AdminController {
                     updated_at = NOW()
                     WHERE id = :id";
             
-            $stmt = $db->prepare($sql);
-            $stmt->execute([
+            $params = [
                 'id' => $data['id'],
                 'name' => $data['name'],
                 'address' => $data['address'] ?? '',
                 'phone' => $data['phone'] ?? '',
                 'website' => $data['website'] ?? '',
                 'description' => $data['description'] ?? ''
-            ]);
+            ];
+            error_log('AdminController::updateHotel() - SQL params: ' . json_encode($params));
+            
+            $stmt = $db->prepare($sql);
+            $stmt->execute($params);
+            
+            error_log('AdminController::updateHotel() - Hotel updated with ID: ' . $data['id']);
             
             jsonResponse(['success' => true, 'message' => 'Hotel updated successfully']);
         } catch (Exception $e) {
-            error_log('Error updating hotel: ' . $e->getMessage());
+            error_log('AdminController::updateHotel() - Exception: ' . $e->getMessage());
+            error_log('AdminController::updateHotel() - File: ' . $e->getFile() . ':' . $e->getLine());
+            error_log('AdminController::updateHotel() - Trace: ' . $e->getTraceAsString());
             jsonResponse(['success' => false, 'message' => 'Failed to update hotel'], 500);
         }
     }
@@ -610,14 +912,30 @@ class AdminController {
      * Delete hotel
      */
     public function deleteHotel() {
+        error_log('AdminController::deleteHotel() - Method called');
+        
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             jsonResponse(['success' => false, 'message' => 'Invalid request method'], 405);
         }
         
-        $data = json_decode(file_get_contents('php://input'), true);
-        
         try {
+            // Decode and validate JSON
+            $data = json_decode(file_get_contents('php://input'), true);
+            if ($data === null) {
+                error_log('AdminController::deleteHotel() - Failed to decode JSON');
+                jsonResponse(['success' => false, 'message' => 'Invalid JSON data'], 400);
+            }
+            error_log('AdminController::deleteHotel() - JSON decoded successfully');
+            
+            // Validate required fields
+            if (!isset($data['id'])) {
+                error_log('AdminController::deleteHotel() - Missing required field: id');
+                jsonResponse(['success' => false, 'message' => 'Missing required field: id'], 400);
+            }
+            
             $db = getDbConnection();
+            
+            error_log('AdminController::deleteHotel() - Deleting hotel ID: ' . $data['id']);
             
             // Get all rooms for this hotel
             $stmt = $db->prepare("SELECT id FROM hotel_rooms WHERE hotel_id = :hotel_id");
@@ -638,9 +956,13 @@ class AdminController {
             $stmt = $db->prepare("DELETE FROM hotels WHERE id = :id");
             $stmt->execute(['id' => $data['id']]);
             
+            error_log('AdminController::deleteHotel() - Hotel deleted with ID: ' . $data['id']);
+            
             jsonResponse(['success' => true, 'message' => 'Hotel deleted successfully']);
         } catch (Exception $e) {
-            error_log('Error deleting hotel: ' . $e->getMessage());
+            error_log('AdminController::deleteHotel() - Exception: ' . $e->getMessage());
+            error_log('AdminController::deleteHotel() - File: ' . $e->getFile() . ':' . $e->getLine());
+            error_log('AdminController::deleteHotel() - Trace: ' . $e->getTraceAsString());
             jsonResponse(['success' => false, 'message' => 'Failed to delete hotel'], 500);
         }
     }
@@ -649,30 +971,60 @@ class AdminController {
      * Create hotel room
      */
     public function createRoom() {
+        error_log('AdminController::createRoom() - Method called');
+        
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             jsonResponse(['success' => false, 'message' => 'Invalid request method'], 405);
         }
         
-        $data = json_decode(file_get_contents('php://input'), true);
-        
         try {
+            // Decode and validate JSON
+            $data = json_decode(file_get_contents('php://input'), true);
+            if ($data === null) {
+                error_log('AdminController::createRoom() - Failed to decode JSON');
+                jsonResponse(['success' => false, 'message' => 'Invalid JSON data'], 400);
+            }
+            error_log('AdminController::createRoom() - JSON decoded successfully');
+            
+            // Validate required fields
+            $requiredFields = ['hotel_id', 'room_type', 'price_per_night'];
+            foreach ($requiredFields as $field) {
+                if (!isset($data[$field])) {
+                    error_log("AdminController::createRoom() - Missing required field: $field");
+                    jsonResponse(['success' => false, 'message' => "Missing required field: $field"], 400);
+                }
+                // For string fields, also check they're not empty after trimming
+                if ($field === 'room_type' && trim($data[$field]) === '') {
+                    error_log("AdminController::createRoom() - Empty required field: $field");
+                    jsonResponse(['success' => false, 'message' => "Missing required field: $field"], 400);
+                }
+            }
+            
             $db = getDbConnection();
             
             $sql = "INSERT INTO hotel_rooms (hotel_id, room_type, price_per_night, max_occupancy, available_rooms, created_at, updated_at)
                     VALUES (:hotel_id, :room_type, :price_per_night, :max_occupancy, :available_rooms, NOW(), NOW())";
             
-            $stmt = $db->prepare($sql);
-            $stmt->execute([
+            $params = [
                 'hotel_id' => $data['hotel_id'],
                 'room_type' => $data['room_type'],
                 'price_per_night' => $data['price_per_night'],
                 'max_occupancy' => $data['max_occupancy'] ?? 2,
                 'available_rooms' => $data['available_rooms'] ?? 1
-            ]);
+            ];
+            error_log('AdminController::createRoom() - SQL params: ' . json_encode($params));
             
-            jsonResponse(['success' => true, 'message' => 'Room created successfully', 'id' => $db->lastInsertId()]);
+            $stmt = $db->prepare($sql);
+            $stmt->execute($params);
+            
+            $roomId = $db->lastInsertId();
+            error_log('AdminController::createRoom() - Room created with ID: ' . $roomId);
+            
+            jsonResponse(['success' => true, 'message' => 'Room created successfully', 'id' => $roomId]);
         } catch (Exception $e) {
-            error_log('Error creating room: ' . $e->getMessage());
+            error_log('AdminController::createRoom() - Exception: ' . $e->getMessage());
+            error_log('AdminController::createRoom() - File: ' . $e->getFile() . ':' . $e->getLine());
+            error_log('AdminController::createRoom() - Trace: ' . $e->getTraceAsString());
             jsonResponse(['success' => false, 'message' => 'Failed to create room'], 500);
         }
     }
@@ -681,13 +1033,35 @@ class AdminController {
      * Update hotel room
      */
     public function updateRoom() {
+        error_log('AdminController::updateRoom() - Method called');
+        
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             jsonResponse(['success' => false, 'message' => 'Invalid request method'], 405);
         }
         
-        $data = json_decode(file_get_contents('php://input'), true);
-        
         try {
+            // Decode and validate JSON
+            $data = json_decode(file_get_contents('php://input'), true);
+            if ($data === null) {
+                error_log('AdminController::updateRoom() - Failed to decode JSON');
+                jsonResponse(['success' => false, 'message' => 'Invalid JSON data'], 400);
+            }
+            error_log('AdminController::updateRoom() - JSON decoded successfully');
+            
+            // Validate required fields
+            $requiredFields = ['id', 'room_type', 'price_per_night'];
+            foreach ($requiredFields as $field) {
+                if (!isset($data[$field])) {
+                    error_log("AdminController::updateRoom() - Missing required field: $field");
+                    jsonResponse(['success' => false, 'message' => "Missing required field: $field"], 400);
+                }
+                // For string fields, also check they're not empty after trimming
+                if ($field === 'room_type' && trim($data[$field]) === '') {
+                    error_log("AdminController::updateRoom() - Empty required field: $field");
+                    jsonResponse(['success' => false, 'message' => "Missing required field: $field"], 400);
+                }
+            }
+            
             $db = getDbConnection();
             
             $sql = "UPDATE hotel_rooms SET 
@@ -698,18 +1072,25 @@ class AdminController {
                     updated_at = NOW()
                     WHERE id = :id";
             
-            $stmt = $db->prepare($sql);
-            $stmt->execute([
+            $params = [
                 'id' => $data['id'],
                 'room_type' => $data['room_type'],
                 'price_per_night' => $data['price_per_night'],
                 'max_occupancy' => $data['max_occupancy'] ?? 2,
                 'available_rooms' => $data['available_rooms'] ?? 1
-            ]);
+            ];
+            error_log('AdminController::updateRoom() - SQL params: ' . json_encode($params));
+            
+            $stmt = $db->prepare($sql);
+            $stmt->execute($params);
+            
+            error_log('AdminController::updateRoom() - Room updated with ID: ' . $data['id']);
             
             jsonResponse(['success' => true, 'message' => 'Room updated successfully']);
         } catch (Exception $e) {
-            error_log('Error updating room: ' . $e->getMessage());
+            error_log('AdminController::updateRoom() - Exception: ' . $e->getMessage());
+            error_log('AdminController::updateRoom() - File: ' . $e->getFile() . ':' . $e->getLine());
+            error_log('AdminController::updateRoom() - Trace: ' . $e->getTraceAsString());
             jsonResponse(['success' => false, 'message' => 'Failed to update room'], 500);
         }
     }
@@ -718,14 +1099,30 @@ class AdminController {
      * Delete hotel room
      */
     public function deleteRoom() {
+        error_log('AdminController::deleteRoom() - Method called');
+        
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             jsonResponse(['success' => false, 'message' => 'Invalid request method'], 405);
         }
         
-        $data = json_decode(file_get_contents('php://input'), true);
-        
         try {
+            // Decode and validate JSON
+            $data = json_decode(file_get_contents('php://input'), true);
+            if ($data === null) {
+                error_log('AdminController::deleteRoom() - Failed to decode JSON');
+                jsonResponse(['success' => false, 'message' => 'Invalid JSON data'], 400);
+            }
+            error_log('AdminController::deleteRoom() - JSON decoded successfully');
+            
+            // Validate required fields
+            if (!isset($data['id'])) {
+                error_log('AdminController::deleteRoom() - Missing required field: id');
+                jsonResponse(['success' => false, 'message' => 'Missing required field: id'], 400);
+            }
+            
             $db = getDbConnection();
+            
+            error_log('AdminController::deleteRoom() - Deleting room ID: ' . $data['id']);
             
             // Delete reservations first
             $stmt = $db->prepare("DELETE FROM hotel_reservations WHERE room_id = :id");
@@ -735,9 +1132,13 @@ class AdminController {
             $stmt = $db->prepare("DELETE FROM hotel_rooms WHERE id = :id");
             $stmt->execute(['id' => $data['id']]);
             
+            error_log('AdminController::deleteRoom() - Room deleted with ID: ' . $data['id']);
+            
             jsonResponse(['success' => true, 'message' => 'Room deleted successfully']);
         } catch (Exception $e) {
-            error_log('Error deleting room: ' . $e->getMessage());
+            error_log('AdminController::deleteRoom() - Exception: ' . $e->getMessage());
+            error_log('AdminController::deleteRoom() - File: ' . $e->getFile() . ':' . $e->getLine());
+            error_log('AdminController::deleteRoom() - Trace: ' . $e->getTraceAsString());
             jsonResponse(['success' => false, 'message' => 'Failed to delete room'], 500);
         }
     }
