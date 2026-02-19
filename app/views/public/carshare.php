@@ -18,7 +18,7 @@ ob_start();
                         <p><strong>Passengers:</strong></p>
                         <ul>
                             <?php foreach ($offerBookings as $booking): ?>
-                                <li><?php echo e($booking['discord_name']); ?> (<?php echo e($booking['name']); ?>)</li>
+                                <li><?php echo displayName($booking['discord_name']); ?> (<?php echo displayName($booking['name']); ?>)</li>
                             <?php endforeach; ?>
                         </ul>
                     <?php endif; ?>
@@ -30,7 +30,7 @@ ob_start();
             <div class="card mb-3">
                 <div class="card-header bg-success text-white">Your Carshare Booking</div>
                 <div class="card-body">
-                    <p><strong>Driver:</strong> <?php echo e($userBooking['driver_name']); ?></p>
+                    <p><strong>Driver:</strong> <?php echo displayName($userBooking['driver_name']); ?></p>
                     <p><strong>Travelling from:</strong> <?php echo e($userBooking['origin']); ?></p>
                     <button class="btn btn-danger btn-sm" onclick="cancelCarshare(<?php echo $userBooking['carshare_offer_id']; ?>)">Cancel Booking</button>
                 </div>
@@ -49,7 +49,7 @@ ob_start();
             <?php foreach ($availableOffers as $offer): ?>
                 <div class="item">
                     <div class="item-header">
-                        <h3 class="item-title">Offered by: <?php echo e($offer['discord_name']); ?></h3>
+                        <h3 class="item-title">Offered by: <?php echo displayName($offer['discord_name']); ?></h3>
                     </div>
                     
                     <div class="item-meta">

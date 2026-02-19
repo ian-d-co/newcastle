@@ -199,6 +199,31 @@ function formatDisplayTime($time) {
 }
 
 /**
+ * Check if user is viewing in guest mode
+ *
+ * @return bool True if guest mode is active
+ */
+function isGuestMode() {
+    if (session_status() !== PHP_SESSION_ACTIVE) {
+        return false;
+    }
+    return isset($_SESSION['guest_mode']) && $_SESSION['guest_mode'] === true;
+}
+
+/**
+ * Display a user name, or a placeholder if in guest mode
+ *
+ * @param string $name The name to display
+ * @return string Escaped name or guest-mode placeholder
+ */
+function displayName($name) {
+    if (isGuestMode()) {
+        return 'Hidden - please register to view';
+    }
+    return e($name);
+}
+
+/**
  * Get database connection using PDO
  * 
  * @return PDO Database connection instance

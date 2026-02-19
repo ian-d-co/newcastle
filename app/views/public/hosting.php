@@ -20,7 +20,7 @@ ob_start();
                         <p><strong>Guests:</strong></p>
                         <ul>
                             <?php foreach ($offerBookings as $booking): ?>
-                                <li><?php echo e($booking['discord_name']); ?> (<?php echo e($booking['name']); ?>)</li>
+                                <li><?php echo displayName($booking['discord_name']); ?> (<?php echo displayName($booking['name']); ?>)</li>
                             <?php endforeach; ?>
                         </ul>
                     <?php endif; ?>
@@ -32,7 +32,7 @@ ob_start();
             <div class="card mb-3">
                 <div class="card-header bg-success text-white">Your Hosting Booking</div>
                 <div class="card-body">
-                    <p><strong>Host:</strong> <?php echo e($userBooking['host_name']); ?></p>
+                    <p><strong>Host:</strong> <?php echo displayName($userBooking['host_name']); ?></p>
                     <?php if ($userBooking['notes']): ?>
                         <p><strong>Notes:</strong> <?php echo nl2br(e($userBooking['notes'])); ?></p>
                     <?php endif; ?>
@@ -53,7 +53,7 @@ ob_start();
             <?php foreach ($availableOffers as $offer): ?>
                 <div class="item">
                     <div class="item-header">
-                        <h3 class="item-title">Offered by: <?php echo e($offer['discord_name']); ?></h3>
+                        <h3 class="item-title">Offered by: <?php echo displayName($offer['discord_name']); ?></h3>
                     </div>
                     
                     <div class="item-meta">

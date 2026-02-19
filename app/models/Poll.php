@@ -56,7 +56,7 @@ class Poll {
                 AND p.is_active = 1 
                 AND (p.expires_at IS NULL OR p.expires_at > NOW())
                 ORDER BY 
-                    COALESCE(pc.display_order, 999), -- 999 = sort uncategorized polls last
+                    COALESCE(pc.display_order, 999),
                     pc.name ASC,
                     CASE WHEN p.expires_at IS NULL THEN 1 ELSE 0 END,
                     p.expires_at ASC,

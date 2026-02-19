@@ -1379,6 +1379,70 @@ class AdminController {
     }
     
     /**
+     * Show pending user approvals
+     */
+    public function showPendingApprovals() {
+        try {
+            $db = getDbConnection();
+            $sql = "SELECT * FROM users WHERE approved = 0 ORDER BY created_at DESC";
+            $stmt = $db->query($sql);
+            $pendingUsers = $stmt->fetchAll();
+
+            $pageTitle = 'Pending User Approvals';
+            $currentPage = 'admin';
+            include BASE_PATH . '/app/views/admin/approve-users.php';
+        } catch (Exception $e) {
+            error_log('Error loading pending users: ' . $e->getMessage());
+            renderErrorPage('Error', 'Failed to load pending users');
+        }
+    }
+
+    /**
+     * Approve a user
+     */
+    public function approveUser() {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            jsonResponse(['success' => false, 'message' => 'Invalid request method'], 405);
+        }
+
+        $data = json_decode(file_get_contents('php://input'), true);
+
+        try {
+            $db = getDbConnection();
+            $sql = "UPDATE users SET approved = 1, approved_by = :approved_by, approved_at = NOW() WHERE id = :id";
+            $stmt = $db->prepare($sql);
+            $stmt->execute(['id' => $data['id'], 'approved_by' => getCurrentUserId()]);
+
+            jsonResponse(['success' => true, 'message' => 'User approved successfully']);
+        } catch (Exception $e) {
+            error_log('Error approving user: ' . $e->getMessage());
+            jsonResponse(['success' => false, 'message' => 'Failed to approve user'], 500);
+        }
+    }
+
+    /**
+     * Reject (delete) a pending user
+     */
+    public function rejectUser() {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            jsonResponse(['success' => false, 'message' => 'Invalid request method'], 405);
+        }
+
+        $data = json_decode(file_get_contents('php://input'), true);
+
+        try {
+            $db = getDbConnection();
+            $stmt = $db->prepare("DELETE FROM users WHERE id = :id AND approved = 0");
+            $stmt->execute(['id' => $data['id']]);
+
+            jsonResponse(['success' => true, 'message' => 'User rejected and deleted']);
+        } catch (Exception $e) {
+            error_log('Error rejecting user: ' . $e->getMessage());
+            jsonResponse(['success' => false, 'message' => 'Failed to reject user'], 500);
+        }
+    }
+
+    /**
      * Delete user
      */
     public function deleteUser() {

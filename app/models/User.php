@@ -7,7 +7,7 @@ class User {
     }
     
     public function create($discordName, $name, $pin) {
-        $sql = "INSERT INTO users (discord_name, name, pin_hash) VALUES (:discord_name, :name, :pin_hash)";
+        $sql = "INSERT INTO users (discord_name, name, pin_hash, approved) VALUES (:discord_name, :name, :pin_hash, 0)";
         $stmt = $this->db->prepare($sql);
         $pinHash = password_hash($pin, PASSWORD_BCRYPT);
         

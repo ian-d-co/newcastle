@@ -12,6 +12,16 @@ ob_start();
             <p><?php echo e($event['description']); ?></p>
             <?php endif; ?>
             <p><strong><?php echo formatDisplayDate($event['start_date']); ?> - <?php echo formatDisplayDate($event['end_date']); ?></strong></p>
+            <?php if (!isLoggedIn()): ?>
+            <div class="hero-actions" style="display: flex; gap: 1rem; justify-content: center; margin-top: 1.5rem; flex-wrap: wrap;">
+                <a href="/index.php?page=login" class="btn btn-primary btn-lg">
+                    Login / Register
+                </a>
+                <a href="/index.php?page=home&view=guest" class="btn btn-secondary btn-lg">
+                    View as Guest
+                </a>
+            </div>
+            <?php endif; ?>
         </div>
     </div>
 </div>
