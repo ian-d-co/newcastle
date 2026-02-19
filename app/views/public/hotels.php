@@ -63,7 +63,9 @@ ob_start();
                                     <?php endif; ?>
                                     
                                     <div class="item-footer">
-                                        <?php if ($room['available_rooms'] > 0): ?>
+                                        <?php if (isGuestMode()): ?>
+                                            <button class="btn btn-primary" disabled>Reserve (Login Required)</button>
+                                        <?php elseif ($room['available_rooms'] > 0): ?>
                                             <button class="btn btn-primary" onclick="modalManager.open('reserve-modal-<?php echo $room['id']; ?>')">
                                                 Reserve Room
                                             </button>

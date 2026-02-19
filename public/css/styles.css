@@ -3,9 +3,9 @@
    Primary: #613704 (Dark Brown)
    Secondary: #D46300 (Orange)
    Accent: #FDDC62 (Gold)
-   Light: #FDE5B7 (Light Cream)
    White: #FFFFFF
-   Dark: #545454, #000000
+   Dark: #545454
+   Black: #000000
 */
 
 /* CSS Reset & Base Styles */
@@ -19,14 +19,14 @@
     --primary: #613704;
     --secondary: #D46300;
     --accent: #FDDC62;
-    --light: #FDE5B7;
     --white: #FFFFFF;
     --dark: #545454;
     --black: #000000;
-    --success: #28a745;
-    --danger: #dc3545;
-    --warning: #ffc107;
-    --info: #17a2b8;
+    /* Semantic states mapped to palette colours */
+    --success: #FDDC62;
+    --danger: #613704;
+    --warning: #D46300;
+    --info: #545454;
 }
 
 body {
@@ -34,7 +34,7 @@ body {
     font-size: 16px;
     line-height: 1.6;
     color: var(--dark);
-    background-color: var(--light);
+    background-color: var(--accent);
     min-height: 100vh;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -170,12 +170,12 @@ a:hover {
 }
 
 .btn-login-mobile:hover {
-    background: #fdd034;
+    background: #FDDC62;
     color: var(--primary);
 }
 
 .btn-login-mobile.active {
-    background: #e5bd1a;
+    background: #FDDC62;
     color: var(--primary);
 }
 
@@ -231,7 +231,7 @@ a:hover {
 }
 
 .btn-primary:hover {
-    background-color: #b85400;
+    background-color: #613704;
     color: var(--white);
 }
 
@@ -241,7 +241,7 @@ a:hover {
 }
 
 .btn-secondary:hover {
-    background-color: #4a2a03;
+    background-color: #000000;
     color: var(--white);
 }
 
@@ -251,13 +251,13 @@ a:hover {
 }
 
 .btn-accent:hover {
-    background-color: #fdd034;
+    background-color: #FDDC62;
     color: var(--primary);
 }
 
 .btn-success {
     background-color: var(--success);
-    color: var(--white);
+    color: var(--primary);
 }
 
 .btn-danger {
@@ -312,7 +312,7 @@ a:hover {
     width: 100%;
     padding: 0.875rem;
     font-size: 16px; /* Prevent zoom on iOS */
-    border: 2px solid #ddd;
+    border: 2px solid #FDDC62;
     border-radius: 8px;
     background-color: var(--white);
     color: var(--dark);
@@ -385,9 +385,9 @@ select.form-control {
 }
 
 .card-footer {
-    background-color: #f8f9fa;
+    background-color: #FFFFFF;
     padding: 1rem;
-    border-top: 1px solid #dee2e6;
+    border-top: 1px solid #FDDC62;
 }
 
 .card-title {
@@ -507,7 +507,7 @@ select.form-control {
 
 .badge-success {
     background-color: var(--success);
-    color: var(--white);
+    color: var(--primary);
 }
 
 .badge-danger {
@@ -517,7 +517,7 @@ select.form-control {
 
 .badge-warning {
     background-color: var(--warning);
-    color: var(--dark);
+    color: var(--white);
 }
 
 .badge-info {
@@ -609,7 +609,7 @@ select.form-control {
 
 .modal-footer {
     padding: 1rem 1.5rem;
-    border-top: 1px solid #dee2e6;
+    border-top: 1px solid #FDDC62;
     display: flex;
     gap: 1rem;
     flex-wrap: wrap;
@@ -648,7 +648,7 @@ select.form-control {
 .poll-bar {
     width: 100%;
     height: 44px;
-    background-color: #f0f0f0;
+    background-color: #FFFFFF;
     border-radius: 8px;
     overflow: hidden;
     position: relative;
@@ -723,27 +723,27 @@ select.form-control {
 }
 
 .alert-success {
-    background-color: #d4edda;
-    color: #155724;
-    border: 1px solid #c3e6cb;
+    background-color: #FDDC62;
+    color: #613704;
+    border: 1px solid #D46300;
 }
 
 .alert-danger {
-    background-color: #f8d7da;
-    color: #721c24;
-    border: 1px solid #f5c6cb;
+    background-color: #613704;
+    color: #FFFFFF;
+    border: 1px solid #000000;
 }
 
 .alert-warning {
-    background-color: #fff3cd;
-    color: #856404;
-    border: 1px solid #ffeaa7;
+    background-color: #D46300;
+    color: #FFFFFF;
+    border: 1px solid #613704;
 }
 
 .alert-info {
-    background-color: #d1ecf1;
-    color: #0c5460;
-    border: 1px solid #bee5eb;
+    background-color: #545454;
+    color: #FFFFFF;
+    border: 1px solid #000000;
 }
 
 /* Loading Spinner */
@@ -786,7 +786,7 @@ select.form-control {
 .bg-primary { background-color: var(--primary); }
 .bg-secondary { background-color: var(--secondary); }
 .bg-accent { background-color: var(--accent); }
-.bg-light { background-color: var(--light); }
+.bg-light { background-color: var(--accent); }
 .bg-white { background-color: var(--white); }
 
 .mt-1 { margin-top: 0.5rem; }
@@ -814,15 +814,15 @@ select.form-control {
 /* Dashboard Collapsible Sections */
 .dashboard-section {
     margin-bottom: 1.5rem;
-    border: 1px solid #dee2e6;
+    border: 1px solid #FDDC62;
     border-radius: 0.5rem;
     overflow: hidden;
     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 
 .dashboard-section-header {
-    background: #2c3e50 !important;
-    color: #ffffff !important;
+    background: #D46300 !important;
+    color: #FDDC62 !important;
     padding: 1rem 1.5rem;
     cursor: pointer;
     display: flex;
@@ -834,7 +834,7 @@ select.form-control {
 }
 
 .dashboard-section-header:hover {
-    background: #34495e !important;
+    background: #613704 !important;
 }
 
 .dashboard-section-header h3,
@@ -842,7 +842,7 @@ select.form-control {
     margin: 0;
     display: inline-flex;
     align-items: center;
-    color: #ffffff !important;
+    color: #FDDC62 !important;
     font-size: 1.1rem;
 }
 
@@ -850,7 +850,7 @@ select.form-control {
     margin-right: 0.75rem;
     font-size: 0.875rem;
     transition: transform 0.2s;
-    color: #ffffff;
+    color: #FDDC62;
 }
 
 .dashboard-section-header .section-action {
@@ -858,14 +858,14 @@ select.form-control {
 }
 
 .dashboard-section-content {
-    background: #f8f9fa;
-    color: #212529;
+    background: #FFFFFF;
+    color: #545454;
     padding: 1.5rem;
 }
 
 .dashboard-booking-card {
-    background: #ffffff;
-    border: 1px solid #dee2e6;
+    background: #FFFFFF;
+    border: 1px solid #FDDC62;
     border-radius: 0.25rem;
     padding: 1rem;
     margin-bottom: 0.75rem;

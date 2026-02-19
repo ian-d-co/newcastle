@@ -56,7 +56,11 @@ ob_start();
                                     </div>
                                 <?php endforeach; ?>
                             </div>
-                            <button type="submit" class="btn btn-primary btn-block mt-3">Vote</button>
+                            <?php if (isGuestMode()): ?>
+                                <button type="button" class="btn btn-primary btn-block mt-3" disabled>Vote (Login Required)</button>
+                            <?php else: ?>
+                                <button type="submit" class="btn btn-primary btn-block mt-3">Vote</button>
+                            <?php endif; ?>
                         </form>
                     <?php else: ?>
                         <!-- Results -->

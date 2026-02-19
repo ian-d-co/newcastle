@@ -65,7 +65,9 @@ ob_start();
                     </div>
                     
                     <div class="item-footer">
-                        <?php if ($offer['available_spaces'] > 0 && !$userBooking && $offer['user_id'] != getCurrentUserId()): ?>
+                        <?php if (isGuestMode()): ?>
+                            <button class="btn btn-primary" disabled>Book (Login Required)</button>
+                        <?php elseif ($offer['available_spaces'] > 0 && !$userBooking && $offer['user_id'] != getCurrentUserId()): ?>
                             <button class="btn btn-primary" onclick="bookCarshare(<?php echo $offer['id']; ?>)">Book Carshare</button>
                         <?php elseif ($offer['available_spaces'] <= 0): ?>
                             <span class="badge badge-danger">Full</span>
