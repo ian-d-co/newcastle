@@ -62,25 +62,24 @@ class Hotel {
         return $stmt->execute(['id' => $id]);
     }
     
-    public function createRoom($hotelId, $roomType, $capacity, $pricePerNight, $totalRooms, $description) {
-        $sql = "INSERT INTO hotel_rooms (hotel_id, room_type, capacity, price_per_night, total_rooms, available_rooms, description)
-                VALUES (:hotel_id, :room_type, :capacity, :price_per_night, :total_rooms, :total_rooms, :description)";
+    public function createRoom($hotelId, $roomType, $capacity, $pricePerNight, $totalRooms) {
+        $sql = "INSERT INTO hotel_rooms (hotel_id, room_type, capacity, price, quantity_available, status)
+                VALUES (:hotel_id, :room_type, :capacity, :price, :quantity_available, 'available')";
         
         $stmt = $this->db->prepare($sql);
         $stmt->execute([
             'hotel_id' => $hotelId,
             'room_type' => $roomType,
             'capacity' => $capacity,
-            'price_per_night' => $pricePerNight,
-            'total_rooms' => $totalRooms,
-            'description' => $description
+            'price' => $pricePerNight,
+            'quantity_available' => $totalRooms
         ]);
         
         return $this->db->lastInsertId();
     }
     
     public function getRoomsByHotel($hotelId) {
-        $sql = "SELECT * FROM hotel_rooms WHERE hotel_id = :hotel_id ORDER BY price_per_night";
+        $sql = "SELECT * FROM hotel_rooms WHERE hotel_id = :hotel_id ORDER BY price";
         $stmt = $this->db->prepare($sql);
         $stmt->execute(['hotel_id' => $hotelId]);
         return $stmt->fetchAll();
@@ -97,7 +96,7 @@ class Hotel {
         $fields = [];
         $params = ['id' => $id];
         
-        foreach (['room_type', 'capacity', 'price_per_night', 'total_rooms', 'available_rooms', 'description'] as $field) {
+        foreach (['room_type', 'capacity', 'price', 'quantity_available', 'quantity_reserved', 'status'] as $field) {
             if (isset($data[$field])) {
                 $fields[] = "$field = :$field";
                 $params[$field] = $data[$field];
@@ -125,14 +124,14 @@ class Hotel {
         try {
             $room = $this->getRoomById($roomId);
             
-            if ($room['available_rooms'] <= 0) {
+            if ($room['quantity_available'] <= 0) {
                 throw new Exception('No available rooms');
             }
             
             $checkInDate = new DateTime($checkIn);
             $checkOutDate = new DateTime($checkOut);
             $nights = $checkInDate->diff($checkOutDate)->days;
-            $totalPrice = $nights * $room['price_per_night'];
+            $totalPrice = $nights * $room['price'];
             
             $sql = "INSERT INTO room_reservations (hotel_room_id, user_id, check_in, check_out, total_nights, total_price)
                     VALUES (:room_id, :user_id, :check_in, :check_out, :total_nights, :total_price)";
@@ -147,7 +146,10 @@ class Hotel {
                 'total_price' => $totalPrice
             ]);
             
-            $sql = "UPDATE hotel_rooms SET available_rooms = available_rooms - 1 WHERE id = :id";
+            $sql = "UPDATE hotel_rooms 
+                    SET quantity_available = quantity_available - 1, 
+                        quantity_reserved = quantity_reserved + 1 
+                    WHERE id = :id AND quantity_available > 0";
             $stmt = $this->db->prepare($sql);
             $stmt->execute(['id' => $roomId]);
             
@@ -176,7 +178,10 @@ class Hotel {
             $stmt = $this->db->prepare($sql);
             $stmt->execute(['id' => $reservationId]);
             
-            $sql = "UPDATE hotel_rooms SET available_rooms = available_rooms + 1 WHERE id = :id";
+            $sql = "UPDATE hotel_rooms 
+                    SET quantity_available = quantity_available + 1, 
+                        quantity_reserved = quantity_reserved - 1 
+                    WHERE id = :id AND quantity_reserved > 0";
             $stmt = $this->db->prepare($sql);
             $stmt->execute(['id' => $reservation['hotel_room_id']]);
             

@@ -79,9 +79,9 @@ ob_start();
                                         <tr style="border-bottom: 1px solid #dee2e6;">
                                             <td style="padding: 0.5rem;"><?php echo e($room['room_type']); ?></td>
                                             <td style="padding: 0.5rem; text-align: center;"><?php echo e($room['max_occupancy']); ?></td>
-                                            <td style="padding: 0.5rem; text-align: center;"><?php echo e($room['available_rooms']); ?></td>
+                                            <td style="padding: 0.5rem; text-align: center;"><?php echo e($room['quantity_available']); ?></td>
                                             <td style="padding: 0.5rem; text-align: center;"><?php echo e($room['reservation_count']); ?></td>
-                                            <td style="padding: 0.5rem; text-align: center;">£<?php echo number_format($room['price_per_night'], 2); ?></td>
+                                            <td style="padding: 0.5rem; text-align: center;">£<?php echo number_format($room['price'], 2); ?></td>
                                             <td style="padding: 0.5rem; text-align: right;">
                                                 <button onclick='editRoom(<?php echo json_encode($room); ?>)' 
                                                         class="btn btn-xs btn-primary" style="margin-right: 0.25rem;">Edit</button>
@@ -175,16 +175,16 @@ ob_start();
                 
                 <div class="col">
                     <div class="form-group">
-                        <label for="available_rooms">Available Rooms *</label>
-                        <input type="number" id="available_rooms" name="available_rooms" class="form-control" 
+                        <label for="quantity_available">Available Rooms *</label>
+                        <input type="number" id="quantity_available" name="quantity_available" class="form-control" 
                                min="1" value="1" required>
                     </div>
                 </div>
             </div>
             
             <div class="form-group">
-                <label for="price_per_night">Price Per Night (£) *</label>
-                <input type="number" id="price_per_night" name="price_per_night" class="form-control" 
+                <label for="price">Price Per Night (£) *</label>
+                <input type="number" id="price" name="price" class="form-control" 
                        min="0" step="0.01" required>
             </div>
 
@@ -325,8 +325,8 @@ function editRoom(room) {
     document.getElementById('room_hotel_id').value = room.hotel_id;
     document.getElementById('room_type').value = room.room_type;
     document.getElementById('max_occupancy').value = room.max_occupancy;
-    document.getElementById('available_rooms').value = room.available_rooms;
-    document.getElementById('price_per_night').value = room.price_per_night;
+    document.getElementById('quantity_available').value = room.quantity_available;
+    document.getElementById('price').value = room.price;
     document.getElementById('room_confirmation_deadline').value = room.confirmation_deadline ? room.confirmation_deadline.replace(' ', 'T').substring(0, 16) : '';
     document.getElementById('room_payment_deadline').value = room.payment_deadline ? room.payment_deadline.replace(' ', 'T').substring(0, 16) : '';
     modalManager.open('roomModal');
@@ -370,8 +370,8 @@ document.getElementById('roomForm').addEventListener('submit', function(e) {
         hotel_id: this.room_hotel_id.value,
         room_type: this.room_type.value,
         max_occupancy: parseInt(this.max_occupancy.value),
-        available_rooms: parseInt(this.available_rooms.value),
-        price_per_night: parseFloat(this.price_per_night.value),
+        quantity_available: parseInt(this.quantity_available.value),
+        price: parseFloat(this.price.value),
         confirmation_deadline: document.getElementById('room_confirmation_deadline').value || null,
         payment_deadline: document.getElementById('room_payment_deadline').value || null
     };

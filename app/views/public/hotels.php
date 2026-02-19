@@ -74,25 +74,24 @@ if (!empty($allRoomIds)) {
                                             <strong>Capacity:</strong> <?php echo e($room['capacity']); ?> people
                                         </div>
                                         <div class="item-meta-item">
-                                            <strong>Price:</strong> £<?php echo number_format($room['price_per_night'], 2); ?> per night
+                                            <strong>Price:</strong> £<?php echo number_format($room['price'], 2); ?> per night
                                         </div>
                                         <div class="item-meta-item">
                                             <strong>Available:</strong> 
                                             <?php
-                                            $occupancyPct = $room['total_rooms'] > 0 ? (($room['total_rooms'] - $room['available_rooms']) / $room['total_rooms']) * 100 : 100;
+                                            $totalRooms = $room['quantity_available'] + ($room['quantity_reserved'] ?? 0);
+                                            $occupancyPct = $totalRooms > 0 ? (($room['quantity_reserved'] ?? 0) / $totalRooms) * 100 : 0;
                                             $capacityClass = $occupancyPct >= 95 ? 'text-danger' : ($occupancyPct >= 71 ? 'text-warning' : 'text-success');
                                             ?>
                                             <span class="<?php echo $capacityClass; ?>">
-                                                <?php echo e($room['available_rooms']); ?> / <?php echo e($room['total_rooms']); ?>
+                                                <?php echo e($room['quantity_available']); ?> available
+                                                <?php if (isset($room['quantity_reserved']) && $room['quantity_reserved'] > 0): ?>
+                                                    (<?php echo e($room['quantity_reserved']); ?> reserved)
+                                                <?php endif; ?>
                                             </span>
                                         </div>
                                     </div>
                                     
-                                    <?php if ($room['description']): ?>
-                                        <div class="item-description">
-                                            <?php echo nl2br(e($room['description'])); ?>
-                                        </div>
-                                    <?php endif; ?>
 
                                     <?php if (!empty($room['confirmation_deadline'])): ?>
                                         <div class="deadline-warning" style="margin: 0.5rem 0; padding: 0.5rem; background: #fff3cd; border-radius: 4px; font-size: 0.875rem;">
@@ -134,7 +133,7 @@ if (!empty($allRoomIds)) {
                                     <div class="item-footer">
                                         <?php if (isGuestMode()): ?>
                                             <button class="btn btn-primary" disabled>Reserve (Login Required)</button>
-                                        <?php elseif ($room['available_rooms'] > 0): ?>
+                                        <?php elseif ($room['quantity_available'] > 0): ?>
                                             <button class="btn btn-primary" onclick="modalManager.open('reserve-modal-<?php echo $room['id']; ?>')">
                                                 Reserve Room
                                             </button>
@@ -163,7 +162,7 @@ if (!empty($allRoomIds)) {
                                                     <input type="date" class="form-control" id="check-out-<?php echo $room['id']; ?>" name="check_out" min="2026-11-20" required>
                                                 </div>
                                                 
-                                                <p><strong>Price per night:</strong> £<?php echo number_format($room['price_per_night'], 2); ?></p>
+                                                <p><strong>Price per night:</strong> £<?php echo number_format($room['price'], 2); ?></p>
                                                 
                                                 <button type="submit" class="btn btn-primary btn-block">Reserve Room</button>
                                             </form>
