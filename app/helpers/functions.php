@@ -224,6 +224,30 @@ function displayName($name) {
 }
 
 /**
+ * Check if current user has registered attendance for any event
+ *
+ * @return bool True if user has registered attendance
+ */
+function hasRegisteredAttendance() {
+    if (!isLoggedIn()) return false;
+
+    try {
+        $db = getDbConnection();
+        $stmt = $db->prepare("
+            SELECT COUNT(*) as count 
+            FROM event_attendees 
+            WHERE user_id = :user_id
+        ");
+        $stmt->execute(['user_id' => getCurrentUserId()]);
+        $result = $stmt->fetch();
+        return $result['count'] > 0;
+    } catch (Exception $e) {
+        error_log('Error checking attendance: ' . $e->getMessage());
+        return false;
+    }
+}
+
+/**
  * Get database connection using PDO
  * 
  * @return PDO Database connection instance

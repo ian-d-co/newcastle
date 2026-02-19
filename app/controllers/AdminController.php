@@ -1172,14 +1172,14 @@ class AdminController {
             
             $db = getDbConnection();
             
-            $sql = "INSERT INTO hotel_rooms (hotel_id, room_type, price, max_occupancy, quantity_available, confirmation_deadline, payment_deadline, created_at, updated_at)
-                    VALUES (:hotel_id, :room_type, :price, :max_occupancy, :quantity_available, :confirmation_deadline, :payment_deadline, NOW(), NOW())";
+            $sql = "INSERT INTO hotel_rooms (hotel_id, room_type, price, capacity, quantity_available, confirmation_deadline, payment_deadline, created_at, updated_at)
+                    VALUES (:hotel_id, :room_type, :price, :capacity, :quantity_available, :confirmation_deadline, :payment_deadline, NOW(), NOW())";
             
             $params = [
                 'hotel_id' => $data['hotel_id'],
                 'room_type' => $data['room_type'],
                 'price' => $data['price'],
-                'max_occupancy' => $data['max_occupancy'] ?? 2,
+                'capacity' => $data['capacity'] ?? 2,
                 'quantity_available' => $data['quantity_available'] ?? 1,
                 'confirmation_deadline' => $data['confirmation_deadline'] ?: null,
                 'payment_deadline' => $data['payment_deadline'] ?: null
@@ -1239,7 +1239,7 @@ class AdminController {
             $sql = "UPDATE hotel_rooms SET 
                     room_type = :room_type,
                     price = :price,
-                    max_occupancy = :max_occupancy,
+                    capacity = :capacity,
                     quantity_available = :quantity_available,
                     confirmation_deadline = :confirmation_deadline,
                     payment_deadline = :payment_deadline,
@@ -1250,7 +1250,7 @@ class AdminController {
                 'id' => $data['id'],
                 'room_type' => $data['room_type'],
                 'price' => $data['price'],
-                'max_occupancy' => $data['max_occupancy'] ?? 2,
+                'capacity' => $data['capacity'] ?? 2,
                 'quantity_available' => $data['quantity_available'] ?? 1,
                 'confirmation_deadline' => $data['confirmation_deadline'] ?: null,
                 'payment_deadline' => $data['payment_deadline'] ?: null
@@ -1333,10 +1333,20 @@ class AdminController {
             $db = getDbConnection();
             
             // Get all users with their attendance status
-            $sql = "SELECT u.*, 
+            $sql = "SELECT u.id,
+                    u.discord_name,
+                    u.name,
+                    u.pin_hash,
+                    u.is_admin,
+                    u.approved,
+                    u.approved_by,
+                    u.approved_at,
+                    u.created_at,
+                    u.updated_at,
                     ea.id as attendance_id,
                     ea.days_attending,
                     ea.travel_method,
+                    ea.status as attendance_status,
                     ea.created_at as registered_at
                     FROM users u
                     LEFT JOIN event_attendees ea ON u.id = ea.user_id AND ea.event_id = :event_id

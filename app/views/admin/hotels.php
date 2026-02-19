@@ -25,7 +25,7 @@ ob_start();
                 <div class="card" style="margin-bottom: 1.5rem;">
                     <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
                         <div>
-                            <h3 style="margin: 0;"><?php echo e($hotel['name']); ?></h3>
+                            <h3 style="margin: 0; font-weight: 400;"><?php echo e($hotel['name']); ?></h3>
                             <?php if ($hotel['location']): ?>
                                 <small><?php echo e($hotel['location']); ?></small>
                             <?php endif; ?>
@@ -61,7 +61,7 @@ ob_start();
                                 <thead>
                                     <tr style="border-bottom: 2px solid #dee2e6;">
                                         <th style="padding: 0.5rem; text-align: left;">Room Type</th>
-                                        <th style="padding: 0.5rem; text-align: center;">Max Occupancy</th>
+                                        <th style="padding: 0.5rem; text-align: center;">Capacity</th>
                                         <th style="padding: 0.5rem; text-align: center;">Available</th>
                                         <th style="padding: 0.5rem; text-align: center;">Reservations</th>
                                         <th style="padding: 0.5rem; text-align: center;">Price/Night</th>
@@ -72,7 +72,7 @@ ob_start();
                                     <?php foreach ($hotel['rooms'] as $room): ?>
                                         <tr style="border-bottom: 1px solid #dee2e6;">
                                             <td style="padding: 0.5rem;"><?php echo e($room['room_type']); ?></td>
-                                            <td style="padding: 0.5rem; text-align: center;"><?php echo e($room['max_occupancy']); ?></td>
+                                            <td style="padding: 0.5rem; text-align: center;"><?php echo e($room['capacity']); ?></td>
                                             <td style="padding: 0.5rem; text-align: center;"><?php echo e($room['quantity_available']); ?></td>
                                             <td style="padding: 0.5rem; text-align: center;"><?php echo e($room['reservation_count']); ?></td>
                                             <td style="padding: 0.5rem; text-align: center;">£<?php echo number_format($room['price'], 2); ?></td>
@@ -161,8 +161,8 @@ ob_start();
             <div class="row">
                 <div class="col">
                     <div class="form-group">
-                        <label for="max_occupancy">Max Occupancy *</label>
-                        <input type="number" id="max_occupancy" name="max_occupancy" class="form-control" 
+                        <label for="capacity">Capacity *</label>
+                        <input type="number" id="capacity" name="capacity" class="form-control" 
                                min="1" value="2" required>
                     </div>
                 </div>
@@ -320,7 +320,7 @@ function editRoom(room) {
     document.getElementById('room_id').value = room.id;
     document.getElementById('room_hotel_id').value = room.hotel_id;
     document.getElementById('room_type').value = room.room_type;
-    document.getElementById('max_occupancy').value = room.max_occupancy;
+    document.getElementById('capacity').value = room.capacity;
     document.getElementById('quantity_available').value = room.quantity_available;
     document.getElementById('price').value = room.price;
     document.getElementById('room_confirmation_deadline').value = room.confirmation_deadline ? room.confirmation_deadline.replace(' ', 'T').substring(0, 16) : '';
@@ -365,7 +365,7 @@ document.getElementById('roomForm').addEventListener('submit', function(e) {
     const formData = {
         hotel_id: this.room_hotel_id.value,
         room_type: this.room_type.value,
-        max_occupancy: parseInt(this.max_occupancy.value),
+        capacity: parseInt(this.capacity.value),
         quantity_available: parseInt(this.quantity_available.value),
         price: parseFloat(this.price.value),
         confirmation_deadline: document.getElementById('room_confirmation_deadline').value || null,

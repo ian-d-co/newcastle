@@ -146,6 +146,8 @@ if (!empty($activities)) {
                                         <span class="badge badge-danger">Full</span>
                                     <?php elseif (isGuestMode()): ?>
                                         <button class="btn btn-primary" disabled>Book (Login Required)</button>
+                                    <?php elseif (!hasRegisteredAttendance()): ?>
+                                        <button class="btn btn-warning" onclick="showAttendanceRequired()">Register Attendance First</button>
                                     <?php else: ?>
                                         <button class="btn btn-primary" onclick="bookActivity(<?php echo $activity['id']; ?>)">Book Activity</button>
                                     <?php endif; ?>
@@ -160,6 +162,13 @@ if (!empty($activities)) {
 </div>
 
 <script>
+function showAttendanceRequired() {
+    showAlert('Please register your event attendance first from your Dashboard or My Plans page.', 'warning');
+    setTimeout(function() {
+        window.location.href = '/index.php?page=dashboard';
+    }, 2000);
+}
+
 document.querySelectorAll('.interest-selector').forEach(function(container) {
     container.querySelectorAll('.btn-interest').forEach(function(btn) {
         btn.addEventListener('click', function() {

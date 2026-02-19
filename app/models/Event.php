@@ -43,8 +43,8 @@ class Event {
         $sql = "INSERT INTO event_attendees (user_id, event_id, days_attending, travel_method) 
                 VALUES (:user_id, :event_id, :days_attending, :travel_method)
                 ON DUPLICATE KEY UPDATE 
-                days_attending = :days_attending, 
-                travel_method = :travel_method";
+                days_attending = VALUES(days_attending), 
+                travel_method = VALUES(travel_method)";
         
         $stmt = $this->db->prepare($sql);
         return $stmt->execute([

@@ -166,7 +166,22 @@ ob_start();
                        WHEN 'activity' THEN a.title
                        WHEN 'meal' THEN m.title
                        WHEN 'hotel_room' THEN CONCAT(h.name, ' - ', hr.room_type)
-                   END as item_name
+                   END as item_name,
+                   CASE ui.item_type
+                       WHEN 'activity' THEN a.day
+                       WHEN 'meal' THEN m.day
+                       ELSE NULL
+                   END as item_day,
+                   CASE ui.item_type
+                       WHEN 'activity' THEN a.start_time
+                       WHEN 'meal' THEN m.start_time
+                       ELSE NULL
+                   END as item_time,
+                   CASE ui.item_type
+                       WHEN 'activity' THEN a.price
+                       WHEN 'meal' THEN m.price
+                       WHEN 'hotel_room' THEN hr.price
+                   END as item_price
             FROM user_interests ui
             LEFT JOIN activities a ON ui.item_type = 'activity' AND ui.item_id = a.id
             LEFT JOIN meals m ON ui.item_type = 'meal' AND ui.item_id = m.id
@@ -186,7 +201,25 @@ ob_start();
                 <?php if (!empty($myInterests)): ?>
                     <ul style="list-style: none; padding: 0; margin: 0;">
                         <?php foreach ($myInterests as $interest): ?>
-                            <li style="padding: 0.25rem 0;">👍 <?php echo e($interest['item_name']); ?></li>
+                            <li style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid #eee;">
+                                <div>
+                                    <strong><?php echo e($interest['item_name']); ?></strong>
+                                    <?php if ($interest['item_day']): ?>
+                                        <span class="badge badge-secondary" style="margin-left: 0.5rem;"><?php echo e($interest['item_day']); ?></span>
+                                    <?php endif; ?>
+                                    <?php if ($interest['item_time']): ?>
+                                        <span style="color: #666; font-size: 0.875rem; margin-left: 0.5rem;"><?php echo date('H:i', strtotime($interest['item_time'])); ?></span>
+                                    <?php endif; ?>
+                                    <?php if ($interest['item_price'] > 0): ?>
+                                        <span style="color: #666; font-size: 0.875rem; margin-left: 0.5rem;">£<?php echo number_format($interest['item_price'], 2); ?></span>
+                                    <?php endif; ?>
+                                </div>
+                                <?php
+                                $pageMap = ['activity' => 'activities', 'meal' => 'meals', 'hotel_room' => 'hotels'];
+                                $page = $pageMap[$interest['item_type']] ?? e($interest['item_type']);
+                                ?>
+                                <a href="/index.php?page=<?php echo $page; ?>" class="btn btn-sm btn-primary" style="flex-shrink: 0; margin-left: 1rem;">View</a>
+                            </li>
                         <?php endforeach; ?>
                     </ul>
                 <?php else: ?>
