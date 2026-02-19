@@ -978,6 +978,35 @@ select.form-control {
     }
 }
 
+/* Section headers with consistent height */
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    min-height: 60px;
+    padding: 1rem 1.25rem;
+    background: linear-gradient(135deg, var(--primary-color, #1a6aa8) 0%, #1e5a8e 100%);
+    color: white;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+}
+
+.section-header h1,
+.section-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    line-height: 1.4;
+    flex: 1;
+}
+
+.section-header .btn,
+.section-header button,
+.section-header a {
+    margin-left: 1rem;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
 /* Expander sections (e.g. closed polls) */
 .expander-header {
     display: flex;

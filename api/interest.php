@@ -36,7 +36,7 @@ try {
     $stmt = $db->prepare("
         INSERT INTO user_interests (user_id, item_type, item_id, interest_level)
         VALUES (:user_id, :item_type, :item_id, :interest_level)
-        ON DUPLICATE KEY UPDATE interest_level = :interest_level
+        ON DUPLICATE KEY UPDATE interest_level = VALUES(interest_level)
     ");
 
     $stmt->execute([

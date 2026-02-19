@@ -50,8 +50,8 @@ class Event {
         return $stmt->execute([
             'user_id' => $userId,
             'event_id' => $eventId,
-            'days_attending' => json_encode($daysAttending),
-            'travel_method' => json_encode($travelMethod)
+            'days_attending' => implode(',', $daysAttending),
+            'travel_method' => implode(',', $travelMethod)
         ]);
     }
     
@@ -62,8 +62,8 @@ class Event {
         $result = $stmt->fetch();
         
         if ($result) {
-            $result['days_attending'] = json_decode($result['days_attending'], true);
-            $result['travel_method'] = json_decode($result['travel_method'], true);
+            $result['days_attending'] = $result['days_attending'] ? explode(',', $result['days_attending']) : [];
+            $result['travel_method'] = $result['travel_method'] ? explode(',', $result['travel_method']) : [];
         }
         
         return $result;
@@ -86,8 +86,8 @@ class Event {
         $results = $stmt->fetchAll();
         
         foreach ($results as &$result) {
-            $result['days_attending'] = json_decode($result['days_attending'], true);
-            $result['travel_method'] = json_decode($result['travel_method'], true);
+            $result['days_attending'] = $result['days_attending'] ? explode(',', $result['days_attending']) : [];
+            $result['travel_method'] = $result['travel_method'] ? explode(',', $result['travel_method']) : [];
         }
         
         return $results;
