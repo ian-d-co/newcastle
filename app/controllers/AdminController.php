@@ -1148,7 +1148,7 @@ class AdminController {
             error_log('AdminController::createRoom() - JSON decoded successfully');
             
             // Validate required fields
-            $requiredFields = ['hotel_id', 'room_type', 'price_per_night'];
+            $requiredFields = ['hotel_id', 'room_type', 'price'];
             foreach ($requiredFields as $field) {
                 if (!isset($data[$field])) {
                     error_log("AdminController::createRoom() - Missing required field: $field");
@@ -1163,15 +1163,15 @@ class AdminController {
             
             $db = getDbConnection();
             
-            $sql = "INSERT INTO hotel_rooms (hotel_id, room_type, price_per_night, max_occupancy, available_rooms, confirmation_deadline, payment_deadline, created_at, updated_at)
-                    VALUES (:hotel_id, :room_type, :price_per_night, :max_occupancy, :available_rooms, :confirmation_deadline, :payment_deadline, NOW(), NOW())";
+            $sql = "INSERT INTO hotel_rooms (hotel_id, room_type, price, max_occupancy, quantity_available, confirmation_deadline, payment_deadline, created_at, updated_at)
+                    VALUES (:hotel_id, :room_type, :price, :max_occupancy, :quantity_available, :confirmation_deadline, :payment_deadline, NOW(), NOW())";
             
             $params = [
                 'hotel_id' => $data['hotel_id'],
                 'room_type' => $data['room_type'],
-                'price_per_night' => $data['price_per_night'],
+                'price' => $data['price'],
                 'max_occupancy' => $data['max_occupancy'] ?? 2,
-                'available_rooms' => $data['available_rooms'] ?? 1,
+                'quantity_available' => $data['quantity_available'] ?? 1,
                 'confirmation_deadline' => $data['confirmation_deadline'] ?: null,
                 'payment_deadline' => $data['payment_deadline'] ?: null
             ];
@@ -1212,7 +1212,7 @@ class AdminController {
             error_log('AdminController::updateRoom() - JSON decoded successfully');
             
             // Validate required fields
-            $requiredFields = ['id', 'room_type', 'price_per_night'];
+            $requiredFields = ['id', 'room_type', 'price'];
             foreach ($requiredFields as $field) {
                 if (!isset($data[$field])) {
                     error_log("AdminController::updateRoom() - Missing required field: $field");
@@ -1229,9 +1229,9 @@ class AdminController {
             
             $sql = "UPDATE hotel_rooms SET 
                     room_type = :room_type,
-                    price_per_night = :price_per_night,
+                    price = :price,
                     max_occupancy = :max_occupancy,
-                    available_rooms = :available_rooms,
+                    quantity_available = :quantity_available,
                     confirmation_deadline = :confirmation_deadline,
                     payment_deadline = :payment_deadline,
                     updated_at = NOW()
@@ -1240,9 +1240,9 @@ class AdminController {
             $params = [
                 'id' => $data['id'],
                 'room_type' => $data['room_type'],
-                'price_per_night' => $data['price_per_night'],
+                'price' => $data['price'],
                 'max_occupancy' => $data['max_occupancy'] ?? 2,
-                'available_rooms' => $data['available_rooms'] ?? 1,
+                'quantity_available' => $data['quantity_available'] ?? 1,
                 'confirmation_deadline' => $data['confirmation_deadline'] ?: null,
                 'payment_deadline' => $data['payment_deadline'] ?: null
             ];
