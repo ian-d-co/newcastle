@@ -78,6 +78,7 @@ ob_start();
                     <div class="card-body">
                         <p>Create and manage polls with various options.</p>
                         <a href="/index.php?page=admin_polls" class="btn btn-primary btn-block">Manage Polls</a>
+                        <a href="/index.php?page=admin_poll_categories" class="btn btn-secondary btn-block" style="margin-top: 0.5rem;">Manage Categories</a>
                     </div>
                 </div>
             </div>

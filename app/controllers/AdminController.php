@@ -533,6 +533,10 @@ class AdminController {
             $poll['options'] = $pollModel->getOptions($poll['id']);
         }
         
+        // Get categories for dropdown
+        $stmt = $db->query("SELECT * FROM poll_categories ORDER BY display_order, name");
+        $categories = $stmt->fetchAll();
+        
         $pageTitle = 'Manage Polls';
         $currentPage = 'admin';
         
@@ -581,11 +585,12 @@ class AdminController {
             $db->beginTransaction();
             
             // Create poll
-            $sql = "INSERT INTO polls (event_id, question, is_anonymous, is_multiple_choice, expires_at, is_active, created_by)
-                    VALUES (:event_id, :question, :is_anonymous, :is_multiple_choice, :expires_at, 1, :created_by)";
+            $sql = "INSERT INTO polls (event_id, category_id, question, is_anonymous, is_multiple_choice, expires_at, is_active, created_by)
+                    VALUES (:event_id, :category_id, :question, :is_anonymous, :is_multiple_choice, :expires_at, 1, :created_by)";
             
             $params = [
                 'event_id' => $event['id'],
+                'category_id' => !empty($data['category_id']) ? (int)$data['category_id'] : null,
                 'question' => $data['question'],
                 'is_anonymous' => $data['is_anonymous'] ?? 0,
                 'is_multiple_choice' => $data['is_multiple_choice'] ?? 0,
@@ -662,6 +667,7 @@ class AdminController {
             
             $sql = "UPDATE polls SET 
                     question = :question,
+                    category_id = :category_id,
                     is_anonymous = :is_anonymous,
                     is_multiple_choice = :is_multiple_choice,
                     expires_at = :expires_at,
@@ -671,6 +677,7 @@ class AdminController {
             $params = [
                 'id' => $data['id'],
                 'question' => $data['question'],
+                'category_id' => !empty($data['category_id']) ? (int)$data['category_id'] : null,
                 'is_anonymous' => $data['is_anonymous'] ?? 0,
                 'is_multiple_choice' => $data['is_multiple_choice'] ?? 0,
                 'expires_at' => $data['expires_at'] ?? null,
@@ -741,6 +748,146 @@ class AdminController {
             error_log('AdminController::deletePoll() - File: ' . $e->getFile() . ':' . $e->getLine());
             error_log('AdminController::deletePoll() - Trace: ' . $e->getTraceAsString());
             jsonResponse(['success' => false, 'message' => 'Failed to delete poll'], 500);
+        }
+    }
+    
+    // ========================================================================
+    // POLL CATEGORY MANAGEMENT
+    // ========================================================================
+    
+    /**
+     * Show poll category manager
+     */
+    public function showPollCategoryManager() {
+        try {
+            $db = getDbConnection();
+            
+            $sql = "SELECT pc.*, COUNT(p.id) as poll_count 
+                    FROM poll_categories pc
+                    LEFT JOIN polls p ON pc.id = p.category_id
+                    GROUP BY pc.id
+                    ORDER BY pc.display_order, pc.name";
+            
+            $stmt = $db->query($sql);
+            $categories = $stmt->fetchAll();
+            
+            $pageTitle = 'Manage Poll Categories';
+            $currentPage = 'admin';
+            
+            include BASE_PATH . '/app/views/admin/poll-categories.php';
+        } catch (Exception $e) {
+            error_log('Error loading poll categories: ' . $e->getMessage());
+            renderErrorPage('Error', 'Failed to load poll categories');
+        }
+    }
+    
+    /**
+     * Create poll category
+     */
+    public function createPollCategory() {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            jsonResponse(['success' => false, 'message' => 'Invalid request method'], 405);
+        }
+        
+        $data = json_decode(file_get_contents('php://input'), true);
+        if ($data === null) {
+            jsonResponse(['success' => false, 'message' => 'Invalid JSON data'], 400);
+        }
+        
+        if (!isset($data['name']) || trim($data['name']) === '') {
+            jsonResponse(['success' => false, 'message' => 'Category name is required'], 400);
+        }
+        
+        try {
+            $db = getDbConnection();
+            
+            $stmt = $db->prepare("INSERT INTO poll_categories (name, display_order) VALUES (:name, :display_order)");
+            $stmt->execute([
+                'name' => trim($data['name']),
+                'display_order' => isset($data['display_order']) ? (int)$data['display_order'] : 999
+            ]);
+            
+            jsonResponse(['success' => true, 'message' => 'Category created successfully', 'id' => $db->lastInsertId()]);
+        } catch (Exception $e) {
+            error_log('Error creating poll category: ' . $e->getMessage());
+            jsonResponse(['success' => false, 'message' => 'Failed to create category'], 500);
+        }
+    }
+    
+    /**
+     * Update poll category
+     */
+    public function updatePollCategory() {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            jsonResponse(['success' => false, 'message' => 'Invalid request method'], 405);
+        }
+        
+        $data = json_decode(file_get_contents('php://input'), true);
+        if ($data === null) {
+            jsonResponse(['success' => false, 'message' => 'Invalid JSON data'], 400);
+        }
+        
+        if (!isset($data['id'])) {
+            jsonResponse(['success' => false, 'message' => 'Category ID is required'], 400);
+        }
+        if (!isset($data['name']) || trim($data['name']) === '') {
+            jsonResponse(['success' => false, 'message' => 'Category name is required'], 400);
+        }
+        
+        try {
+            $db = getDbConnection();
+            
+            $stmt = $db->prepare("UPDATE poll_categories SET name = :name, display_order = :display_order WHERE id = :id");
+            $stmt->execute([
+                'id' => (int)$data['id'],
+                'name' => trim($data['name']),
+                'display_order' => isset($data['display_order']) ? (int)$data['display_order'] : 999
+            ]);
+            
+            jsonResponse(['success' => true, 'message' => 'Category updated successfully']);
+        } catch (Exception $e) {
+            error_log('Error updating poll category: ' . $e->getMessage());
+            jsonResponse(['success' => false, 'message' => 'Failed to update category'], 500);
+        }
+    }
+    
+    /**
+     * Delete poll category
+     */
+    public function deletePollCategory() {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            jsonResponse(['success' => false, 'message' => 'Invalid request method'], 405);
+        }
+        
+        $data = json_decode(file_get_contents('php://input'), true);
+        if ($data === null) {
+            jsonResponse(['success' => false, 'message' => 'Invalid JSON data'], 400);
+        }
+        
+        if (!isset($data['id'])) {
+            jsonResponse(['success' => false, 'message' => 'Category ID is required'], 400);
+        }
+        
+        try {
+            $db = getDbConnection();
+            
+            // Check if category has polls
+            $stmt = $db->prepare("SELECT COUNT(*) as count FROM polls WHERE category_id = :id");
+            $stmt->execute(['id' => (int)$data['id']]);
+            $result = $stmt->fetch();
+            
+            if ($result['count'] > 0) {
+                jsonResponse(['success' => false, 'message' => 'Cannot delete category that has polls assigned to it'], 400);
+                return;
+            }
+            
+            $stmt = $db->prepare("DELETE FROM poll_categories WHERE id = :id");
+            $stmt->execute(['id' => (int)$data['id']]);
+            
+            jsonResponse(['success' => true, 'message' => 'Category deleted successfully']);
+        } catch (Exception $e) {
+            error_log('Error deleting poll category: ' . $e->getMessage());
+            jsonResponse(['success' => false, 'message' => 'Failed to delete category'], 500);
         }
     }
     

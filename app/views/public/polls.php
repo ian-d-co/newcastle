@@ -14,12 +14,26 @@ ob_start();
                 </div>
             </div>
         <?php else: ?>
-            <?php foreach ($polls as $poll): ?>
-                <?php
+            <?php
+            $currentCategory = null;
+            foreach ($polls as $poll):
                 $hasVoted = $poll['has_voted'] ?? false;
                 $userVotes = $poll['user_votes'] ?? [];
                 $isExpired = $poll['expires_at'] && strtotime($poll['expires_at']) < time();
-                ?>
+                $categoryName = $poll['category_name'] ?? null;
+
+                // Show category header when category changes
+                if ($categoryName !== $currentCategory):
+                    if ($currentCategory !== null): ?>
+                        </div><!-- /.poll-category-group -->
+                    <?php endif; ?>
+                    <h2 class="section-title mt-4">
+                        <?php echo e($categoryName ?? 'Uncategorized'); ?>
+                    </h2>
+                    <div class="poll-category-group">
+                    <?php $currentCategory = $categoryName;
+                endif;
+            ?>
                 
                 <div class="poll" id="poll-<?php echo $poll['id']; ?>" data-poll-id="<?php echo $poll['id']; ?>">
                     <div class="poll-question"><?php echo e($poll['question']); ?></div>
@@ -46,7 +60,26 @@ ob_start();
                         </form>
                     <?php else: ?>
                         <!-- Results -->
-                        <div class="poll-results"></div>
+                        <div class="poll-results">
+                            <?php
+                            $totalVotes = array_sum(array_column($poll['options'], 'vote_count'));
+                            foreach ($poll['options'] as $option):
+                                $pct = $totalVotes > 0 ? round(($option['vote_count'] / $totalVotes) * 100) : 0;
+                                $isUserVote = in_array($option['id'], $userVotes);
+                                $voteLabel = $option['vote_count'] === 1 ? 'vote' : 'votes';
+                            ?>
+                                <div class="poll-result-option" style="margin-bottom: 0.75rem;">
+                                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.25rem;">
+                                        <span><?php echo e($option['option_text']); ?><?php if ($isUserVote): ?> <strong>✓</strong><?php endif; ?></span>
+                                        <span><?php echo $option['vote_count']; ?> <?php echo $voteLabel; ?> (<?php echo $pct; ?>%)</span>
+                                    </div>
+                                    <div style="background: #e9ecef; border-radius: 0.25rem; height: 8px;">
+                                        <div style="background: <?php echo $isUserVote ? '#28a745' : '#007bff'; ?>; width: <?php echo $pct; ?>%; height: 8px; border-radius: 0.25rem; transition: width 0.3s;"></div>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                            <p style="font-size: 0.875rem; color: #666; margin-top: 0.5rem;"><?php echo $totalVotes; ?> total <?php echo $totalVotes === 1 ? 'vote' : 'votes'; ?></p>
+                        </div>
                         <?php if ($hasVoted): ?>
                             <div class="badge badge-success mt-2">✓ You voted</div>
                         <?php endif; ?>
@@ -75,9 +108,56 @@ ob_start();
                     </div>
                 </div>
             <?php endforeach; ?>
+            <?php if ($currentCategory !== null): ?>
+                </div><!-- /.poll-category-group -->
+            <?php endif; ?>
         <?php endif; ?>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.poll-form').forEach(function(form) {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            var pollId = this.getAttribute('data-poll-id');
+            var csrfToken = this.querySelector('input[name="csrf_token"]').value;
+            var selectedOptions = Array.from(this.querySelectorAll('input[name="poll_option[]"]:checked')).map(function(el) {
+                return parseInt(el.value, 10);
+            });
+
+            if (selectedOptions.length === 0) {
+                showAlert('Please select an option before voting.', 'danger');
+                return;
+            }
+
+            var submitBtn = this.querySelector('button[type="submit"]');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Submitting...';
+
+            var self = this;
+            apiCall('/api/poll-vote.php', 'POST', {
+                poll_id: parseInt(pollId, 10),
+                option_ids: selectedOptions,
+                csrf_token: csrfToken
+            }, function(err, response) {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Vote';
+
+                if (err) {
+                    showAlert(err.message || 'Failed to submit vote.', 'danger');
+                } else {
+                    showAlert('Vote submitted successfully!', 'success');
+                    setTimeout(function() {
+                        window.location.reload();
+                    }, 1000);
+                }
+            });
+        });
+    });
+});
+</script>
 
 <?php
 $content = ob_get_clean();

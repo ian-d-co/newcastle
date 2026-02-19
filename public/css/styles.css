@@ -867,6 +867,75 @@ select.form-control {
 .gap-1 { gap: 0.5rem; }
 .gap-2 { gap: 1rem; }
 
+/* Dashboard Collapsible Sections */
+.dashboard-section {
+    margin-bottom: 1rem;
+    border: 1px solid #dee2e6;
+    border-radius: 0.25rem;
+    overflow: hidden;
+}
+
+.dashboard-section-header {
+    background: #2c3e50;
+    color: #ffffff;
+    padding: 1rem 1.5rem;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background 0.2s;
+    user-select: none;
+}
+
+.dashboard-section-header:hover {
+    background: #34495e;
+}
+
+.dashboard-section-header h3 {
+    margin: 0;
+    display: inline-flex;
+    align-items: center;
+    color: #ffffff;
+    font-size: 1.1rem;
+}
+
+.dashboard-section-header .toggle-icon {
+    margin-right: 0.75rem;
+    font-size: 0.875rem;
+    transition: transform 0.2s;
+}
+
+.dashboard-section-header .section-action {
+    margin-left: auto;
+}
+
+.dashboard-section-content {
+    background: #f8f9fa;
+    color: #212529;
+    padding: 1.5rem;
+}
+
+.dashboard-booking-card {
+    background: #ffffff;
+    border: 1px solid #dee2e6;
+    border-radius: 0.25rem;
+    padding: 1rem;
+    margin-bottom: 0.75rem;
+}
+
+.dashboard-booking-card p {
+    margin-bottom: 0.5rem;
+}
+
+.dashboard-booking-card p:last-child {
+    margin-bottom: 0;
+}
+
+/* Poll Category Groups */
+.poll-category-group {
+    margin-bottom: 1.5rem;
+}
+
 /* Tablet Styles (768px+) */
 @media (min-width: 768px) {
     h1 { font-size: 2.5rem; }
