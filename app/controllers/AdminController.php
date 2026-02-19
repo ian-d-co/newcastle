@@ -979,15 +979,16 @@ class AdminController {
             
             $db = getDbConnection();
             
-            $sql = "INSERT INTO hotels (event_id, name, address, website, description, link, created_at, updated_at)
-                    VALUES (:event_id, :name, :address, :website, :description, :link, NOW(), NOW())";
+            $sql = "INSERT INTO hotels (event_id, name, description, location, contact_phone, contact_email, link, status)
+                    VALUES (:event_id, :name, :description, :location, :contact_phone, :contact_email, :link, 'active')";
             
             $params = [
                 'event_id' => $event['id'],
                 'name' => $data['name'],
-                'address' => $data['address'] ?? '',
-                'website' => $data['website'] ?? '',
-                'description' => $data['description'] ?? '',
+                'description' => $data['description'] ?? null,
+                'location' => $data['location'] ?? null,
+                'contact_phone' => $data['contact_phone'] ?? null,
+                'contact_email' => $data['contact_email'] ?? null,
                 'link' => $data['link'] ?? null
             ];
             error_log('AdminController::createHotel() - SQL params: ' . json_encode($params));
@@ -1044,8 +1045,9 @@ class AdminController {
             
             $sql = "UPDATE hotels SET 
                     name = :name,
-                    address = :address,
-                    website = :website,
+                    location = :location,
+                    contact_phone = :contact_phone,
+                    contact_email = :contact_email,
                     description = :description,
                     link = :link,
                     updated_at = NOW()
@@ -1054,9 +1056,10 @@ class AdminController {
             $params = [
                 'id' => $data['id'],
                 'name' => $data['name'],
-                'address' => $data['address'] ?? '',
-                'website' => $data['website'] ?? '',
-                'description' => $data['description'] ?? '',
+                'location' => $data['location'] ?? null,
+                'contact_phone' => $data['contact_phone'] ?? null,
+                'contact_email' => $data['contact_email'] ?? null,
+                'description' => $data['description'] ?? null,
                 'link' => $data['link'] ?? null
             ];
             error_log('AdminController::updateHotel() - SQL params: ' . json_encode($params));
@@ -1344,10 +1347,13 @@ class AdminController {
             $stmt->execute(['event_id' => $event['id']]);
             $users = $stmt->fetchAll();
             
-            // Parse days_attending JSON for each user
+            // Parse days_attending and travel_method for each user (stored as comma-separated VARCHAR)
             foreach ($users as &$user) {
                 if ($user['days_attending']) {
-                    $user['days_attending'] = json_decode($user['days_attending'], true);
+                    $user['days_attending'] = explode(',', $user['days_attending']);
+                }
+                if ($user['travel_method']) {
+                    $user['travel_method'] = explode(',', $user['travel_method']);
                 }
             }
             

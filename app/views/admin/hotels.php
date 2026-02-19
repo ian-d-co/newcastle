@@ -26,8 +26,8 @@ ob_start();
                     <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
                         <div>
                             <h3 style="margin: 0;"><?php echo e($hotel['name']); ?></h3>
-                            <?php if ($hotel['address']): ?>
-                                <small><?php echo e($hotel['address']); ?></small>
+                            <?php if ($hotel['location']): ?>
+                                <small><?php echo e($hotel['location']); ?></small>
                             <?php endif; ?>
                         </div>
                         <div>
@@ -44,9 +44,9 @@ ob_start();
                             <p><?php echo e($hotel['description']); ?></p>
                         <?php endif; ?>
                         
-                        <?php if (!empty($hotel['website'])): ?>
+                        <?php if (!empty($hotel['link'])): ?>
                             <p style="margin: 0.5rem 0;">
-                                <strong>Website:</strong> <a href="<?php echo e($hotel['website']); ?>" target="_blank"><?php echo e($hotel['website']); ?></a>
+                                <strong>Website:</strong> <a href="<?php echo e($hotel['link']); ?>" target="_blank"><?php echo e($hotel['link']); ?></a>
                             </p>
                         <?php endif; ?>
                         
@@ -109,13 +109,19 @@ ob_start();
             </div>
             
             <div class="form-group">
-                <label for="hotel_address">Address</label>
-                <textarea id="hotel_address" name="address" class="form-control" rows="2"></textarea>
+                <label for="hotel_location">Location</label>
+                <input type="text" id="hotel_location" name="location" class="form-control" placeholder="City or area">
             </div>
             
             <div class="form-group">
-                <label for="hotel_website">Website</label>
-                <input type="url" id="hotel_website" name="website" class="form-control" placeholder="https://"></div>
+                <label for="hotel_phone">Contact Phone</label>
+                <input type="tel" id="hotel_phone" name="contact_phone" class="form-control" placeholder="+44 123 456 7890">
+            </div>
+            
+            <div class="form-group">
+                <label for="hotel_email">Contact Email</label>
+                <input type="email" id="hotel_email" name="contact_email" class="form-control" placeholder="contact@hotel.com">
+            </div>
             
             <div class="form-group">
                 <label for="hotel_description">Description</label>
@@ -214,8 +220,9 @@ function editHotel(hotel) {
     document.getElementById('hotelModalTitle').textContent = 'Edit Hotel';
     document.getElementById('hotel_id').value = hotel.id;
     document.getElementById('hotel_name').value = hotel.name;
-    document.getElementById('hotel_address').value = hotel.address || '';
-    document.getElementById('hotel_website').value = hotel.website || '';
+    document.getElementById('hotel_location').value = hotel.location || '';
+    document.getElementById('hotel_phone').value = hotel.contact_phone || '';
+    document.getElementById('hotel_email').value = hotel.contact_email || '';
     document.getElementById('hotel_description').value = hotel.description || '';
     document.getElementById('hotel_link').value = hotel.link || '';
     modalManager.open('hotelModal');
@@ -257,8 +264,9 @@ document.getElementById('hotelForm').addEventListener('submit', function(e) {
     
     const formData = {
         name: this.hotel_name.value,
-        address: this.hotel_address.value,
-        website: this.hotel_website.value,
+        location: this.hotel_location.value,
+        contact_phone: this.hotel_phone.value,
+        contact_email: this.hotel_email.value,
         description: this.hotel_description.value,
         link: this.hotel_link.value || null
     };
