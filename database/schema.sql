@@ -111,6 +111,8 @@ CREATE TABLE IF NOT EXISTS activities (
     current_bookings INT DEFAULT 0,
     requires_prepayment TINYINT(1) DEFAULT 0,
     price DECIMAL(10, 2) DEFAULT 0.00,
+    confirmation_deadline DATETIME NULL,
+    payment_deadline DATETIME NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE
@@ -142,6 +144,8 @@ CREATE TABLE IF NOT EXISTS meals (
     current_bookings INT DEFAULT 0,
     requires_prepayment TINYINT(1) DEFAULT 0,
     price DECIMAL(10, 2) DEFAULT 0.00,
+    confirmation_deadline DATETIME NULL,
+    payment_deadline DATETIME NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE
@@ -243,6 +247,8 @@ CREATE TABLE IF NOT EXISTS hotel_rooms (
     total_rooms INT NOT NULL,
     available_rooms INT NOT NULL,
     description TEXT,
+    confirmation_deadline DATETIME NULL,
+    payment_deadline DATETIME NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (hotel_id) REFERENCES hotels(id) ON DELETE CASCADE
@@ -272,6 +278,19 @@ CREATE TABLE IF NOT EXISTS sessions (
     last_activity TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     INDEX idx_last_activity (last_activity)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- User interest ratings table
+CREATE TABLE IF NOT EXISTS user_interests (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT NOT NULL,
+    item_type ENUM('activity', 'meal', 'hotel_room') NOT NULL,
+    item_id INT NOT NULL,
+    interest_level ENUM('interested', 'maybe', 'not_interested') NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    UNIQUE KEY unique_interest (user_id, item_type, item_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Insert default event

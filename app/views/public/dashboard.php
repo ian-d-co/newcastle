@@ -156,6 +156,44 @@ ob_start();
                 <?php endif; ?>
             </div>
         </div>
+
+        <!-- My Interests Section -->
+        <?php
+        $db = getDbConnection();
+        $stmt = $db->prepare("
+            SELECT ui.*,
+                   CASE ui.item_type
+                       WHEN 'activity' THEN a.title
+                       WHEN 'meal' THEN m.title
+                       WHEN 'hotel_room' THEN CONCAT(h.name, ' - ', hr.room_type)
+                   END as item_name
+            FROM user_interests ui
+            LEFT JOIN activities a ON ui.item_type = 'activity' AND ui.item_id = a.id
+            LEFT JOIN meals m ON ui.item_type = 'meal' AND ui.item_id = m.id
+            LEFT JOIN hotel_rooms hr ON ui.item_type = 'hotel_room' AND ui.item_id = hr.id
+            LEFT JOIN hotels h ON hr.hotel_id = h.id
+            WHERE ui.user_id = :user_id AND ui.interest_level = 'interested'
+            ORDER BY ui.updated_at DESC
+        ");
+        $stmt->execute(['user_id' => $userId]);
+        $myInterests = $stmt->fetchAll();
+        ?>
+        <div class="dashboard-section">
+            <div class="dashboard-section-header" onclick="toggleSection(this)">
+                <h3><span class="toggle-icon">▶</span>My Interests<?php if (!empty($myInterests)): ?> (<?php echo count($myInterests); ?>)<?php endif; ?></h3>
+            </div>
+            <div class="dashboard-section-content" style="display: none;">
+                <?php if (!empty($myInterests)): ?>
+                    <ul style="list-style: none; padding: 0; margin: 0;">
+                        <?php foreach ($myInterests as $interest): ?>
+                            <li style="padding: 0.25rem 0;">👍 <?php echo e($interest['item_name']); ?></li>
+                        <?php endforeach; ?>
+                    </ul>
+                <?php else: ?>
+                    <p>No interests marked yet. Browse <a href="/index.php?page=activities">activities</a>, <a href="/index.php?page=meals">meals</a>, or <a href="/index.php?page=hotels">hotels</a> to mark your interest.</p>
+                <?php endif; ?>
+            </div>
+        </div>
     </div>
 </div>
 

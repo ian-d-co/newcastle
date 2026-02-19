@@ -139,8 +139,8 @@ class AdminController {
             
             $db = getDbConnection();
             
-            $sql = "INSERT INTO activities (event_id, title, description, day, start_time, end_time, max_capacity, requires_prepayment, price)
-                    VALUES (:event_id, :title, :description, :day, :start_time, :end_time, :max_capacity, :requires_prepayment, :price)";
+            $sql = "INSERT INTO activities (event_id, title, description, day, start_time, end_time, max_capacity, requires_prepayment, price, confirmation_deadline, payment_deadline)
+                    VALUES (:event_id, :title, :description, :day, :start_time, :end_time, :max_capacity, :requires_prepayment, :price, :confirmation_deadline, :payment_deadline)";
             
             $params = [
                 'event_id' => $event['id'],
@@ -151,7 +151,9 @@ class AdminController {
                 'end_time' => $data['end_time'],
                 'max_capacity' => $data['max_capacity'] ?? 20,
                 'requires_prepayment' => $data['requires_prepayment'] ?? 0,
-                'price' => $data['price'] ?? 0
+                'price' => $data['price'] ?? 0,
+                'confirmation_deadline' => $data['confirmation_deadline'] ?: null,
+                'payment_deadline' => $data['payment_deadline'] ?: null
             ];
             error_log('AdminController::createActivity() - SQL params: ' . json_encode($params));
             
@@ -213,7 +215,9 @@ class AdminController {
                     end_time = :end_time,
                     max_capacity = :max_capacity,
                     requires_prepayment = :requires_prepayment,
-                    price = :price
+                    price = :price,
+                    confirmation_deadline = :confirmation_deadline,
+                    payment_deadline = :payment_deadline
                     WHERE id = :id";
             
             $params = [
@@ -225,7 +229,9 @@ class AdminController {
                 'end_time' => $data['end_time'],
                 'max_capacity' => $data['max_capacity'] ?? 20,
                 'requires_prepayment' => $data['requires_prepayment'] ?? 0,
-                'price' => $data['price'] ?? 0
+                'price' => $data['price'] ?? 0,
+                'confirmation_deadline' => $data['confirmation_deadline'] ?: null,
+                'payment_deadline' => $data['payment_deadline'] ?: null
             ];
             error_log('AdminController::updateActivity() - SQL params: ' . json_encode($params));
             
@@ -357,8 +363,8 @@ class AdminController {
             
             $db = getDbConnection();
             
-            $sql = "INSERT INTO meals (event_id, title, description, day, start_time, end_time, max_capacity, requires_prepayment, price)
-                    VALUES (:event_id, :title, :description, :day, :start_time, :end_time, :max_capacity, :requires_prepayment, :price)";
+            $sql = "INSERT INTO meals (event_id, title, description, day, start_time, end_time, max_capacity, requires_prepayment, price, confirmation_deadline, payment_deadline)
+                    VALUES (:event_id, :title, :description, :day, :start_time, :end_time, :max_capacity, :requires_prepayment, :price, :confirmation_deadline, :payment_deadline)";
             
             $params = [
                 'event_id' => $event['id'],
@@ -369,7 +375,9 @@ class AdminController {
                 'end_time' => $data['end_time'],
                 'max_capacity' => $data['max_capacity'] ?? 20,
                 'requires_prepayment' => $data['requires_prepayment'] ?? 0,
-                'price' => $data['price'] ?? 0
+                'price' => $data['price'] ?? 0,
+                'confirmation_deadline' => $data['confirmation_deadline'] ?: null,
+                'payment_deadline' => $data['payment_deadline'] ?: null
             ];
             error_log('AdminController::createMeal() - SQL params: ' . json_encode($params));
             
@@ -431,7 +439,9 @@ class AdminController {
                     end_time = :end_time,
                     max_capacity = :max_capacity,
                     requires_prepayment = :requires_prepayment,
-                    price = :price
+                    price = :price,
+                    confirmation_deadline = :confirmation_deadline,
+                    payment_deadline = :payment_deadline
                     WHERE id = :id";
             
             $params = [
@@ -443,7 +453,9 @@ class AdminController {
                 'end_time' => $data['end_time'],
                 'max_capacity' => $data['max_capacity'] ?? 20,
                 'requires_prepayment' => $data['requires_prepayment'] ?? 0,
-                'price' => $data['price'] ?? 0
+                'price' => $data['price'] ?? 0,
+                'confirmation_deadline' => $data['confirmation_deadline'] ?: null,
+                'payment_deadline' => $data['payment_deadline'] ?: null
             ];
             error_log('AdminController::updateMeal() - SQL params: ' . json_encode($params));
             
@@ -914,8 +926,8 @@ class AdminController {
             // Get reservation count for each room
             $db = getDbConnection();
             foreach ($hotel['rooms'] as &$room) {
-                $stmt = $db->prepare("SELECT COUNT(*) as count FROM hotel_reservations WHERE room_id = :room_id");
-                $stmt->execute(['room_id' => $room['id']]);
+                $stmt = $db->prepare("SELECT COUNT(*) as count FROM room_reservations WHERE hotel_room_id = :hotel_room_id");
+                $stmt->execute(['hotel_room_id' => $room['id']]);
                 $room['reservation_count'] = $stmt->fetch()['count'];
             }
         }
@@ -1093,8 +1105,8 @@ class AdminController {
             
             // Delete reservations for each room
             foreach ($rooms as $room) {
-                $stmt = $db->prepare("DELETE FROM hotel_reservations WHERE room_id = :room_id");
-                $stmt->execute(['room_id' => $room['id']]);
+                $stmt = $db->prepare("DELETE FROM room_reservations WHERE hotel_room_id = :hotel_room_id");
+                $stmt->execute(['hotel_room_id' => $room['id']]);
             }
             
             // Delete rooms
@@ -1151,15 +1163,17 @@ class AdminController {
             
             $db = getDbConnection();
             
-            $sql = "INSERT INTO hotel_rooms (hotel_id, room_type, price_per_night, max_occupancy, available_rooms, created_at, updated_at)
-                    VALUES (:hotel_id, :room_type, :price_per_night, :max_occupancy, :available_rooms, NOW(), NOW())";
+            $sql = "INSERT INTO hotel_rooms (hotel_id, room_type, price_per_night, max_occupancy, available_rooms, confirmation_deadline, payment_deadline, created_at, updated_at)
+                    VALUES (:hotel_id, :room_type, :price_per_night, :max_occupancy, :available_rooms, :confirmation_deadline, :payment_deadline, NOW(), NOW())";
             
             $params = [
                 'hotel_id' => $data['hotel_id'],
                 'room_type' => $data['room_type'],
                 'price_per_night' => $data['price_per_night'],
                 'max_occupancy' => $data['max_occupancy'] ?? 2,
-                'available_rooms' => $data['available_rooms'] ?? 1
+                'available_rooms' => $data['available_rooms'] ?? 1,
+                'confirmation_deadline' => $data['confirmation_deadline'] ?: null,
+                'payment_deadline' => $data['payment_deadline'] ?: null
             ];
             error_log('AdminController::createRoom() - SQL params: ' . json_encode($params));
             
@@ -1218,6 +1232,8 @@ class AdminController {
                     price_per_night = :price_per_night,
                     max_occupancy = :max_occupancy,
                     available_rooms = :available_rooms,
+                    confirmation_deadline = :confirmation_deadline,
+                    payment_deadline = :payment_deadline,
                     updated_at = NOW()
                     WHERE id = :id";
             
@@ -1226,7 +1242,9 @@ class AdminController {
                 'room_type' => $data['room_type'],
                 'price_per_night' => $data['price_per_night'],
                 'max_occupancy' => $data['max_occupancy'] ?? 2,
-                'available_rooms' => $data['available_rooms'] ?? 1
+                'available_rooms' => $data['available_rooms'] ?? 1,
+                'confirmation_deadline' => $data['confirmation_deadline'] ?: null,
+                'payment_deadline' => $data['payment_deadline'] ?: null
             ];
             error_log('AdminController::updateRoom() - SQL params: ' . json_encode($params));
             
@@ -1274,8 +1292,8 @@ class AdminController {
             error_log('AdminController::deleteRoom() - Deleting room ID: ' . $data['id']);
             
             // Delete reservations first
-            $stmt = $db->prepare("DELETE FROM hotel_reservations WHERE room_id = :id");
-            $stmt->execute(['id' => $data['id']]);
+            $stmt = $db->prepare("DELETE FROM room_reservations WHERE hotel_room_id = :hotel_room_id");
+            $stmt->execute(['hotel_room_id' => $data['id']]);
             
             // Delete room
             $stmt = $db->prepare("DELETE FROM hotel_rooms WHERE id = :id");
@@ -1488,7 +1506,7 @@ class AdminController {
             $stmt->execute(['user_id' => $userId]);
             
             // Hotel reservations
-            $stmt = $db->prepare("DELETE FROM hotel_reservations WHERE user_id = :user_id");
+            $stmt = $db->prepare("DELETE FROM room_reservations WHERE user_id = :user_id");
             $stmt->execute(['user_id' => $userId]);
             
             // Finally, delete the user
@@ -1501,6 +1519,38 @@ class AdminController {
             $db->rollBack();
             error_log('Error deleting user: ' . $e->getMessage());
             jsonResponse(['success' => false, 'message' => 'Failed to delete user'], 500);
+        }
+    }
+
+    /**
+     * Reset user PIN
+     */
+    public function resetUserPin() {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            jsonResponse(['success' => false, 'message' => 'Invalid request method'], 405);
+        }
+
+        $data = json_decode(file_get_contents('php://input'), true);
+
+        if (!isset($data['id']) || !isset($data['new_pin'])) {
+            jsonResponse(['success' => false, 'message' => 'Missing required fields'], 400);
+        }
+
+        if (strlen($data['new_pin']) < 4) {
+            jsonResponse(['success' => false, 'message' => 'PIN must be at least 4 digits'], 400);
+        }
+
+        try {
+            $db = getDbConnection();
+            $pinHash = password_hash($data['new_pin'], PASSWORD_DEFAULT);
+
+            $stmt = $db->prepare("UPDATE users SET pin_hash = :pin_hash WHERE id = :id");
+            $stmt->execute(['pin_hash' => $pinHash, 'id' => $data['id']]);
+
+            jsonResponse(['success' => true, 'message' => 'PIN reset successfully']);
+        } catch (Exception $e) {
+            error_log('Error resetting PIN: ' . $e->getMessage());
+            jsonResponse(['success' => false, 'message' => 'Failed to reset PIN'], 500);
         }
     }
 }

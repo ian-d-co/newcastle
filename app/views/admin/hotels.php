@@ -187,6 +187,18 @@ ob_start();
                 <input type="number" id="price_per_night" name="price_per_night" class="form-control" 
                        min="0" step="0.01" required>
             </div>
+
+            <div class="form-group">
+                <label for="room_confirmation_deadline">Confirmation Deadline (Optional)</label>
+                <input type="datetime-local" id="room_confirmation_deadline" name="confirmation_deadline" class="form-control">
+                <small class="form-text">Last date to confirm booking</small>
+            </div>
+
+            <div class="form-group">
+                <label for="room_payment_deadline">Payment Deadline (Optional)</label>
+                <input type="datetime-local" id="room_payment_deadline" name="payment_deadline" class="form-control">
+                <small class="form-text">Last date to complete payment</small>
+            </div>
             
             <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
                 <button type="submit" class="btn btn-primary">Save Room</button>
@@ -315,6 +327,8 @@ function editRoom(room) {
     document.getElementById('max_occupancy').value = room.max_occupancy;
     document.getElementById('available_rooms').value = room.available_rooms;
     document.getElementById('price_per_night').value = room.price_per_night;
+    document.getElementById('room_confirmation_deadline').value = room.confirmation_deadline ? room.confirmation_deadline.replace(' ', 'T').substring(0, 16) : '';
+    document.getElementById('room_payment_deadline').value = room.payment_deadline ? room.payment_deadline.replace(' ', 'T').substring(0, 16) : '';
     modalManager.open('roomModal');
 }
 
@@ -357,7 +371,9 @@ document.getElementById('roomForm').addEventListener('submit', function(e) {
         room_type: this.room_type.value,
         max_occupancy: parseInt(this.max_occupancy.value),
         available_rooms: parseInt(this.available_rooms.value),
-        price_per_night: parseFloat(this.price_per_night.value)
+        price_per_night: parseFloat(this.price_per_night.value),
+        confirmation_deadline: document.getElementById('room_confirmation_deadline').value || null,
+        payment_deadline: document.getElementById('room_payment_deadline').value || null
     };
     
     if (editingRoomId) {
