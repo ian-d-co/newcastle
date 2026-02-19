@@ -66,7 +66,6 @@
     <!-- Footer -->
     <footer class="footer">
         <div class="container">
-            <p>&copy; 2026 Dicksord Fest - Newcastle. All rights reserved.</p>
             <p>November 20-22, 2026</p>
         </div>
     </footer>

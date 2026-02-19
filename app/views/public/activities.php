@@ -30,6 +30,8 @@ ob_start();
                         $isFull = $activity['current_bookings'] >= $activity['max_capacity'];
                         $isBooked = $activity['is_booked'] ?? false;
                         $spotsLeft = $activity['max_capacity'] - $activity['current_bookings'];
+                        $occupancyPct = $activity['max_capacity'] > 0 ? ($activity['current_bookings'] / $activity['max_capacity']) * 100 : 100;
+                        $capacityClass = $occupancyPct >= 95 ? 'text-danger' : ($occupancyPct >= 71 ? 'text-warning' : 'text-success');
                         ?>
                         
                         <div class="item">
@@ -43,7 +45,7 @@ ob_start();
                                 </div>
                                 <div class="item-meta-item">
                                     <strong>Capacity:</strong> 
-                                    <span class="<?php echo $isFull ? 'text-danger' : 'text-success'; ?>">
+                                    <span class="<?php echo $capacityClass; ?>">
                                         <?php echo e($activity['current_bookings']); ?> / <?php echo e($activity['max_capacity']); ?>
                                         <?php if (!$isFull && !$isBooked): ?>
                                             (<?php echo $spotsLeft; ?> spot<?php echo $spotsLeft !== 1 ? 's' : ''; ?> left)
