@@ -69,8 +69,8 @@
                 discord_name: formData.get('discord_name'),
                 name: formData.get('name'),
                 pin: formData.get('pin'),
-                days_attending: formData.getAll('days_attending[]'),
-                travel_method: formData.getAll('travel_method[]'),
+                days_attending: Array.from(form.querySelectorAll('input[name="days_attending[]"]:checked')).map(function(cb) { return cb.value; }),
+                travel_method: Array.from(form.querySelectorAll('input[name="travel_method[]"]:checked')).map(function(cb) { return cb.value; }),
                 csrf_token: formData.get('csrf_token')
             };
 
