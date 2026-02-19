@@ -372,8 +372,8 @@ document.getElementById('roomForm').addEventListener('submit', function(e) {
         max_occupancy: parseInt(this.max_occupancy.value),
         available_rooms: parseInt(this.available_rooms.value),
         price_per_night: parseFloat(this.price_per_night.value),
-        confirmation_deadline: this.room_confirmation_deadline.value || null,
-        payment_deadline: this.room_payment_deadline.value || null
+        confirmation_deadline: document.getElementById('room_confirmation_deadline').value || null,
+        payment_deadline: document.getElementById('room_payment_deadline').value || null
     };
     
     if (editingRoomId) {

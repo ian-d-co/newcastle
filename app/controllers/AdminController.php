@@ -1292,8 +1292,8 @@ class AdminController {
             error_log('AdminController::deleteRoom() - Deleting room ID: ' . $data['id']);
             
             // Delete reservations first
-            $stmt = $db->prepare("DELETE FROM room_reservations WHERE hotel_room_id = :id");
-            $stmt->execute(['id' => $data['id']]);
+            $stmt = $db->prepare("DELETE FROM room_reservations WHERE hotel_room_id = :hotel_room_id");
+            $stmt->execute(['hotel_room_id' => $data['id']]);
             
             // Delete room
             $stmt = $db->prepare("DELETE FROM hotel_rooms WHERE id = :id");
