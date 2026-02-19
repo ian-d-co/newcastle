@@ -813,15 +813,16 @@ select.form-control {
 
 /* Dashboard Collapsible Sections */
 .dashboard-section {
-    margin-bottom: 1rem;
+    margin-bottom: 1.5rem;
     border: 1px solid #dee2e6;
-    border-radius: 0.25rem;
+    border-radius: 0.5rem;
     overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 
 .dashboard-section-header {
-    background: #2c3e50;
-    color: #ffffff;
+    background: #2c3e50 !important;
+    color: #ffffff !important;
     padding: 1rem 1.5rem;
     cursor: pointer;
     display: flex;
@@ -829,17 +830,19 @@ select.form-control {
     align-items: center;
     transition: background 0.2s;
     user-select: none;
+    border: none;
 }
 
 .dashboard-section-header:hover {
-    background: #34495e;
+    background: #34495e !important;
 }
 
-.dashboard-section-header h3 {
+.dashboard-section-header h3,
+.dashboard-section-header h2 {
     margin: 0;
     display: inline-flex;
     align-items: center;
-    color: #ffffff;
+    color: #ffffff !important;
     font-size: 1.1rem;
 }
 
@@ -847,6 +850,7 @@ select.form-control {
     margin-right: 0.75rem;
     font-size: 0.875rem;
     transition: transform 0.2s;
+    color: #ffffff;
 }
 
 .dashboard-section-header .section-action {

@@ -135,6 +135,12 @@ if ($page === 'register') {
 
 // Homepage (PUBLIC - No authentication required)
 if ($page === 'home') {
+    // Handle guest mode activation
+    $view = $_GET['view'] ?? null;
+    if ($view === 'guest') {
+        $_SESSION['guest_mode'] = true;
+    }
+
     try {
         require_once BASE_PATH . '/app/models/Event.php';
         
@@ -187,6 +193,13 @@ if ($page === 'home') {
                 '<p>The website is currently experiencing technical difficulties.</p></body></html>');
         }
     }
+}
+
+// Pending approval page (PUBLIC - accessible without full login)
+if ($page === 'pending_approval') {
+    $pageTitle = 'Awaiting Approval';
+    include BASE_PATH . '/app/views/public/pending-approval.php';
+    exit;
 }
 
 // ============================================================================
@@ -565,6 +578,12 @@ try {
                 $adminController->toggleAdmin();
             } elseif ($action === 'delete') {
                 $adminController->deleteUser();
+            } elseif ($action === 'approve') {
+                $adminController->approveUser();
+            } elseif ($action === 'reject') {
+                $adminController->rejectUser();
+            } elseif ($action === 'pending') {
+                $adminController->showPendingApprovals();
             } else {
                 $adminController->showUserManager();
             }

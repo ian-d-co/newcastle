@@ -7,7 +7,10 @@ ob_start();
     <div class="container">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
             <h1 class="section-title">Manage Users</h1>
-            <a href="/index.php?page=admin" class="btn btn-secondary">Back to Dashboard</a>
+            <div style="display: flex; gap: 0.5rem;">
+                <a href="/index.php?page=admin_users&action=pending" class="btn btn-warning">Pending Approvals</a>
+                <a href="/index.php?page=admin" class="btn btn-secondary">Back to Dashboard</a>
+            </div>
         </div>
 
         <?php if (empty($users)): ?>

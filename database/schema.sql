@@ -11,9 +11,13 @@ CREATE TABLE IF NOT EXISTS users (
     name VARCHAR(100) NOT NULL,
     pin_hash VARCHAR(255) NOT NULL,
     is_admin TINYINT(1) DEFAULT 0,
+    approved TINYINT(1) DEFAULT 0,
+    approved_by INT DEFAULT NULL,
+    approved_at TIMESTAMP NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    INDEX idx_discord_name (discord_name)
+    INDEX idx_discord_name (discord_name),
+    INDEX idx_approved (approved)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Events table
@@ -282,10 +286,11 @@ VALUES (
 );
 
 -- Insert default admin user (PIN: 123456)
-INSERT INTO users (discord_name, name, pin_hash, is_admin) 
+INSERT INTO users (discord_name, name, pin_hash, is_admin, approved) 
 VALUES (
     'Admin',
     'Admin User',
     '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi',
+    1,
     1
 );

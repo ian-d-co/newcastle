@@ -39,6 +39,19 @@
                         <li><a href="/index.php?action=logout">Logout</a></li>
                     </ul>
                 </nav>
+                <?php elseif (isGuestMode()): ?>
+                <nav class="nav">
+                    <ul>
+                        <li><a href="/index.php?page=home" class="<?php echo ($currentPage ?? '') === 'home' ? 'active' : ''; ?>">Home</a></li>
+                        <li><a href="/index.php?page=activities" class="<?php echo ($currentPage ?? '') === 'activities' ? 'active' : ''; ?>">Activities</a></li>
+                        <li><a href="/index.php?page=meals" class="<?php echo ($currentPage ?? '') === 'meals' ? 'active' : ''; ?>">Meals</a></li>
+                        <li><a href="/index.php?page=carshare" class="<?php echo ($currentPage ?? '') === 'carshare' ? 'active' : ''; ?>">Carshare</a></li>
+                        <li><a href="/index.php?page=hosting" class="<?php echo ($currentPage ?? '') === 'hosting' ? 'active' : ''; ?>">Hosting</a></li>
+                        <li><a href="/index.php?page=polls" class="<?php echo ($currentPage ?? '') === 'polls' ? 'active' : ''; ?>">Polls</a></li>
+                        <li><a href="/index.php?page=hotels" class="<?php echo ($currentPage ?? '') === 'hotels' ? 'active' : ''; ?>">Hotels</a></li>
+                        <li><a href="/index.php?page=login" style="color: #FDDC62;">Login / Register</a></li>
+                    </ul>
+                </nav>
                 <?php endif; ?>
                 <!-- Login button already shown via btn-login-mobile above -->
             </div>
