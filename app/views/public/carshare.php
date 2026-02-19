@@ -32,7 +32,7 @@ ob_start();
                 <div class="card-body">
                     <p><strong>Driver:</strong> <?php echo displayName($userBooking['driver_name']); ?></p>
                     <p><strong>Travelling from:</strong> <?php echo e($userBooking['origin']); ?></p>
-                    <button class="btn btn-danger btn-sm" onclick="cancelCarshare(<?php echo $userBooking['carshare_offer_id']; ?>)">Cancel Booking</button>
+                    <button class="btn btn-danger btn-sm" onclick="cancelCarshare(<?php echo $userBooking['carshare_offer_id']; ?>)" <?php if (isGuestMode()): ?>disabled title="Please log in to manage bookings"<?php endif; ?>>Cancel Booking</button>
                 </div>
             </div>
         <?php endif; ?>
@@ -66,7 +66,7 @@ ob_start();
                     
                     <div class="item-footer">
                         <?php if ($offer['available_spaces'] > 0 && !$userBooking && $offer['user_id'] != getCurrentUserId()): ?>
-                            <button class="btn btn-primary" onclick="bookCarshare(<?php echo $offer['id']; ?>)">Book Carshare</button>
+                            <button class="btn btn-primary" onclick="bookCarshare(<?php echo $offer['id']; ?>)" <?php if (isGuestMode()): ?>disabled title="Please log in to book"<?php endif; ?>>Book Carshare</button>
                         <?php elseif ($offer['available_spaces'] <= 0): ?>
                             <span class="badge badge-danger">Full</span>
                         <?php endif; ?>

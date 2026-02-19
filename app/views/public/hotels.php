@@ -64,7 +64,7 @@ ob_start();
                                     
                                     <div class="item-footer">
                                         <?php if ($room['available_rooms'] > 0): ?>
-                                            <button class="btn btn-primary" onclick="modalManager.open('reserve-modal-<?php echo $room['id']; ?>')">
+                                            <button class="btn btn-primary" onclick="modalManager.open('reserve-modal-<?php echo $room['id']; ?>')" <?php if (isGuestMode()): ?>disabled title="Please log in to reserve"<?php endif; ?>>
                                                 Reserve Room
                                             </button>
                                         <?php else: ?>
@@ -126,7 +126,7 @@ ob_start();
                                 <span class="badge badge-warning">Pending</span>
                             <?php endif; ?>
                         </p>
-                        <button class="btn btn-danger btn-sm" onclick="cancelReservation(<?php echo $reservation['id']; ?>)">Cancel Reservation</button>
+                        <button class="btn btn-danger btn-sm" onclick="cancelReservation(<?php echo $reservation['id']; ?>)" <?php if (isGuestMode()): ?>disabled title="Please log in to manage reservations"<?php endif; ?>>Cancel Reservation</button>
                     </div>
                 </div>
             <?php endforeach; ?>

@@ -71,12 +71,12 @@ ob_start();
                                     <?php elseif ($activity['requires_prepayment'] && $activity['payment_status'] === 'paid'): ?>
                                         <span class="badge badge-success">Paid</span>
                                     <?php endif; ?>
-                                    <button class="btn btn-danger btn-sm" onclick="cancelActivity(<?php echo $activity['id']; ?>)">Cancel Booking</button>
+                                    <button class="btn btn-danger btn-sm" onclick="cancelActivity(<?php echo $activity['id']; ?>)" <?php if (isGuestMode()): ?>disabled title="Please log in to manage bookings"<?php endif; ?>>Cancel Booking</button>
                                 <?php else: ?>
                                     <?php if ($isFull): ?>
                                         <span class="badge badge-danger">Full</span>
                                     <?php else: ?>
-                                        <button class="btn btn-primary" onclick="bookActivity(<?php echo $activity['id']; ?>)">Book Activity</button>
+                                        <button class="btn btn-primary" onclick="bookActivity(<?php echo $activity['id']; ?>)" <?php if (isGuestMode()): ?>disabled title="Please log in to book"<?php endif; ?>>Book Activity</button>
                                     <?php endif; ?>
                                 <?php endif; ?>
                             </div>

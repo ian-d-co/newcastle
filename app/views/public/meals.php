@@ -71,12 +71,12 @@ ob_start();
                                     <?php elseif ($meal['requires_prepayment'] && $meal['payment_status'] === 'paid'): ?>
                                         <span class="badge badge-success">Paid</span>
                                     <?php endif; ?>
-                                    <button class="btn btn-danger btn-sm" onclick="cancelMeal(<?php echo $meal['id']; ?>)">Cancel Booking</button>
+                                    <button class="btn btn-danger btn-sm" onclick="cancelMeal(<?php echo $meal['id']; ?>)" <?php if (isGuestMode()): ?>disabled title="Please log in to manage bookings"<?php endif; ?>>Cancel Booking</button>
                                 <?php else: ?>
                                     <?php if ($isFull): ?>
                                         <span class="badge badge-danger">Full</span>
                                     <?php else: ?>
-                                        <button class="btn btn-primary" onclick="bookMeal(<?php echo $meal['id']; ?>)">Book Meal</button>
+                                        <button class="btn btn-primary" onclick="bookMeal(<?php echo $meal['id']; ?>)" <?php if (isGuestMode()): ?>disabled title="Please log in to book"<?php endif; ?>>Book Meal</button>
                                     <?php endif; ?>
                                 <?php endif; ?>
                             </div>

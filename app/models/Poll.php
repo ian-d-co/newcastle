@@ -101,12 +101,12 @@ class Poll {
             
             // Add new votes
             foreach ($optionIds as $optionId) {
-                $sql = "INSERT INTO poll_votes (poll_id, poll_option_id, user_id) 
-                        VALUES (:poll_id, :poll_option_id, :user_id)";
+                $sql = "INSERT INTO poll_votes (poll_id, option_id, user_id) 
+                        VALUES (:poll_id, :option_id, :user_id)";
                 $stmt = $this->db->prepare($sql);
                 $stmt->execute([
                     'poll_id' => $pollId,
-                    'poll_option_id' => $optionId,
+                    'option_id' => $optionId,
                     'user_id' => $userId
                 ]);
                 
@@ -133,10 +133,10 @@ class Poll {
     }
     
     public function getUserVotes($pollId, $userId) {
-        $sql = "SELECT poll_option_id FROM poll_votes WHERE poll_id = :poll_id AND user_id = :user_id";
+        $sql = "SELECT option_id FROM poll_votes WHERE poll_id = :poll_id AND user_id = :user_id";
         $stmt = $this->db->prepare($sql);
         $stmt->execute(['poll_id' => $pollId, 'user_id' => $userId]);
-        return array_column($stmt->fetchAll(), 'poll_option_id');
+        return array_column($stmt->fetchAll(), 'option_id');
     }
     
     public function getResults($pollId) {

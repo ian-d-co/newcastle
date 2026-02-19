@@ -56,7 +56,7 @@ ob_start();
                                     </div>
                                 <?php endforeach; ?>
                             </div>
-                            <button type="submit" class="btn btn-primary btn-block mt-3">Vote</button>
+                            <button type="submit" class="btn btn-primary btn-block mt-3" <?php if (isGuestMode()): ?>disabled title="Please log in to vote"<?php endif; ?>>Vote</button>
                         </form>
                     <?php else: ?>
                         <!-- Results -->

@@ -36,7 +36,7 @@ ob_start();
                     <?php if ($userBooking['notes']): ?>
                         <p><strong>Notes:</strong> <?php echo nl2br(e($userBooking['notes'])); ?></p>
                     <?php endif; ?>
-                    <button class="btn btn-danger btn-sm" onclick="cancelHosting(<?php echo $userBooking['hosting_offer_id']; ?>)">Cancel Booking</button>
+                    <button class="btn btn-danger btn-sm" onclick="cancelHosting(<?php echo $userBooking['hosting_offer_id']; ?>)" <?php if (isGuestMode()): ?>disabled title="Please log in to manage bookings"<?php endif; ?>>Cancel Booking</button>
                 </div>
             </div>
         <?php endif; ?>
@@ -73,7 +73,7 @@ ob_start();
                     
                     <div class="item-footer">
                         <?php if ($offer['available_spaces'] > 0 && !$userBooking && $offer['user_id'] != getCurrentUserId()): ?>
-                            <button class="btn btn-primary" onclick="bookHosting(<?php echo $offer['id']; ?>)">Book Accommodation</button>
+                            <button class="btn btn-primary" onclick="bookHosting(<?php echo $offer['id']; ?>)" <?php if (isGuestMode()): ?>disabled title="Please log in to book"<?php endif; ?>>Book Accommodation</button>
                         <?php elseif ($offer['available_spaces'] <= 0): ?>
                             <span class="badge badge-danger">Full</span>
                         <?php endif; ?>

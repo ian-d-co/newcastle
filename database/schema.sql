@@ -211,13 +211,13 @@ CREATE TABLE IF NOT EXISTS poll_options (
 CREATE TABLE IF NOT EXISTS poll_votes (
     id INT PRIMARY KEY AUTO_INCREMENT,
     poll_id INT NOT NULL,
-    poll_option_id INT NOT NULL,
+    option_id INT NOT NULL,
     user_id INT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (poll_id) REFERENCES polls(id) ON DELETE CASCADE,
-    FOREIGN KEY (poll_option_id) REFERENCES poll_options(id) ON DELETE CASCADE,
+    FOREIGN KEY (option_id) REFERENCES poll_options(id) ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    UNIQUE KEY unique_vote (poll_id, user_id, poll_option_id)
+    UNIQUE KEY unique_vote (poll_id, user_id, option_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Hotels table
