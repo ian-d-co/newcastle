@@ -1172,17 +1172,15 @@ class AdminController {
             
             $db = getDbConnection();
             
-            $sql = "INSERT INTO hotel_rooms (hotel_id, room_type, price, capacity, quantity_available, confirmation_deadline, payment_deadline, created_at, updated_at)
-                    VALUES (:hotel_id, :room_type, :price, :capacity, :quantity_available, :confirmation_deadline, :payment_deadline, NOW(), NOW())";
+            $sql = "INSERT INTO hotel_rooms (hotel_id, room_type, price, capacity, quantity_available, quantity_reserved, status)
+                    VALUES (:hotel_id, :room_type, :price, :capacity, :quantity_available, 0, 'available')";
             
             $params = [
-                'hotel_id' => $data['hotel_id'],
+                'hotel_id' => (int)$data['hotel_id'],
                 'room_type' => $data['room_type'],
-                'price' => $data['price'],
-                'capacity' => $data['capacity'] ?? 2,
-                'quantity_available' => $data['quantity_available'] ?? 1,
-                'confirmation_deadline' => $data['confirmation_deadline'] ?: null,
-                'payment_deadline' => $data['payment_deadline'] ?: null
+                'price' => (float)$data['price'],
+                'capacity' => (int)($data['capacity'] ?? 2),
+                'quantity_available' => (int)($data['quantity_available'] ?? 1)
             ];
             error_log('AdminController::createRoom() - SQL params: ' . json_encode($params));
             
@@ -1241,19 +1239,15 @@ class AdminController {
                     price = :price,
                     capacity = :capacity,
                     quantity_available = :quantity_available,
-                    confirmation_deadline = :confirmation_deadline,
-                    payment_deadline = :payment_deadline,
                     updated_at = NOW()
                     WHERE id = :id";
             
             $params = [
-                'id' => $data['id'],
+                'id' => (int)$data['id'],
                 'room_type' => $data['room_type'],
-                'price' => $data['price'],
-                'capacity' => $data['capacity'] ?? 2,
-                'quantity_available' => $data['quantity_available'] ?? 1,
-                'confirmation_deadline' => $data['confirmation_deadline'] ?: null,
-                'payment_deadline' => $data['payment_deadline'] ?: null
+                'price' => (float)$data['price'],
+                'capacity' => (int)($data['capacity'] ?? 2),
+                'quantity_available' => (int)($data['quantity_available'] ?? 1)
             ];
             error_log('AdminController::updateRoom() - SQL params: ' . json_encode($params));
             
@@ -1350,20 +1344,29 @@ class AdminController {
                     ea.created_at as registered_at
                     FROM users u
                     LEFT JOIN event_attendees ea ON u.id = ea.user_id AND ea.event_id = :event_id
-                    GROUP BY u.id
                     ORDER BY u.created_at DESC";
             
             $stmt = $db->prepare($sql);
             $stmt->execute(['event_id' => $event['id']]);
-            $users = $stmt->fetchAll();
+            $allUsers = $stmt->fetchAll();
             
-            // Parse days_attending and travel_method for each user (stored as comma-separated VARCHAR)
-            foreach ($users as &$user) {
-                if ($user['days_attending']) {
-                    $user['days_attending'] = explode(',', $user['days_attending']);
-                }
-                if ($user['travel_method']) {
-                    $user['travel_method'] = explode(',', $user['travel_method']);
+            // Deduplicate users by ID, keeping first occurrence
+            $users = [];
+            $seenIds = [];
+            foreach ($allUsers as $user) {
+                if (!in_array($user['id'], $seenIds)) {
+                    if ($user['days_attending']) {
+                        $user['days_attending'] = explode(',', trim($user['days_attending']));
+                    } else {
+                        $user['days_attending'] = [];
+                    }
+                    if ($user['travel_method']) {
+                        $user['travel_method'] = explode(',', trim($user['travel_method']));
+                    } else {
+                        $user['travel_method'] = [];
+                    }
+                    $users[] = $user;
+                    $seenIds[] = $user['id'];
                 }
             }
             
