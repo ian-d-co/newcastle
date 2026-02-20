@@ -155,6 +155,9 @@ if (!empty($activities)) {
                             
                             <div class="item-footer">
                                 <?php if ($isBooked): ?>
+                                    <?php if (!empty($activity['no_booking_required'])): ?>
+                                        <span class="badge badge-success">✓ Marked as Attending</span>
+                                    <?php else: ?>
                                     <span class="badge badge-success">✓ Booked</span>
                                     <?php if ($activity['requires_prepayment'] && $activity['payment_status'] === 'pending'): ?>
                                         <span class="badge badge-warning">Payment Pending</span>
@@ -162,6 +165,17 @@ if (!empty($activities)) {
                                         <span class="badge badge-success">Paid</span>
                                     <?php endif; ?>
                                     <button class="btn btn-danger btn-sm" onclick="cancelActivity(<?php echo $activity['id']; ?>)">Cancel Booking</button>
+                                    <?php endif; ?>
+                                <?php elseif (!empty($activity['no_booking_required'])): ?>
+                                    <?php if (isGuestMode()): ?>
+                                        <button class="btn btn-primary" disabled>Mark Attending (Login Required)</button>
+                                    <?php else: ?>
+                                        <button class="btn btn-primary" onclick="markAttending('activity', <?php echo $activity['id']; ?>)">
+                                            Mark as Attending
+                                        </button>
+                                    <?php endif; ?>
+                                <?php elseif (empty($activity['booking_open'])): ?>
+                                    <button class="btn btn-secondary" disabled>Booking Closed</button>
                                 <?php else: ?>
                                     <?php if ($isFull): ?>
                                         <span class="badge badge-danger">Full</span>

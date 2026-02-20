@@ -262,6 +262,7 @@ ob_start();
                         </label>
                     </div>
                 </div>
+                <div class="row">
                 <div class="col">
                     <div class="form-group">
                         <label for="group_payment_due">Group Payment Due Date</label>
@@ -269,6 +270,12 @@ ob_start();
                         <small class="form-text">Payment deadline when booking with the group</small>
                     </div>
                 </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">
+                    <input type="checkbox" id="booking_open" name="booking_open" checked style="margin-right: 0.5rem;">
+                    Booking Open (uncheck to close bookings)
+                </label>
             </div>
             
             <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
@@ -413,6 +420,7 @@ function editRoom(room) {
     document.getElementById('book_with_group').checked = room.book_with_group == 1;
     document.getElementById('group_payment_due').value = room.group_payment_due || '';
     document.getElementById('simple_price_type').value = room.simple_price_type || 'per_night';
+    document.getElementById('booking_open').checked = room.booking_open != 0;
     updatePriceTypeVisibility();
     updateBookingFieldVisibility();
     modalManager.open('roomModal');
@@ -468,7 +476,8 @@ document.getElementById('roomForm').addEventListener('submit', function(e) {
         book_direct_with_hotel: this.book_direct_with_hotel.checked ? 1 : 0,
         book_with_group: this.book_with_group.checked ? 1 : 0,
         group_payment_due: this.group_payment_due.value || null,
-        simple_price_type: this.simple_price_type.value || 'per_night'
+        simple_price_type: this.simple_price_type.value || 'per_night',
+        booking_open: this.booking_open.checked ? 1 : 0
     };
     
     if (editingRoomId) {

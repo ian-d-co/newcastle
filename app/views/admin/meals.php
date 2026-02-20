@@ -209,6 +209,25 @@ ob_start();
                 <input type="datetime-local" id="payment_deadline" name="payment_deadline" class="form-control">
                 <small class="form-text">Last date to complete payment</small>
             </div>
+
+            <div class="row">
+                <div class="col">
+                    <div class="form-group">
+                        <label class="form-label">
+                            <input type="checkbox" id="no_booking_required" name="no_booking_required" style="margin-right: 0.5rem;">
+                            No booking required (attendees can mark attendance)
+                        </label>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="form-group">
+                        <label class="form-label">
+                            <input type="checkbox" id="booking_open" name="booking_open" checked style="margin-right: 0.5rem;">
+                            Booking Open (uncheck to close bookings)
+                        </label>
+                    </div>
+                </div>
+            </div>
             
             <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
                 <button type="submit" class="btn btn-primary">Save Meal</button>
@@ -248,6 +267,8 @@ function editMeal(meal) {
     document.getElementById('pay_on_arrival').checked = meal.pay_on_arrival == 1;
     document.getElementById('confirmation_deadline').value = meal.confirmation_deadline ? meal.confirmation_deadline.replace(' ', 'T').substring(0, 16) : '';
     document.getElementById('payment_deadline').value = meal.payment_deadline ? meal.payment_deadline.replace(' ', 'T').substring(0, 16) : '';
+    document.getElementById('no_booking_required').checked = meal.no_booking_required == 1;
+    document.getElementById('booking_open').checked = meal.booking_open != 0;
     modalManager.open('mealModal');
 }
 
@@ -300,7 +321,9 @@ document.getElementById('mealForm').addEventListener('submit', function(e) {
         prepayment_required: this.prepayment_required.checked ? 1 : 0,
         pay_on_arrival: this.pay_on_arrival.checked ? 1 : 0,
         confirmation_deadline: this.confirmation_deadline.value || null,
-        payment_deadline: this.payment_deadline.value || null
+        payment_deadline: this.payment_deadline.value || null,
+        no_booking_required: this.no_booking_required.checked ? 1 : 0,
+        booking_open: this.booking_open.checked ? 1 : 0
     };
     
     if (editingId) {

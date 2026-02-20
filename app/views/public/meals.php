@@ -141,6 +141,9 @@ if (!empty($meals)) {
                             
                             <div class="item-footer">
                                 <?php if ($isBooked): ?>
+                                    <?php if (!empty($meal['no_booking_required'])): ?>
+                                        <span class="badge badge-success">✓ Marked as Attending</span>
+                                    <?php else: ?>
                                     <span class="badge badge-success">✓ Booked</span>
                                     <?php if ($meal['requires_prepayment'] && $meal['payment_status'] === 'pending'): ?>
                                         <span class="badge badge-warning">Payment Pending</span>
@@ -148,6 +151,17 @@ if (!empty($meals)) {
                                         <span class="badge badge-success">Paid</span>
                                     <?php endif; ?>
                                     <button class="btn btn-danger btn-sm" onclick="cancelMeal(<?php echo $meal['id']; ?>)">Cancel Booking</button>
+                                    <?php endif; ?>
+                                <?php elseif (!empty($meal['no_booking_required'])): ?>
+                                    <?php if (isGuestMode()): ?>
+                                        <button class="btn btn-primary" disabled>Mark Attending (Login Required)</button>
+                                    <?php else: ?>
+                                        <button class="btn btn-primary" onclick="markAttending('meal', <?php echo $meal['id']; ?>)">
+                                            Mark as Attending
+                                        </button>
+                                    <?php endif; ?>
+                                <?php elseif (empty($meal['booking_open'])): ?>
+                                    <button class="btn btn-secondary" disabled>Booking Closed</button>
                                 <?php else: ?>
                                     <?php if ($isFull): ?>
                                         <span class="badge badge-danger">Full</span>
