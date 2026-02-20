@@ -35,6 +35,15 @@ ob_start();
         <div class="dashboard-section">
             <div class="dashboard-section-header" onclick="toggleSection(this)">
                 <h3><span class="toggle-icon">▶</span>Activities<?php if (!empty($activityBookings)): ?> (<?php echo count($activityBookings); ?>)<?php endif; ?></h3>
+                <?php
+                $activityTotal = 0;
+                foreach ($activityBookings as $b) {
+                    if ($b['requires_prepayment']) { $activityTotal += (float)$b['price']; }
+                }
+                ?>
+                <?php if ($activityTotal > 0): ?>
+                    <div class="section-action"><span class="badge badge-secondary">£<?php echo number_format($activityTotal, 2); ?> total</span></div>
+                <?php endif; ?>
             </div>
             <div class="dashboard-section-content" style="display: none;">
                 <?php if (!empty($activityBookings)): ?>
@@ -65,6 +74,15 @@ ob_start();
         <div class="dashboard-section">
             <div class="dashboard-section-header" onclick="toggleSection(this)">
                 <h3><span class="toggle-icon">▶</span>Meals<?php if (!empty($mealBookings)): ?> (<?php echo count($mealBookings); ?>)<?php endif; ?></h3>
+                <?php
+                $mealTotal = 0;
+                foreach ($mealBookings as $b) {
+                    if ($b['requires_prepayment']) { $mealTotal += (float)$b['price']; }
+                }
+                ?>
+                <?php if ($mealTotal > 0): ?>
+                    <div class="section-action"><span class="badge badge-secondary">£<?php echo number_format($mealTotal, 2); ?> total</span></div>
+                <?php endif; ?>
             </div>
             <div class="dashboard-section-content" style="display: none;">
                 <?php if (!empty($mealBookings)): ?>
@@ -95,6 +113,13 @@ ob_start();
         <div class="dashboard-section">
             <div class="dashboard-section-header" onclick="toggleSection(this)">
                 <h3><span class="toggle-icon">▶</span>Travel &amp; Accommodation</h3>
+                <?php
+                $accommodationTotal = 0;
+                foreach ($hotelReservations as $r) { $accommodationTotal += (float)$r['total_price']; }
+                ?>
+                <?php if ($accommodationTotal > 0): ?>
+                    <div class="section-action"><span class="badge badge-secondary">£<?php echo number_format($accommodationTotal, 2); ?> total</span></div>
+                <?php endif; ?>
             </div>
             <div class="dashboard-section-content" style="display: none;">
                 <?php if ($isAttending): ?>
@@ -105,7 +130,7 @@ ob_start();
                     <hr>
                     <p><strong>Carshare — Offering a ride</strong></p>
                     <p>From: <?php echo e($carshareOffer['origin']); ?></p>
-                    <p>Available seats: <?php echo e($carshareOffer['available_spaces']); ?></p>
+                    <p>Capacity: <?php echo (int)$carshareOffer['passenger_capacity']; ?> passengers &bull; Available: <?php echo (int)$carshareOffer['available_spaces']; ?> spaces</p>
                 <?php endif; ?>
 
                 <?php if ($carshareBooking): ?>
@@ -172,6 +197,11 @@ ob_start();
                     <a href="/index.php?page=hotels" class="btn btn-primary btn-sm">Browse Hotels</a>
                     <a href="/index.php?page=hosting" class="btn btn-secondary btn-sm">View Hosting Offers</a>
                     <a href="/index.php?page=carshare" class="btn btn-secondary btn-sm">View Carshare</a>
+                <?php endif; ?>
+
+                <?php if ($isAttending): ?>
+                    <hr>
+                    <button class="btn btn-secondary btn-sm" onclick="modalManager.open('update-attendance-modal')">Update Travel &amp; Hosting Details</button>
                 <?php endif; ?>
             </div>
         </div>
@@ -436,6 +466,128 @@ ob_start();
 </div>
 <?php endif; ?>
 
+<!-- Update Attendance Modal (for users already attending) -->
+<?php if ($isAttending): ?>
+<?php
+$updateDays = is_array($attendance['days_attending']) ? $attendance['days_attending'] : explode(',', $attendance['days_attending']);
+$updateTravel = is_array($attendance['travel_method']) ? $attendance['travel_method'] : explode(',', $attendance['travel_method']);
+$updateDays = array_map('trim', $updateDays);
+$updateTravel = array_map('trim', $updateTravel);
+?>
+<div class="modal" id="update-attendance-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title">Update Travel &amp; Hosting Details</h3>
+            <button class="modal-close" onclick="modalManager.close('update-attendance-modal')" aria-label="Close">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form id="update-attendance-form">
+                <?php echo CSRF::field(); ?>
+
+                <div class="form-group">
+                    <label class="form-label">Days Attending *</label>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="upd-day-friday" name="days_attending[]" value="Friday"
+                               <?php echo in_array('Friday', $updateDays) ? 'checked' : ''; ?>>
+                        <label class="form-check-label" for="upd-day-friday">Friday (Nov 20)</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="upd-day-saturday" name="days_attending[]" value="Saturday"
+                               <?php echo in_array('Saturday', $updateDays) ? 'checked' : ''; ?>>
+                        <label class="form-check-label" for="upd-day-saturday">Saturday (Nov 21)</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="upd-day-sunday" name="days_attending[]" value="Sunday"
+                               <?php echo in_array('Sunday', $updateDays) ? 'checked' : ''; ?>>
+                        <label class="form-check-label" for="upd-day-sunday">Sunday (Nov 22)</label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Travel Method *</label>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="upd-travel-train" name="travel_method[]" value="Train"
+                               <?php echo in_array('Train', $updateTravel) ? 'checked' : ''; ?>>
+                        <label class="form-check-label" for="upd-travel-train">Train</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="upd-travel-plane" name="travel_method[]" value="Plane"
+                               <?php echo in_array('Plane', $updateTravel) ? 'checked' : ''; ?>>
+                        <label class="form-check-label" for="upd-travel-plane">Plane</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="upd-travel-car" name="travel_method[]" value="Car"
+                               <?php echo in_array('Car', $updateTravel) ? 'checked' : ''; ?>>
+                        <label class="form-check-label" for="upd-travel-car">Car</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="upd-travel-coach" name="travel_method[]" value="Coach"
+                               <?php echo in_array('Coach', $updateTravel) ? 'checked' : ''; ?>>
+                        <label class="form-check-label" for="upd-travel-coach">Coach</label>
+                    </div>
+                </div>
+
+                <div id="upd-carshare-section" style="display: <?php echo in_array('Car', $updateTravel) ? 'block' : 'none'; ?>;">
+                    <div class="form-group">
+                        <label class="form-label">Can you offer a carshare/lift?</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" id="upd-can-carshare-yes" name="can_carshare" value="yes"
+                                   <?php echo $carshareOffer ? 'checked' : ''; ?>>
+                            <label class="form-check-label" for="upd-can-carshare-yes">Yes</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" id="upd-can-carshare-no" name="can_carshare" value="no"
+                                   <?php echo (!$carshareOffer && in_array('Car', $updateTravel)) ? 'checked' : ''; ?>>
+                            <label class="form-check-label" for="upd-can-carshare-no">No</label>
+                        </div>
+                    </div>
+                    <div id="upd-carshare-details" style="display: <?php echo $carshareOffer ? 'block' : 'none'; ?>;">
+                        <div class="form-group">
+                            <label class="form-label" for="upd-carshare-origin">Where are you travelling from?</label>
+                            <input type="text" class="form-control" id="upd-carshare-origin" name="carshare_origin"
+                                   value="<?php echo e($carshareOffer['origin'] ?? ''); ?>">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="upd-carshare-capacity">How many passengers can you take?</label>
+                            <input type="number" class="form-control" id="upd-carshare-capacity" name="carshare_capacity"
+                                   min="1" max="8" value="<?php echo (int)($carshareOffer['passenger_capacity'] ?? 0) ?: ''; ?>">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Can you host people?</label>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" id="upd-can-host-yes" name="can_host" value="yes"
+                               <?php echo $hostingOffer ? 'checked' : ''; ?>>
+                        <label class="form-check-label" for="upd-can-host-yes">Yes</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" id="upd-can-host-no" name="can_host" value="no"
+                               <?php echo !$hostingOffer ? 'checked' : ''; ?>>
+                        <label class="form-check-label" for="upd-can-host-no">No</label>
+                    </div>
+                </div>
+
+                <div id="upd-hosting-details" style="display: <?php echo $hostingOffer ? 'block' : 'none'; ?>;">
+                    <div class="form-group">
+                        <label class="form-label" for="upd-hosting-capacity">How many people can you host?</label>
+                        <input type="number" class="form-control" id="upd-hosting-capacity" name="hosting_capacity"
+                               min="1" max="20" value="<?php echo (int)($hostingOffer['capacity'] ?? 0) ?: ''; ?>">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="upd-hosting-notes">Additional notes (optional)</label>
+                        <textarea class="form-control" id="upd-hosting-notes" name="hosting_notes" rows="3"><?php echo e($hostingOffer['notes'] ?? ''); ?></textarea>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block btn-lg">Save Changes</button>
+            </form>
+        </div>
+    </div>
+</div>
+<?php endif; ?>
+
 <script>
 function toggleSection(header) {
     var content = header.nextElementSibling;
@@ -551,6 +703,72 @@ function cancelAttendance() {
         });
     });
 }
+
+// Update attendance modal JS (for users already attending)
+document.addEventListener('DOMContentLoaded', function() {
+    var updTravelCar = document.getElementById('upd-travel-car');
+    if (updTravelCar) {
+        updTravelCar.addEventListener('change', function() {
+            document.getElementById('upd-carshare-section').style.display = this.checked ? 'block' : 'none';
+        });
+    }
+    var updCanCarshareYes = document.getElementById('upd-can-carshare-yes');
+    var updCanCarshareNo = document.getElementById('upd-can-carshare-no');
+    if (updCanCarshareYes) {
+        updCanCarshareYes.addEventListener('change', function() {
+            document.getElementById('upd-carshare-details').style.display = this.checked ? 'block' : 'none';
+        });
+    }
+    if (updCanCarshareNo) {
+        updCanCarshareNo.addEventListener('change', function() {
+            document.getElementById('upd-carshare-details').style.display = 'none';
+        });
+    }
+    var updCanHostYes = document.getElementById('upd-can-host-yes');
+    var updCanHostNo = document.getElementById('upd-can-host-no');
+    if (updCanHostYes) {
+        updCanHostYes.addEventListener('change', function() {
+            document.getElementById('upd-hosting-details').style.display = this.checked ? 'block' : 'none';
+        });
+    }
+    if (updCanHostNo) {
+        updCanHostNo.addEventListener('change', function() {
+            document.getElementById('upd-hosting-details').style.display = 'none';
+        });
+    }
+
+    var updateForm = document.getElementById('update-attendance-form');
+    if (updateForm) {
+        updateForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            var csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+            var form = this;
+            var days = Array.from(form.querySelectorAll('input[name="days_attending[]"]:checked')).map(function(el) { return el.value; });
+            var travel = Array.from(form.querySelectorAll('input[name="travel_method[]"]:checked')).map(function(el) { return el.value; });
+            if (days.length === 0) { showAlert('Please select at least one day', 'danger'); return; }
+            if (travel.length === 0) { showAlert('Please select at least one travel method', 'danger'); return; }
+            var canCarshare = form.querySelector('input[name="can_carshare"]:checked');
+            var canHost = form.querySelector('input[name="can_host"]:checked');
+            var data = { csrf_token: csrfToken, days_attending: days, travel_method: travel };
+            if (canCarshare && canCarshare.value === 'yes') {
+                data.carshare_origin = form.carshare_origin.value;
+                data.carshare_capacity = form.carshare_capacity.value;
+            }
+            if (canHost && canHost.value === 'yes') {
+                data.hosting_capacity = form.hosting_capacity.value;
+                data.hosting_notes = form.hosting_notes.value;
+            }
+            apiCall('/api/attendance-update.php', 'POST', data, function(err, response) {
+                if (err) {
+                    showAlert(err.message || 'Failed to update attendance', 'danger');
+                } else {
+                    showAlert('Attendance updated successfully!', 'success');
+                    setTimeout(function() { location.reload(); }, 1000);
+                }
+            });
+        });
+    }
+});
 </script>
 
 <?php
