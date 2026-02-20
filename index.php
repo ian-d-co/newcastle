@@ -387,6 +387,7 @@ try {
                     }
                 }
             }
+            unset($activity);
             
             include BASE_PATH . '/app/views/public/activities.php';
             break;
@@ -410,6 +411,7 @@ try {
                     }
                 }
             }
+            unset($meal);
             
             include BASE_PATH . '/app/views/public/meals.php';
             break;
@@ -424,6 +426,7 @@ try {
                 $poll['user_votes'] = $pollModel->getUserVotes($poll['id'], $userId);
                 $poll['options'] = $pollModel->getOptions($poll['id']);
             }
+            unset($poll);
             
             include BASE_PATH . '/app/views/public/polls.php';
             break;
@@ -465,6 +468,7 @@ try {
             foreach ($hotels as &$hotel) {
                 $hotel['rooms'] = $hotelModel->getRoomsByHotel($hotel['id']);
             }
+            unset($hotel);
             
             $userReservations = $hotelModel->getUserReservations($userId, $event['id']);
             
