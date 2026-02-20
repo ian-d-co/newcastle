@@ -48,6 +48,8 @@ try {
 
     if (!empty($input['hosting_capacity'])) {
         $hosting->updateOffer($userId, $event['id'], (int)$input['hosting_capacity'], $input['hosting_notes'] ?? '');
+    } else {
+        $hosting->removeOffer($userId, $event['id']);
     }
 
     jsonResponse(['success' => true, 'message' => 'Attendance updated successfully']);

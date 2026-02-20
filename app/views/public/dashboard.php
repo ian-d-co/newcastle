@@ -290,13 +290,23 @@ ob_start();
             FROM meal_bookings mb
             JOIN meals m ON mb.meal_id = m.id
             WHERE mb.user_id = :user_id2 AND m.event_id = :event_id2 AND m.price > 0
-            ORDER BY day
+            UNION ALL
+            SELECT 'hotel' as type, CONCAT(h.name, ' - ', hr.room_type) as title, NULL as day,
+                   rr.total_price as price, rr.payment_status, rr.total_price as amount_due,
+                   COALESCE(rr.amount_paid, 0) as amount_paid
+            FROM room_reservations rr
+            JOIN hotel_rooms hr ON rr.hotel_room_id = hr.id
+            JOIN hotels h ON hr.hotel_id = h.id
+            WHERE rr.user_id = :user_id3 AND h.event_id = :event_id3 AND rr.payment_status != 'cancelled'
+            ORDER BY COALESCE(day, 'zzz'), type
         ");
         $paymentStmt->execute([
             'user_id1' => $userId,
             'event_id1' => $event['id'],
             'user_id2' => $userId,
-            'event_id2' => $event['id']
+            'event_id2' => $event['id'],
+            'user_id3' => $userId,
+            'event_id3' => $event['id']
         ]);
         $myPayments = $paymentStmt->fetchAll();
         $totalDue = array_sum(array_column($myPayments, 'amount_due')) ?: array_sum(array_column($myPayments, 'price'));

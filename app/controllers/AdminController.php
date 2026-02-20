@@ -1229,11 +1229,11 @@ class AdminController {
             
             $db = getDbConnection();
             
-            $sql = "INSERT INTO hotel_rooms (hotel_id, room_type, price, simple_price_type, capacity, quantity_available, quantity_reserved, status, booking_open,
+            $sql = "INSERT INTO hotel_rooms (hotel_id, room_type, price, simple_price_type, capacity, quantity_available, quantity_reserved, status,
                     single_price_friday, single_price_saturday, double_price_friday, double_price_saturday,
                     triple_price_friday, triple_price_saturday, breakfast_included, book_direct_with_hotel,
                     book_with_group, group_payment_due)
-                    VALUES (:hotel_id, :room_type, :price, :simple_price_type, :capacity, :quantity_available, 0, 'available', :booking_open,
+                    VALUES (:hotel_id, :room_type, :price, :simple_price_type, :capacity, :quantity_available, 0, 'available',
                     :single_price_friday, :single_price_saturday, :double_price_friday, :double_price_saturday,
                     :triple_price_friday, :triple_price_saturday, :breakfast_included, :book_direct_with_hotel,
                     :book_with_group, :group_payment_due)";
@@ -1245,7 +1245,6 @@ class AdminController {
                 'simple_price_type' => in_array($data['simple_price_type'] ?? '', ['per_night', 'both_nights']) ? $data['simple_price_type'] : 'per_night',
                 'capacity' => (int)($data['capacity'] ?? 2),
                 'quantity_available' => (int)($data['quantity_available'] ?? 1),
-                'booking_open' => isset($data['booking_open']) ? (int)$data['booking_open'] : 1,
                 'single_price_friday' => (float)($data['single_price_friday'] ?? 0),
                 'single_price_saturday' => (float)($data['single_price_saturday'] ?? 0),
                 'double_price_friday' => (float)($data['double_price_friday'] ?? 0),
