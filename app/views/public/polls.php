@@ -133,7 +133,7 @@ ob_start();
             <div class="expander" style="margin-top: 2rem;">
                 <div class="expander-header" onclick="toggleExpander(this)" style="background: linear-gradient(135deg, #6d4c1f 0%, #8b6331 100%);">
                     <h2>Closed Polls (<?php echo count($closedPolls); ?>)</h2>
-                    <span class="expander-icon">▶</span>
+                    <span class="expander-icon">▼</span>
                 </div>
                 <div class="expander-content">
                     <?php foreach ($closedPolls as $poll): ?>
@@ -177,28 +177,12 @@ ob_start();
 
 <script>
 function toggleExpander(header) {
-    const icon = header.querySelector('.expander-icon');
+    header.classList.toggle('active');
     const content = header.nextElementSibling;
-
-    if (content.style.display === 'none' || !content.style.display) {
-        content.style.display = 'block';
-        icon.textContent = '▼';
-        header.classList.add('active');
-    } else {
-        content.style.display = 'none';
-        icon.textContent = '▶';
-        header.classList.remove('active');
-    }
+    content.classList.toggle('active');
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-    document.querySelectorAll('.expander-content').forEach(function(content) {
-        content.style.display = 'none';
-    });
-    document.querySelectorAll('.expander-icon').forEach(function(icon) {
-        icon.textContent = '▶';
-    });
-
     document.querySelectorAll('.poll-form').forEach(function(form) {
         form.addEventListener('submit', function(e) {
             e.preventDefault();
