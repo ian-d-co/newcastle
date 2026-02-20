@@ -275,6 +275,7 @@ CREATE TABLE IF NOT EXISTS hotel_rooms (
     room_type VARCHAR(100) NOT NULL,
     capacity INT NOT NULL,
     price DECIMAL(10, 2) NOT NULL,
+    simple_price_type VARCHAR(20) DEFAULT 'per_night',
     quantity_available INT NOT NULL,
     quantity_reserved INT NOT NULL DEFAULT 0,
     status ENUM('available','unavailable') NOT NULL DEFAULT 'available',

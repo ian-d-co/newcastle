@@ -43,11 +43,17 @@ if (!empty($allRoomIds)) {
             </div>
         <?php else: ?>
             <?php foreach ($hotels as $hotel): ?>
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h3 class="card-title"><?php echo e($hotel['name']); ?></h3>
+                <div class="card mb-3">
+                    <div class="card-header" style="cursor: pointer; user-select: none;" 
+                         onclick="toggleHotelSection('hotel-<?php echo $hotel['id']; ?>')"
+                         tabindex="0" role="button" aria-expanded="false"
+                         onkeydown="if(event.key==='Enter'||event.key===' '){toggleHotelSection('hotel-<?php echo $hotel['id']; ?>');}">
+                        <h3 class="card-title" style="display: flex; justify-content: space-between; align-items: center; margin: 0;">
+                            <span><?php echo e($hotel['name']); ?></span>
+                            <span id="toggle-icon-hotel-<?php echo $hotel['id']; ?>" style="font-size: 1.2rem;" aria-hidden="true">▼</span>
+                        </h3>
                     </div>
-                    <div class="card-body">
+                    <div id="hotel-<?php echo $hotel['id']; ?>" class="card-body" style="display: none;">
                         <?php if (!empty($hotel['location'])): ?>
                             <p><strong>Location:</strong> <?php echo e($hotel['location']); ?></p>
                         <?php endif; ?>
@@ -139,7 +145,7 @@ if (!empty($allRoomIds)) {
                                             </tbody>
                                         </table>
                                         <?php else: ?>
-                                        <span style="margin-left: 0.25rem;">£<?php echo number_format($room['price'], 2); ?> per night</span>
+                                        <span style="margin-left: 0.25rem;">£<?php echo number_format($room['price'], 2); ?> <?php echo ($room['simple_price_type'] ?? 'per_night') === 'both_nights' ? 'for both nights' : 'per night'; ?></span>
                                         <?php endif; ?>
                                     </div>
 
@@ -316,7 +322,7 @@ if (!empty($allRoomIds)) {
                                                     <input type="date" class="form-control" id="check-out-<?php echo $room['id']; ?>" name="check_out" min="2026-11-20" required>
                                                 </div>
                                                 
-                                                <p><strong>Price per night:</strong> £<?php echo number_format($room['price'], 2); ?></p>
+                                                <p><strong>Price:</strong> £<?php echo number_format($room['price'], 2); ?> <?php echo ($room['simple_price_type'] ?? 'per_night') === 'both_nights' ? 'for both nights' : 'per night'; ?></p>
                                                 
                                                 <button type="submit" class="btn btn-primary btn-block">Reserve Room</button>
                                                 <?php endif; ?>
@@ -374,6 +380,21 @@ if (!empty($allRoomIds)) {
 </div>
 
 <script>
+function toggleHotelSection(sectionId) {
+    var section = document.getElementById(sectionId);
+    var icon = document.getElementById('toggle-icon-' + sectionId);
+    var header = section.previousElementSibling;
+    
+    if (section.style.display === 'none') {
+        section.style.display = 'block';
+        icon.textContent = '▲';
+        if (header) header.setAttribute('aria-expanded', 'true');
+    } else {
+        section.style.display = 'none';
+        icon.textContent = '▼';
+        if (header) header.setAttribute('aria-expanded', 'false');
+    }
+}
 function showAttendanceRequired() {
     showAlert('Please register your event attendance first from your Dashboard or My Plans page.', 'warning');
     setTimeout(function() {

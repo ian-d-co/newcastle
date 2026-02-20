@@ -1217,11 +1217,11 @@ class AdminController {
             
             $db = getDbConnection();
             
-            $sql = "INSERT INTO hotel_rooms (hotel_id, room_type, price, capacity, quantity_available, quantity_reserved, status,
+            $sql = "INSERT INTO hotel_rooms (hotel_id, room_type, price, simple_price_type, capacity, quantity_available, quantity_reserved, status,
                     single_price_friday, single_price_saturday, double_price_friday, double_price_saturday,
                     triple_price_friday, triple_price_saturday, breakfast_included, book_direct_with_hotel,
                     book_with_group, group_payment_due)
-                    VALUES (:hotel_id, :room_type, :price, :capacity, :quantity_available, 0, 'available',
+                    VALUES (:hotel_id, :room_type, :price, :simple_price_type, :capacity, :quantity_available, 0, 'available',
                     :single_price_friday, :single_price_saturday, :double_price_friday, :double_price_saturday,
                     :triple_price_friday, :triple_price_saturday, :breakfast_included, :book_direct_with_hotel,
                     :book_with_group, :group_payment_due)";
@@ -1230,6 +1230,7 @@ class AdminController {
                 'hotel_id' => (int)$data['hotel_id'],
                 'room_type' => $data['room_type'],
                 'price' => (float)$data['price'],
+                'simple_price_type' => in_array($data['simple_price_type'] ?? '', ['per_night', 'both_nights']) ? $data['simple_price_type'] : 'per_night',
                 'capacity' => (int)($data['capacity'] ?? 2),
                 'quantity_available' => (int)($data['quantity_available'] ?? 1),
                 'single_price_friday' => (float)($data['single_price_friday'] ?? 0),
@@ -1298,6 +1299,7 @@ class AdminController {
             $sql = "UPDATE hotel_rooms SET 
                     room_type = :room_type,
                     price = :price,
+                    simple_price_type = :simple_price_type,
                     capacity = :capacity,
                     quantity_available = :quantity_available,
                     single_price_friday = :single_price_friday,
@@ -1317,6 +1319,7 @@ class AdminController {
                 'id' => (int)$data['id'],
                 'room_type' => $data['room_type'],
                 'price' => (float)$data['price'],
+                'simple_price_type' => in_array($data['simple_price_type'] ?? '', ['per_night', 'both_nights']) ? $data['simple_price_type'] : 'per_night',
                 'capacity' => (int)($data['capacity'] ?? 2),
                 'quantity_available' => (int)($data['quantity_available'] ?? 1),
                 'single_price_friday' => (float)($data['single_price_friday'] ?? 0),
