@@ -155,6 +155,21 @@ class Hosting {
         return $stmt->fetchAll();
     }
     
+    public function removeOffer($userId, $eventId) {
+        $offer = $this->getUserOffer($userId, $eventId);
+
+        if (!$offer) return;
+
+        $booked = $offer['capacity'] - $offer['available_spaces'];
+        if ($booked > 0) {
+            throw new Exception('Cannot remove hosting offer - ' . $booked . ' guest(s) have already booked');
+        }
+
+        $sql = "DELETE FROM hosting_offers WHERE user_id = :user_id AND event_id = :event_id";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute(['user_id' => $userId, 'event_id' => $eventId]);
+    }
+
     public function isBooked($offerId, $userId) {
         $sql = "SELECT COUNT(*) as count FROM hosting_bookings WHERE hosting_offer_id = :offer_id AND user_id = :user_id";
         $stmt = $this->db->prepare($sql);
