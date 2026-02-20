@@ -7,6 +7,8 @@
  */
 
 class AdminController {
+
+    const ALLOWED_DAYS = ['Friday', 'Saturday', 'Sunday'];
     
     /**
      * Get the active event
@@ -136,6 +138,13 @@ class AdminController {
                     jsonResponse(['success' => false, 'message' => "Missing required field: $field"], 400);
                 }
             }
+
+            // Normalize and whitelist the day value
+            $normalizedDay = ucfirst(strtolower(trim($data['day'])));
+            if (!in_array($normalizedDay, self::ALLOWED_DAYS, true)) {
+                error_log("AdminController::createActivity() - Invalid day value: " . $data['day']);
+                jsonResponse(['success' => false, 'message' => 'Invalid day. Must be Friday, Saturday, or Sunday'], 400);
+            }
             
             $db = getDbConnection();
             
@@ -147,7 +156,7 @@ class AdminController {
                 'title' => $data['title'],
                 'description' => $data['description'] ?? '',
                 'link' => $data['link'] ?? null,
-                'day' => trim($data['day']),
+                'day' => $normalizedDay,
                 'start_time' => $data['start_time'],
                 'end_time' => $data['end_time'],
                 'max_capacity' => $data['max_capacity'] ?? 20,
@@ -209,6 +218,13 @@ class AdminController {
                     jsonResponse(['success' => false, 'message' => "Missing required field: $field"], 400);
                 }
             }
+
+            // Normalize and whitelist the day value
+            $normalizedDay = ucfirst(strtolower(trim($data['day'])));
+            if (!in_array($normalizedDay, self::ALLOWED_DAYS, true)) {
+                error_log("AdminController::updateActivity() - Invalid day value: " . $data['day']);
+                jsonResponse(['success' => false, 'message' => 'Invalid day. Must be Friday, Saturday, or Sunday'], 400);
+            }
             
             $db = getDbConnection();
             
@@ -235,7 +251,7 @@ class AdminController {
                 'title' => $data['title'],
                 'description' => $data['description'] ?? '',
                 'link' => $data['link'] ?? null,
-                'day' => trim($data['day']),
+                'day' => $normalizedDay,
                 'start_time' => $data['start_time'],
                 'end_time' => $data['end_time'],
                 'max_capacity' => $data['max_capacity'] ?? 20,
