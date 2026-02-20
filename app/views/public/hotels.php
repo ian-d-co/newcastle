@@ -137,6 +137,8 @@ if (!empty($allRoomIds)) {
                                     <div class="item-footer">
                                         <?php if (isGuestMode()): ?>
                                             <button class="btn btn-primary" disabled>Reserve (Login Required)</button>
+                                        <?php elseif (!hasRegisteredAttendance()): ?>
+                                            <button class="btn btn-warning" onclick="showAttendanceRequired()">Register Attendance First</button>
                                         <?php elseif ($room['quantity_available'] > 0): ?>
                                             <button class="btn btn-primary" onclick="modalManager.open('reserve-modal-<?php echo $room['id']; ?>')">
                                                 Reserve Room
@@ -209,6 +211,13 @@ if (!empty($allRoomIds)) {
 </div>
 
 <script>
+function showAttendanceRequired() {
+    showAlert('Please register your event attendance first from your Dashboard or My Plans page.', 'warning');
+    setTimeout(function() {
+        window.location.href = '/index.php?page=dashboard';
+    }, 2000);
+}
+
 function submitReservation(roomId) {
     const checkIn = document.getElementById('check-in-' + roomId).value;
     const checkOut = document.getElementById('check-out-' + roomId).value;
