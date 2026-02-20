@@ -227,7 +227,14 @@ class Hotel {
             $sql = "UPDATE room_reservations SET payment_status = 'cancelled' WHERE id = :reservation_id";
             $stmt = $this->db->prepare($sql);
             $stmt->execute(['reservation_id' => $reservationId]);
-            error_log('Hotel::cancelReservation() - Reservation status updated to cancelled');
+            $rowsAffected = $stmt->rowCount();
+
+            if ($rowsAffected === 0) {
+                error_log('Hotel::cancelReservation() - FAILED: UPDATE affected 0 rows for reservation_id: ' . (int)$reservationId);
+                throw new Exception('Failed to cancel reservation - database update did not affect any rows. Reservation may not exist or already be cancelled.');
+            }
+
+            error_log('Hotel::cancelReservation() - Reservation status updated to cancelled (' . $rowsAffected . ' rows)');
             
             $sql = "UPDATE hotel_rooms 
                     SET quantity_available = quantity_available + 1, 
@@ -235,13 +242,14 @@ class Hotel {
                     WHERE id = :room_id";
             $stmt = $this->db->prepare($sql);
             $stmt->execute(['room_id' => $reservation['hotel_room_id']]);
-            $rowsAffected = $stmt->rowCount();
-            error_log('Hotel::cancelReservation() - Rows affected by inventory update: ' . $rowsAffected);
+            $roomsAffected = $stmt->rowCount();
 
-            if ($rowsAffected === 0) {
-                throw new Exception('Failed to update hotel room inventory - room may not exist');
+            if ($roomsAffected === 0) {
+                error_log('Hotel::cancelReservation() - WARNING: Room quantity update affected 0 rows for room_id: ' . (int)$reservation['hotel_room_id']);
+                // Don't throw here - reservation is already cancelled, this is just inventory
             }
-            error_log('Hotel::cancelReservation() - Hotel room quantities updated');
+
+            error_log('Hotel::cancelReservation() - Hotel room quantities updated (' . $roomsAffected . ' rows)');
             
             $this->db->commit();
             error_log('Hotel::cancelReservation() - Transaction committed successfully');
