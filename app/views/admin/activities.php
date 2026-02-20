@@ -37,7 +37,12 @@ ob_start();
                             </tr>
                         </thead>
                         <tbody>
-                            <?php foreach ($activities as $activity): ?>
+                            <?php
+                            $seenActivityIds = [];
+                            foreach ($activities as $activity):
+                                if (isset($seenActivityIds[$activity['id']])) continue;
+                                $seenActivityIds[$activity['id']] = true;
+                            ?>
                                 <tr style="border-bottom: 1px solid #dee2e6;">
                                     <td style="padding: 0.75rem;"><?php echo e($activity['title']); ?></td>
                                     <td style="padding: 0.75rem;"><?php echo e($activity['day']); ?></td>
