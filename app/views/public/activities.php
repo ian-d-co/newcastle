@@ -39,12 +39,18 @@ if (!empty($activities)) {
             </div>
         <?php else: ?>
             <?php
-            $days = ['Friday' => [], 'Saturday' => [], 'Sunday' => []];
+            $dayOrder = ['Friday' => [], 'Saturday' => [], 'Sunday' => []];
+            $seenActivityIds = [];
             foreach ($activities as $activity) {
-                if (array_key_exists($activity['day'], $days)) {
-                    $days[$activity['day']][] = $activity;
+                // Only add each activity once based on its ID
+                if (!isset($seenActivityIds[$activity['id']])) {
+                    if (isset($dayOrder[$activity['day']])) {
+                        $dayOrder[$activity['day']][] = $activity;
+                        $seenActivityIds[$activity['id']] = true;
+                    }
                 }
             }
+            $days = $dayOrder;
             ?>
 
             <?php foreach ($days as $day => $dayActivities): ?>
