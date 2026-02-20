@@ -23,13 +23,33 @@ try {
     $roomId = $input['room_id'] ?? null;
     $checkIn = $input['check_in'] ?? null;
     $checkOut = $input['check_out'] ?? null;
+    $occupancyType = $input['occupancy_type'] ?? null;
+    $nights = $input['nights'] ?? [];
+    $bookDirect = !empty($input['book_direct']);
+    $bookWithGroup = !empty($input['book_with_group']);
 
-    if (!$roomId || !$checkIn || !$checkOut) {
-        throw new Exception('Room ID, check-in and check-out dates are required');
+    if (!$roomId) {
+        throw new Exception('Room ID is required');
+    }
+
+    // Must provide either occupancy-based OR date-based parameters
+    if ($occupancyType && !empty($nights)) {
+        $validOccupancy = ['single', 'double', 'triple'];
+        if (!in_array($occupancyType, $validOccupancy)) {
+            throw new Exception('Invalid occupancy type');
+        }
+        $validNights = ['friday', 'saturday'];
+        foreach ($nights as $night) {
+            if (!in_array($night, $validNights)) {
+                throw new Exception('Invalid night selection');
+            }
+        }
+    } elseif (!$checkIn || !$checkOut) {
+        throw new Exception('Either occupancy type with nights, or check-in and check-out dates are required');
     }
 
     $hotelModel = new Hotel();
-    $hotelModel->reserveRoom($roomId, getCurrentUserId(), $checkIn, $checkOut);
+    $hotelModel->reserveRoom($roomId, getCurrentUserId(), $checkIn, $checkOut, $occupancyType, $nights, $bookDirect, $bookWithGroup);
 
     jsonResponse(['success' => true, 'message' => 'Room reserved successfully']);
 } catch (Exception $e) {

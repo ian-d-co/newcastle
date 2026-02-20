@@ -124,7 +124,7 @@ class Hotel {
         return $stmt->execute(['id' => $id]);
     }
     
-    public function reserveRoom($roomId, $userId, $checkIn, $checkOut) {
+    public function reserveRoom($roomId, $userId, $checkIn, $checkOut, $occupancyType = null, $nights = [], $bookDirect = false, $bookWithGroup = false) {
         $this->db->beginTransaction();
         
         try {
@@ -134,13 +134,38 @@ class Hotel {
                 throw new Exception('No available rooms');
             }
             
-            $checkInDate = new DateTime($checkIn);
-            $checkOutDate = new DateTime($checkOut);
-            $nights = $checkInDate->diff($checkOutDate)->days;
-            $totalPrice = $nights * $room['price'];
+            $fridayNight = in_array('friday', $nights);
+            $saturdayNight = in_array('saturday', $nights);
             
-            $sql = "INSERT INTO room_reservations (hotel_room_id, user_id, check_in, check_out, total_nights, total_price)
-                    VALUES (:room_id, :user_id, :check_in, :check_out, :total_nights, :total_price)";
+            if ($occupancyType && !empty($nights)) {
+                // Validate occupancy type against known values
+                $validOccupancyTypes = ['single', 'double', 'triple'];
+                if (!in_array($occupancyType, $validOccupancyTypes)) {
+                    throw new Exception('Invalid occupancy type');
+                }
+                // Occupancy-based pricing
+                $totalNights = count($nights);
+                $totalPrice = 0;
+                if ($fridayNight) {
+                    $totalPrice += (float)($room[$occupancyType . '_price_friday'] ?? 0);
+                }
+                if ($saturdayNight) {
+                    $totalPrice += (float)($room[$occupancyType . '_price_saturday'] ?? 0);
+                }
+                // check_in/check_out are NULL for occupancy-based bookings
+                $checkIn = null;
+                $checkOut = null;
+            } else {
+                // Date-based pricing
+                $checkInDate = new DateTime($checkIn);
+                $checkOutDate = new DateTime($checkOut);
+                $totalNights = $checkInDate->diff($checkOutDate)->days;
+                $totalPrice = $totalNights * $room['price'];
+                $occupancyType = null;
+            }
+            
+            $sql = "INSERT INTO room_reservations (hotel_room_id, user_id, check_in, check_out, total_nights, total_price, occupancy_type, friday_night, saturday_night, calculated_price, book_direct, book_with_group)
+                    VALUES (:room_id, :user_id, :check_in, :check_out, :total_nights, :total_price, :occupancy_type, :friday_night, :saturday_night, :calculated_price, :book_direct, :book_with_group)";
             
             $stmt = $this->db->prepare($sql);
             $stmt->execute([
@@ -148,8 +173,14 @@ class Hotel {
                 'user_id' => $userId,
                 'check_in' => $checkIn,
                 'check_out' => $checkOut,
-                'total_nights' => $nights,
-                'total_price' => $totalPrice
+                'total_nights' => $totalNights,
+                'total_price' => $totalPrice,
+                'occupancy_type' => $occupancyType,
+                'friday_night' => $fridayNight ? 1 : 0,
+                'saturday_night' => $saturdayNight ? 1 : 0,
+                'calculated_price' => $totalPrice,
+                'book_direct' => $bookDirect ? 1 : 0,
+                'book_with_group' => $bookWithGroup ? 1 : 0
             ]);
             
             $sql = "UPDATE hotel_rooms 
@@ -205,7 +236,7 @@ class Hotel {
                 JOIN hotel_rooms hr ON rr.hotel_room_id = hr.id
                 JOIN hotels h ON hr.hotel_id = h.id
                 WHERE rr.user_id = :user_id AND h.event_id = :event_id AND rr.payment_status != 'cancelled'
-                ORDER BY rr.check_in";
+                ORDER BY rr.created_at";
         
         $stmt = $this->db->prepare($sql);
         $stmt->execute(['user_id' => $userId, 'event_id' => $eventId]);

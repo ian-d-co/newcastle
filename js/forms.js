@@ -282,15 +282,25 @@
     };
 
     // Hotel reservation
-    window.reserveRoom = function(roomId, checkIn, checkOut) {
+    window.reserveRoom = function(roomId, checkIn, checkOut, occupancyData) {
         const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
         
-        apiCall('/api/hotel-reserve.php', 'POST', {
+        const payload = {
             room_id: roomId,
-            check_in: checkIn,
-            check_out: checkOut,
             csrf_token: csrfToken
-        }, function(err, response) {
+        };
+
+        if (occupancyData) {
+            payload.occupancy_type = occupancyData.occupancy_type;
+            payload.nights = occupancyData.nights;
+            payload.book_direct = occupancyData.book_direct || false;
+            payload.book_with_group = occupancyData.book_with_group || false;
+        } else {
+            payload.check_in = checkIn;
+            payload.check_out = checkOut;
+        }
+        
+        apiCall('/api/hotel-reserve.php', 'POST', payload, function(err, response) {
             if (err) {
                 showAlert(err.message || 'Failed to reserve room', 'danger');
             } else {

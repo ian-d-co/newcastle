@@ -1181,7 +1181,7 @@ class AdminController {
             error_log('AdminController::createRoom() - JSON decoded successfully');
             
             // Validate required fields
-            $requiredFields = ['hotel_id', 'room_type', 'price'];
+            $requiredFields = ['hotel_id', 'room_type'];
             foreach ($requiredFields as $field) {
                 if (!isset($data[$field])) {
                     error_log("AdminController::createRoom() - Missing required field: $field");
@@ -1259,7 +1259,7 @@ class AdminController {
             error_log('AdminController::updateRoom() - JSON decoded successfully');
             
             // Validate required fields
-            $requiredFields = ['id', 'room_type', 'price'];
+            $requiredFields = ['id', 'room_type'];
             foreach ($requiredFields as $field) {
                 if (!isset($data[$field])) {
                     error_log("AdminController::updateRoom() - Missing required field: $field");
@@ -1659,7 +1659,7 @@ class AdminController {
                 FROM activity_bookings ab
                 JOIN users u ON ab.user_id = u.id
                 JOIN activities a ON ab.activity_id = a.id
-                WHERE a.event_id = :event_id
+                WHERE a.event_id = :event_id_1
                 UNION ALL
                 SELECT u.id as user_id, u.discord_name, u.name,
                     mb.id as booking_id, 'meal' as booking_type,
@@ -1668,11 +1668,11 @@ class AdminController {
                 FROM meal_bookings mb
                 JOIN users u ON mb.user_id = u.id
                 JOIN meals m ON mb.meal_id = m.id
-                WHERE m.event_id = :event_id
+                WHERE m.event_id = :event_id_2
                 ORDER BY user_id, day";
 
         $stmt = $db->prepare($sql);
-        $stmt->execute(['event_id' => $event['id']]);
+        $stmt->execute(['event_id_1' => $event['id'], 'event_id_2' => $event['id']]);
         $allBookings = $stmt->fetchAll();
 
         // Group by user

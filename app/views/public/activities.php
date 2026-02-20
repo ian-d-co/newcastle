@@ -41,7 +41,9 @@ if (!empty($activities)) {
             <?php
             $days = ['Friday' => [], 'Saturday' => [], 'Sunday' => []];
             foreach ($activities as $activity) {
-                $days[$activity['day']][] = $activity;
+                if (array_key_exists($activity['day'], $days)) {
+                    $days[$activity['day']][] = $activity;
+                }
             }
             ?>
 

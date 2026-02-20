@@ -338,9 +338,23 @@ if (!empty($allRoomIds)) {
                         <?php echo e($reservation['hotel_name']); ?> - <?php echo e($reservation['room_type']); ?>
                     </div>
                     <div class="card-body">
+                        <?php if (!empty($reservation['check_in'])): ?>
                         <p><strong>Check-in:</strong> <?php echo formatDisplayDate($reservation['check_in']); ?></p>
                         <p><strong>Check-out:</strong> <?php echo formatDisplayDate($reservation['check_out']); ?></p>
-                        <p><strong>Nights:</strong> <?php echo e($reservation['total_nights']); ?></p>
+                        <?php else: ?>
+                        <p><strong>Nights:</strong>
+                            <?php
+                            $nightLabels = [];
+                            if ($reservation['friday_night']) $nightLabels[] = 'Friday';
+                            if ($reservation['saturday_night']) $nightLabels[] = 'Saturday';
+                            echo e(implode(', ', $nightLabels) ?: '-');
+                            ?>
+                        </p>
+                        <?php if ($reservation['occupancy_type']): ?>
+                        <p><strong>Occupancy:</strong> <?php echo e(ucfirst($reservation['occupancy_type'])); ?></p>
+                        <?php endif; ?>
+                        <?php endif; ?>
+                        <p><strong>Total nights:</strong> <?php echo e($reservation['total_nights']); ?></p>
                         <p><strong>Total price:</strong> £<?php echo number_format($reservation['total_price'], 2); ?></p>
                         <p><strong>Payment status:</strong> 
                             <?php if ($reservation['payment_status'] === 'paid'): ?>
@@ -374,20 +388,52 @@ function toggleGroupPaymentInfo(roomId) {
 }
 
 function submitReservation(roomId) {
-    const checkIn = document.getElementById('check-in-' + roomId).value;
-    const checkOut = document.getElementById('check-out-' + roomId).value;
-    
-    if (!checkIn || !checkOut) {
-        showAlert('Please select check-in and check-out dates', 'warning');
-        return;
+    const occupancyEl = document.getElementById('occupancy-' + roomId);
+    if (occupancyEl) {
+        // Occupancy-based pricing mode
+        const occupancyType = occupancyEl.value;
+        const fridayNight = document.getElementById('friday-' + roomId).checked;
+        const saturdayNight = document.getElementById('saturday-' + roomId).checked;
+
+        if (!occupancyType) {
+            showAlert('Please select an occupancy type', 'warning');
+            return;
+        }
+        if (!fridayNight && !saturdayNight) {
+            showAlert('Please select at least one night', 'warning');
+            return;
+        }
+
+        const nights = [];
+        if (fridayNight) nights.push('friday');
+        if (saturdayNight) nights.push('saturday');
+
+        const bookDirectEl = document.getElementById('book-direct-' + roomId);
+        const bookWithGroupEl = document.getElementById('book-with-group-' + roomId);
+
+        reserveRoom(roomId, null, null, {
+            occupancy_type: occupancyType,
+            nights: nights,
+            book_direct: bookDirectEl ? bookDirectEl.checked : false,
+            book_with_group: bookWithGroupEl ? bookWithGroupEl.checked : false
+        });
+    } else {
+        // Date-based pricing mode
+        const checkIn = document.getElementById('check-in-' + roomId).value;
+        const checkOut = document.getElementById('check-out-' + roomId).value;
+
+        if (!checkIn || !checkOut) {
+            showAlert('Please select check-in and check-out dates', 'warning');
+            return;
+        }
+
+        if (checkOut <= checkIn) {
+            showAlert('Check-out date must be after check-in date', 'warning');
+            return;
+        }
+
+        reserveRoom(roomId, checkIn, checkOut);
     }
-    
-    if (checkOut <= checkIn) {
-        showAlert('Check-out date must be after check-in date', 'warning');
-        return;
-    }
-    
-    reserveRoom(roomId, checkIn, checkOut);
 }
 
 document.querySelectorAll('.interest-selector').forEach(function(container) {
