@@ -1675,7 +1675,7 @@ class AdminController {
         $event = $this->getActiveEvent();
         $db = getDbConnection();
 
-        // Get all users with activity and meal bookings, including payment info
+        // Get all users with activity, meal and hotel bookings, including payment info
         $sql = "SELECT u.id as user_id, u.discord_name, u.name,
                     ab.id as booking_id, 'activity' as booking_type,
                     a.title as item_title, a.day, a.price as item_price,
@@ -1693,10 +1693,22 @@ class AdminController {
                 JOIN users u ON mb.user_id = u.id
                 JOIN meals m ON mb.meal_id = m.id
                 WHERE m.event_id = :event_id_2
+                UNION ALL
+                SELECT u.id as user_id, u.discord_name, u.name,
+                    rr.id as booking_id, 'hotel' as booking_type,
+                    CONCAT(h.name, ' - ', hr.room_type) as item_title,
+                    rr.check_in as day, rr.total_price as item_price,
+                    rr.payment_status, NULL as amount_due,
+                    COALESCE(rr.amount_paid, 0) as amount_paid, NULL as payment_notes
+                FROM room_reservations rr
+                JOIN hotel_rooms hr ON rr.hotel_room_id = hr.id
+                JOIN hotels h ON hr.hotel_id = h.id
+                JOIN users u ON rr.user_id = u.id
+                WHERE h.event_id = :event_id_3 AND rr.payment_status != 'cancelled'
                 ORDER BY user_id, day";
 
         $stmt = $db->prepare($sql);
-        $stmt->execute(['event_id_1' => $event['id'], 'event_id_2' => $event['id']]);
+        $stmt->execute(['event_id_1' => $event['id'], 'event_id_2' => $event['id'], 'event_id_3' => $event['id']]);
         $allBookings = $stmt->fetchAll();
 
         // Group by user
@@ -1742,12 +1754,18 @@ class AdminController {
             $bookingId = $data['booking_id'] ?? null;
             $bookingType = $data['booking_type'] ?? null;
 
-            if (!$bookingId || !in_array($bookingType, ['activity', 'meal'])) {
+            if (!$bookingId || !in_array($bookingType, ['activity', 'meal', 'hotel'])) {
                 jsonResponse(['success' => false, 'message' => 'Invalid booking ID or type'], 400);
             }
 
             $db = getDbConnection();
-            $table = $bookingType === 'activity' ? 'activity_bookings' : 'meal_bookings';
+            if ($bookingType === 'activity') {
+                $table = 'activity_bookings';
+            } elseif ($bookingType === 'meal') {
+                $table = 'meal_bookings';
+            } else {
+                $table = 'room_reservations';
+            }
 
             $fields = [];
             $params = ['id' => (int)$bookingId];
@@ -1756,7 +1774,8 @@ class AdminController {
                 $fields[] = 'payment_status = :payment_status';
                 $params['payment_status'] = $data['payment_status'];
             }
-            if (isset($data['amount_due'])) {
+            // amount_due and payment_notes are not columns in room_reservations
+            if (isset($data['amount_due']) && $bookingType !== 'hotel') {
                 $fields[] = 'amount_due = :amount_due';
                 $params['amount_due'] = (float)$data['amount_due'];
             }
@@ -1764,7 +1783,7 @@ class AdminController {
                 $fields[] = 'amount_paid = :amount_paid';
                 $params['amount_paid'] = (float)$data['amount_paid'];
             }
-            if (isset($data['payment_notes'])) {
+            if (isset($data['payment_notes']) && $bookingType !== 'hotel') {
                 $fields[] = 'payment_notes = :payment_notes';
                 $params['payment_notes'] = $data['payment_notes'];
             }
