@@ -344,6 +344,15 @@ try {
             $hostingOffer = $hostingModel->getUserOffer($userId, $event['id']);
             $hostingBooking = $hostingModel->getUserBooking($userId, $event['id']);
             $hotelReservations = $hotelModel->getUserReservations($userId, $event['id']);
+            $hostingPendingRequests = $hostingOffer ? $hostingModel->getPendingRequestsForHost($userId, $event['id']) : [];
+            $guestHostingRequests = $hostingModel->getRequestsForGuest($userId, $event['id']);
+            $userHostingRequest = null;
+            foreach ($guestHostingRequests as $req) {
+                if ($req['status'] !== 'cancelled') {
+                    $userHostingRequest = $req;
+                    break;
+                }
+            }
             
             // Get polls voted on
             $db = getDbConnection();
@@ -435,6 +444,15 @@ try {
             $userOffer = $hostingModel->getUserOffer($userId, $event['id']);
             $userBooking = $hostingModel->getUserBooking($userId, $event['id']);
             $offerBookings = $userOffer ? $hostingModel->getOfferBookings($userOffer['id']) : [];
+            $pendingRequests = $userOffer ? $hostingModel->getPendingRequestsForHost($userId, $event['id']) : [];
+            $guestRequests = $hostingModel->getRequestsForGuest($userId, $event['id']);
+            $userRequest = null;
+            foreach ($guestRequests as $req) {
+                if ($req['status'] !== 'cancelled') {
+                    $userRequest = $req;
+                    break;
+                }
+            }
             
             include BASE_PATH . '/app/views/public/hosting.php';
             break;
@@ -604,6 +622,19 @@ try {
                 $adminController->deleteRoom();
             } else {
                 $adminController->showHotelManager();
+            }
+            break;
+            
+        // Admin Payment Management
+        case 'admin_payments':
+            AdminAuth::check();
+            require_once BASE_PATH . '/app/controllers/AdminController.php';
+            $adminController = new AdminController();
+            
+            if ($action === 'update_payment') {
+                $adminController->updatePayment();
+            } else {
+                $adminController->showPaymentsManager();
             }
             break;
             

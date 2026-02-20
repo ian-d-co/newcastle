@@ -158,6 +158,46 @@ ob_start();
                 <small class="form-text">Check this if attendees must pay before booking</small>
             </div>
 
+            <div class="row">
+                <div class="col">
+                    <div class="form-group">
+                        <label for="total_price">Total Price (£)</label>
+                        <input type="number" id="total_price" name="total_price" class="form-control"
+                               min="0" step="0.01" value="0.00">
+                        <small class="form-text">Full price of the activity</small>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="form-group">
+                        <label for="deposit_amount">Deposit Amount (£)</label>
+                        <input type="number" id="deposit_amount" name="deposit_amount" class="form-control"
+                               min="0" step="0.01" value="0.00">
+                        <small class="form-text">Deposit required (if any)</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col">
+                    <div class="form-group">
+                        <label style="display: flex; align-items: center; cursor: pointer;">
+                            <input type="checkbox" id="prepayment_required" name="prepayment_required"
+                                   value="1" style="margin-right: 0.5rem;">
+                            Prepayment Required
+                        </label>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="form-group">
+                        <label style="display: flex; align-items: center; cursor: pointer;">
+                            <input type="checkbox" id="pay_on_arrival" name="pay_on_arrival"
+                                   value="1" style="margin-right: 0.5rem;">
+                            Can Pay on Arrival
+                        </label>
+                    </div>
+                </div>
+            </div>
+
             <div class="form-group">
                 <label for="confirmation_deadline">Confirmation Deadline (Optional)</label>
                 <input type="datetime-local" id="confirmation_deadline" name="confirmation_deadline" class="form-control">
@@ -202,6 +242,10 @@ function editActivity(activity) {
     document.getElementById('max_capacity').value = activity.max_capacity;
     document.getElementById('price').value = activity.price;
     document.getElementById('requires_prepayment').checked = activity.requires_prepayment == 1;
+    document.getElementById('total_price').value = activity.total_price || '0.00';
+    document.getElementById('deposit_amount').value = activity.deposit_amount || '0.00';
+    document.getElementById('prepayment_required').checked = activity.prepayment_required == 1;
+    document.getElementById('pay_on_arrival').checked = activity.pay_on_arrival == 1;
     document.getElementById('confirmation_deadline').value = activity.confirmation_deadline ? activity.confirmation_deadline.replace(' ', 'T').substring(0, 16) : '';
     document.getElementById('payment_deadline').value = activity.payment_deadline ? activity.payment_deadline.replace(' ', 'T').substring(0, 16) : '';
     modalManager.open('activityModal');
@@ -251,6 +295,10 @@ document.getElementById('activityForm').addEventListener('submit', function(e) {
         max_capacity: parseInt(this.max_capacity.value),
         price: parseFloat(this.price.value),
         requires_prepayment: this.requires_prepayment.checked ? 1 : 0,
+        total_price: parseFloat(this.total_price.value) || 0,
+        deposit_amount: parseFloat(this.deposit_amount.value) || 0,
+        prepayment_required: this.prepayment_required.checked ? 1 : 0,
+        pay_on_arrival: this.pay_on_arrival.checked ? 1 : 0,
         confirmation_deadline: this.confirmation_deadline.value || null,
         payment_deadline: this.payment_deadline.value || null
     };

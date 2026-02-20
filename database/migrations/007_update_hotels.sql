@@ -1,0 +1,18 @@
+-- Migration: Enhanced hotel room pricing structure
+
+ALTER TABLE hotel_rooms
+ADD COLUMN IF NOT EXISTS single_price_friday DECIMAL(10,2) DEFAULT 0.00,
+ADD COLUMN IF NOT EXISTS single_price_saturday DECIMAL(10,2) DEFAULT 0.00,
+ADD COLUMN IF NOT EXISTS double_price_friday DECIMAL(10,2) DEFAULT 0.00,
+ADD COLUMN IF NOT EXISTS double_price_saturday DECIMAL(10,2) DEFAULT 0.00,
+ADD COLUMN IF NOT EXISTS triple_price_friday DECIMAL(10,2) DEFAULT 0.00,
+ADD COLUMN IF NOT EXISTS triple_price_saturday DECIMAL(10,2) DEFAULT 0.00,
+ADD COLUMN IF NOT EXISTS breakfast_included BOOLEAN DEFAULT FALSE,
+ADD COLUMN IF NOT EXISTS book_direct_with_hotel BOOLEAN DEFAULT FALSE;
+
+ALTER TABLE room_reservations
+ADD COLUMN IF NOT EXISTS occupancy_type ENUM('single', 'double', 'triple') DEFAULT 'single',
+ADD COLUMN IF NOT EXISTS friday_night BOOLEAN DEFAULT FALSE,
+ADD COLUMN IF NOT EXISTS saturday_night BOOLEAN DEFAULT FALSE,
+ADD COLUMN IF NOT EXISTS calculated_price DECIMAL(10,2) DEFAULT 0.00,
+ADD COLUMN IF NOT EXISTS book_direct BOOLEAN DEFAULT FALSE;

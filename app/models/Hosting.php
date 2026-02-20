@@ -162,4 +162,145 @@ class Hosting {
         $result = $stmt->fetch();
         return $result['count'] > 0;
     }
+
+    // ========================================================================
+    // REQUEST / ACCEPT WORKFLOW
+    // ========================================================================
+
+    public function createRequest($offerId, $userId, $message = '') {
+        $sql = "INSERT INTO hosting_requests (hosting_offer_id, user_id, message)
+                VALUES (:offer_id, :user_id, :message)
+                ON DUPLICATE KEY UPDATE message = :message, status = 'pending', updated_at = NOW()";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute(['offer_id' => $offerId, 'user_id' => $userId, 'message' => $message]);
+        return $this->db->lastInsertId() ?: true;
+    }
+
+    public function getRequest($offerId, $userId) {
+        $sql = "SELECT * FROM hosting_requests WHERE hosting_offer_id = :offer_id AND user_id = :user_id";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute(['offer_id' => $offerId, 'user_id' => $userId]);
+        return $stmt->fetch();
+    }
+
+    public function getPendingRequestsForHost($hostUserId, $eventId) {
+        $sql = "SELECT hr.*, u.discord_name, u.name as guest_name, ho.capacity, ho.available_spaces, ho.notes as offer_notes
+                FROM hosting_requests hr
+                JOIN hosting_offers ho ON hr.hosting_offer_id = ho.id
+                JOIN users u ON hr.user_id = u.id
+                WHERE ho.user_id = :host_user_id AND ho.event_id = :event_id AND hr.status = 'pending'
+                ORDER BY hr.created_at ASC";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute(['host_user_id' => $hostUserId, 'event_id' => $eventId]);
+        return $stmt->fetchAll();
+    }
+
+    public function getRequestsForGuest($userId, $eventId) {
+        $sql = "SELECT hr.*, ho.notes as offer_notes, u.discord_name as host_discord_name
+                FROM hosting_requests hr
+                JOIN hosting_offers ho ON hr.hosting_offer_id = ho.id
+                JOIN users u ON ho.user_id = u.id
+                WHERE hr.user_id = :user_id AND ho.event_id = :event_id
+                ORDER BY hr.updated_at DESC";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute(['user_id' => $userId, 'event_id' => $eventId]);
+        return $stmt->fetchAll();
+    }
+
+    public function acceptRequest($requestId, $hostUserId) {
+        $this->db->beginTransaction();
+
+        try {
+            // Fetch request
+            $stmt = $this->db->prepare("SELECT hr.*, ho.user_id as host_id, ho.available_spaces
+                    FROM hosting_requests hr
+                    JOIN hosting_offers ho ON hr.hosting_offer_id = ho.id
+                    WHERE hr.id = :id");
+            $stmt->execute(['id' => $requestId]);
+            $request = $stmt->fetch();
+
+            if (!$request) {
+                throw new Exception('Request not found');
+            }
+            if ($request['host_id'] != $hostUserId) {
+                throw new Exception('Not authorised');
+            }
+            if ($request['status'] !== 'pending') {
+                throw new Exception('Request is no longer pending');
+            }
+            if ($request['available_spaces'] <= 0) {
+                throw new Exception('No available spaces');
+            }
+
+            // Update request status
+            $stmt = $this->db->prepare("UPDATE hosting_requests SET status = 'accepted', updated_at = NOW() WHERE id = :id");
+            $stmt->execute(['id' => $requestId]);
+
+            // Decrement available_spaces
+            $stmt = $this->db->prepare("UPDATE hosting_offers SET available_spaces = available_spaces - 1 WHERE id = :id AND available_spaces > 0");
+            $stmt->execute(['id' => $request['hosting_offer_id']]);
+
+            // Create booking record
+            $stmt = $this->db->prepare("INSERT IGNORE INTO hosting_bookings (hosting_offer_id, user_id) VALUES (:offer_id, :user_id)");
+            $stmt->execute(['offer_id' => $request['hosting_offer_id'], 'user_id' => $request['user_id']]);
+
+            $this->db->commit();
+            return true;
+        } catch (Exception $e) {
+            $this->db->rollBack();
+            throw $e;
+        }
+    }
+
+    public function declineRequest($requestId, $hostUserId) {
+        $stmt = $this->db->prepare("SELECT hr.*, ho.user_id as host_id
+                FROM hosting_requests hr
+                JOIN hosting_offers ho ON hr.hosting_offer_id = ho.id
+                WHERE hr.id = :id");
+        $stmt->execute(['id' => $requestId]);
+        $request = $stmt->fetch();
+
+        if (!$request) {
+            throw new Exception('Request not found');
+        }
+        if ($request['host_id'] != $hostUserId) {
+            throw new Exception('Not authorised');
+        }
+
+        $stmt = $this->db->prepare("UPDATE hosting_requests SET status = 'declined', updated_at = NOW() WHERE id = :id");
+        $stmt->execute(['id' => $requestId]);
+        return true;
+    }
+
+    public function cancelRequest($requestId, $userId) {
+        $this->db->beginTransaction();
+
+        try {
+            $stmt = $this->db->prepare("SELECT * FROM hosting_requests WHERE id = :id AND user_id = :user_id");
+            $stmt->execute(['id' => $requestId, 'user_id' => $userId]);
+            $request = $stmt->fetch();
+
+            if (!$request) {
+                throw new Exception('Request not found');
+            }
+
+            // If it was accepted, restore the space and remove booking
+            if ($request['status'] === 'accepted') {
+                $stmt = $this->db->prepare("UPDATE hosting_offers SET available_spaces = available_spaces + 1 WHERE id = :id");
+                $stmt->execute(['id' => $request['hosting_offer_id']]);
+
+                $stmt = $this->db->prepare("DELETE FROM hosting_bookings WHERE hosting_offer_id = :offer_id AND user_id = :user_id");
+                $stmt->execute(['offer_id' => $request['hosting_offer_id'], 'user_id' => $userId]);
+            }
+
+            $stmt = $this->db->prepare("UPDATE hosting_requests SET status = 'cancelled', updated_at = NOW() WHERE id = :id");
+            $stmt->execute(['id' => $requestId]);
+
+            $this->db->commit();
+            return true;
+        } catch (Exception $e) {
+            $this->db->rollBack();
+            throw $e;
+        }
+    }
 }

@@ -81,11 +81,13 @@ if (!empty($allRoomIds)) {
                                         <div class="item-meta-item">
                                             <strong>Capacity:</strong> <?php echo e($room['capacity']); ?> people
                                         </div>
+                                        <?php if ($room['breakfast_included']): ?>
                                         <div class="item-meta-item">
-                                            <strong>Price:</strong> £<?php echo number_format($room['price'], 2); ?> per night
+                                            <span class="badge badge-success">🍳 Breakfast Included</span>
                                         </div>
+                                        <?php endif; ?>
                                         <div class="item-meta-item">
-                                            <strong>Available:</strong> 
+                                            <strong>Available:</strong>
                                             <?php
                                             $totalRooms = $room['quantity_available'] + ($room['quantity_reserved'] ?? 0);
                                             $occupancyPct = $totalRooms > 0 ? (($room['quantity_reserved'] ?? 0) / $totalRooms) * 100 : 0;
@@ -98,6 +100,31 @@ if (!empty($allRoomIds)) {
                                                 <?php endif; ?>
                                             </span>
                                         </div>
+                                        <?php
+                                        // Show pricing breakdown
+                                        $hasPricing = false;
+                                        $pricingLines = [];
+                                        if (!empty($room['single_price_friday']) && $room['single_price_friday'] > 0) { $pricingLines[] = 'Single Fri: £' . number_format($room['single_price_friday'], 2); $hasPricing = true; }
+                                        if (!empty($room['single_price_saturday']) && $room['single_price_saturday'] > 0) { $pricingLines[] = 'Single Sat: £' . number_format($room['single_price_saturday'], 2); $hasPricing = true; }
+                                        if (!empty($room['double_price_friday']) && $room['double_price_friday'] > 0) { $pricingLines[] = 'Double Fri: £' . number_format($room['double_price_friday'], 2); $hasPricing = true; }
+                                        if (!empty($room['double_price_saturday']) && $room['double_price_saturday'] > 0) { $pricingLines[] = 'Double Sat: £' . number_format($room['double_price_saturday'], 2); $hasPricing = true; }
+                                        if (!empty($room['triple_price_friday']) && $room['triple_price_friday'] > 0) { $pricingLines[] = 'Triple Fri: £' . number_format($room['triple_price_friday'], 2); $hasPricing = true; }
+                                        if (!empty($room['triple_price_saturday']) && $room['triple_price_saturday'] > 0) { $pricingLines[] = 'Triple Sat: £' . number_format($room['triple_price_saturday'], 2); $hasPricing = true; }
+                                        if ($hasPricing): ?>
+                                        <div class="item-meta-item">
+                                            <strong>Pricing:</strong>
+                                            <?php echo implode(' &bull; ', $pricingLines); ?>
+                                        </div>
+                                        <?php else: ?>
+                                        <div class="item-meta-item">
+                                            <strong>Price:</strong> £<?php echo number_format($room['price'], 2); ?> per night
+                                        </div>
+                                        <?php endif; ?>
+                                        <?php if (!empty($room['book_direct_with_hotel'])): ?>
+                                        <div class="item-meta-item">
+                                            <span class="badge badge-info">Book Direct with Hotel</span>
+                                        </div>
+                                        <?php endif; ?>
                                     </div>
                                     
 
@@ -149,6 +176,82 @@ if (!empty($allRoomIds)) {
                                         </div>
                                         <div class="modal-body">
                                             <form id="reserve-form-<?php echo $room['id']; ?>" onsubmit="event.preventDefault(); submitReservation(<?php echo $room['id']; ?>);">
+                                                <?php
+                                                $hasSingle = (!empty($room['single_price_friday']) && $room['single_price_friday'] > 0) || (!empty($room['single_price_saturday']) && $room['single_price_saturday'] > 0);
+                                                $hasDouble = (!empty($room['double_price_friday']) && $room['double_price_friday'] > 0) || (!empty($room['double_price_saturday']) && $room['double_price_saturday'] > 0);
+                                                $hasTriple = (!empty($room['triple_price_friday']) && $room['triple_price_friday'] > 0) || (!empty($room['triple_price_saturday']) && $room['triple_price_saturday'] > 0);
+                                                $hasOccupancyPricing = $hasSingle || $hasDouble || $hasTriple;
+                                                ?>
+
+                                                <?php if ($hasOccupancyPricing): ?>
+                                                <div class="form-group">
+                                                    <label class="form-label">Occupancy Type *</label>
+                                                    <select class="form-control" id="occupancy-<?php echo $room['id']; ?>" onchange="calculatePrice(<?php echo $room['id']; ?>)" required>
+                                                        <option value="">Select...</option>
+                                                        <?php if ($hasSingle): ?><option value="single">Single</option><?php endif; ?>
+                                                        <?php if ($hasDouble): ?><option value="double">Double</option><?php endif; ?>
+                                                        <?php if ($hasTriple): ?><option value="triple">Triple</option><?php endif; ?>
+                                                    </select>
+                                                </div>
+
+                                                <div class="form-group">
+                                                    <label class="form-label">Which nights?</label>
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" id="friday-<?php echo $room['id']; ?>" value="friday" onchange="calculatePrice(<?php echo $room['id']; ?>)">
+                                                        <label class="form-check-label" for="friday-<?php echo $room['id']; ?>">Friday night</label>
+                                                    </div>
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" id="saturday-<?php echo $room['id']; ?>" value="saturday" onchange="calculatePrice(<?php echo $room['id']; ?>)">
+                                                        <label class="form-check-label" for="saturday-<?php echo $room['id']; ?>">Saturday night</label>
+                                                    </div>
+                                                </div>
+
+                                                <div id="price-display-<?php echo $room['id']; ?>" style="padding: 0.5rem; background: #f8f9fa; border-radius: 4px; margin: 0.5rem 0; display: none;">
+                                                    <strong>Estimated Total: <span id="price-amount-<?php echo $room['id']; ?>">£0.00</span></strong>
+                                                </div>
+
+                                                <?php if (!empty($room['book_direct_with_hotel'])): ?>
+                                                <div class="form-group" style="margin-top: 0.5rem;">
+                                                    <label style="display: flex; align-items: center; cursor: pointer;">
+                                                        <input type="checkbox" id="book-direct-<?php echo $room['id']; ?>" style="margin-right: 0.5rem;">
+                                                        Book Direct with Hotel (no payment tracking)
+                                                    </label>
+                                                </div>
+                                                <?php endif; ?>
+
+                                                <script>
+                                                var roomPrices_<?php echo $room['id']; ?> = {
+                                                    single_friday: <?php echo (float)($room['single_price_friday'] ?? 0); ?>,
+                                                    single_saturday: <?php echo (float)($room['single_price_saturday'] ?? 0); ?>,
+                                                    double_friday: <?php echo (float)($room['double_price_friday'] ?? 0); ?>,
+                                                    double_saturday: <?php echo (float)($room['double_price_saturday'] ?? 0); ?>,
+                                                    triple_friday: <?php echo (float)($room['triple_price_friday'] ?? 0); ?>,
+                                                    triple_saturday: <?php echo (float)($room['triple_price_saturday'] ?? 0); ?>
+                                                };
+                                                function calculatePrice(roomId) {
+                                                    var prices = window['roomPrices_' + roomId];
+                                                    var occ = document.getElementById('occupancy-' + roomId).value;
+                                                    var fri = document.getElementById('friday-' + roomId).checked;
+                                                    var sat = document.getElementById('saturday-' + roomId).checked;
+                                                    var total = 0;
+                                                    if (occ && prices) {
+                                                        if (fri) total += prices[occ + '_friday'] || 0;
+                                                        if (sat) total += prices[occ + '_saturday'] || 0;
+                                                    }
+                                                    var display = document.getElementById('price-display-' + roomId);
+                                                    var amount = document.getElementById('price-amount-' + roomId);
+                                                    if (total > 0) {
+                                                        display.style.display = 'block';
+                                                        amount.textContent = '£' + total.toFixed(2);
+                                                    } else {
+                                                        display.style.display = 'none';
+                                                    }
+                                                }
+                                                </script>
+
+                                                <button type="submit" class="btn btn-primary btn-block">Reserve Room</button>
+
+                                                <?php else: ?>
                                                 <div class="form-group">
                                                     <label class="form-label" for="check-in-<?php echo $room['id']; ?>">Check-in Date</label>
                                                     <input type="date" class="form-control" id="check-in-<?php echo $room['id']; ?>" name="check_in" min="2026-11-20" required>
@@ -162,6 +265,7 @@ if (!empty($allRoomIds)) {
                                                 <p><strong>Price per night:</strong> £<?php echo number_format($room['price'], 2); ?></p>
                                                 
                                                 <button type="submit" class="btn btn-primary btn-block">Reserve Room</button>
+                                                <?php endif; ?>
                                             </form>
                                         </div>
                                     </div>

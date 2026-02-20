@@ -139,8 +139,8 @@ class AdminController {
             
             $db = getDbConnection();
             
-            $sql = "INSERT INTO activities (event_id, title, description, link, day, start_time, end_time, max_capacity, requires_prepayment, price, confirmation_deadline, payment_deadline)
-                    VALUES (:event_id, :title, :description, :link, :day, :start_time, :end_time, :max_capacity, :requires_prepayment, :price, :confirmation_deadline, :payment_deadline)";
+            $sql = "INSERT INTO activities (event_id, title, description, link, day, start_time, end_time, max_capacity, requires_prepayment, price, total_price, deposit_amount, prepayment_required, pay_on_arrival, confirmation_deadline, payment_deadline)
+                    VALUES (:event_id, :title, :description, :link, :day, :start_time, :end_time, :max_capacity, :requires_prepayment, :price, :total_price, :deposit_amount, :prepayment_required, :pay_on_arrival, :confirmation_deadline, :payment_deadline)";
             
             $params = [
                 'event_id' => $event['id'],
@@ -153,6 +153,10 @@ class AdminController {
                 'max_capacity' => $data['max_capacity'] ?? 20,
                 'requires_prepayment' => $data['requires_prepayment'] ?? 0,
                 'price' => $data['price'] ?? 0,
+                'total_price' => $data['total_price'] ?? 0,
+                'deposit_amount' => $data['deposit_amount'] ?? 0,
+                'prepayment_required' => $data['prepayment_required'] ?? 0,
+                'pay_on_arrival' => $data['pay_on_arrival'] ?? 0,
                 'confirmation_deadline' => $data['confirmation_deadline'] ?: null,
                 'payment_deadline' => $data['payment_deadline'] ?: null
             ];
@@ -218,6 +222,10 @@ class AdminController {
                     max_capacity = :max_capacity,
                     requires_prepayment = :requires_prepayment,
                     price = :price,
+                    total_price = :total_price,
+                    deposit_amount = :deposit_amount,
+                    prepayment_required = :prepayment_required,
+                    pay_on_arrival = :pay_on_arrival,
                     confirmation_deadline = :confirmation_deadline,
                     payment_deadline = :payment_deadline
                     WHERE id = :id";
@@ -233,6 +241,10 @@ class AdminController {
                 'max_capacity' => $data['max_capacity'] ?? 20,
                 'requires_prepayment' => $data['requires_prepayment'] ?? 0,
                 'price' => $data['price'] ?? 0,
+                'total_price' => $data['total_price'] ?? 0,
+                'deposit_amount' => $data['deposit_amount'] ?? 0,
+                'prepayment_required' => $data['prepayment_required'] ?? 0,
+                'pay_on_arrival' => $data['pay_on_arrival'] ?? 0,
                 'confirmation_deadline' => $data['confirmation_deadline'] ?: null,
                 'payment_deadline' => $data['payment_deadline'] ?: null
             ];
@@ -366,8 +378,8 @@ class AdminController {
             
             $db = getDbConnection();
             
-            $sql = "INSERT INTO meals (event_id, title, description, link, day, start_time, end_time, max_capacity, requires_prepayment, price, confirmation_deadline, payment_deadline)
-                    VALUES (:event_id, :title, :description, :link, :day, :start_time, :end_time, :max_capacity, :requires_prepayment, :price, :confirmation_deadline, :payment_deadline)";
+            $sql = "INSERT INTO meals (event_id, title, description, link, day, start_time, end_time, max_capacity, requires_prepayment, price, total_price, deposit_amount, prepayment_required, pay_on_arrival, confirmation_deadline, payment_deadline)
+                    VALUES (:event_id, :title, :description, :link, :day, :start_time, :end_time, :max_capacity, :requires_prepayment, :price, :total_price, :deposit_amount, :prepayment_required, :pay_on_arrival, :confirmation_deadline, :payment_deadline)";
             
             $params = [
                 'event_id' => $event['id'],
@@ -380,6 +392,10 @@ class AdminController {
                 'max_capacity' => $data['max_capacity'] ?? 20,
                 'requires_prepayment' => $data['requires_prepayment'] ?? 0,
                 'price' => $data['price'] ?? 0,
+                'total_price' => $data['total_price'] ?? 0,
+                'deposit_amount' => $data['deposit_amount'] ?? 0,
+                'prepayment_required' => $data['prepayment_required'] ?? 0,
+                'pay_on_arrival' => $data['pay_on_arrival'] ?? 0,
                 'confirmation_deadline' => $data['confirmation_deadline'] ?: null,
                 'payment_deadline' => $data['payment_deadline'] ?: null
             ];
@@ -445,6 +461,10 @@ class AdminController {
                     max_capacity = :max_capacity,
                     requires_prepayment = :requires_prepayment,
                     price = :price,
+                    total_price = :total_price,
+                    deposit_amount = :deposit_amount,
+                    prepayment_required = :prepayment_required,
+                    pay_on_arrival = :pay_on_arrival,
                     confirmation_deadline = :confirmation_deadline,
                     payment_deadline = :payment_deadline
                     WHERE id = :id";
@@ -460,6 +480,10 @@ class AdminController {
                 'max_capacity' => $data['max_capacity'] ?? 20,
                 'requires_prepayment' => $data['requires_prepayment'] ?? 0,
                 'price' => $data['price'] ?? 0,
+                'total_price' => $data['total_price'] ?? 0,
+                'deposit_amount' => $data['deposit_amount'] ?? 0,
+                'prepayment_required' => $data['prepayment_required'] ?? 0,
+                'pay_on_arrival' => $data['pay_on_arrival'] ?? 0,
                 'confirmation_deadline' => $data['confirmation_deadline'] ?: null,
                 'payment_deadline' => $data['payment_deadline'] ?: null
             ];
@@ -1172,15 +1196,27 @@ class AdminController {
             
             $db = getDbConnection();
             
-            $sql = "INSERT INTO hotel_rooms (hotel_id, room_type, price, capacity, quantity_available, quantity_reserved, status)
-                    VALUES (:hotel_id, :room_type, :price, :capacity, :quantity_available, 0, 'available')";
+            $sql = "INSERT INTO hotel_rooms (hotel_id, room_type, price, capacity, quantity_available, quantity_reserved, status,
+                    single_price_friday, single_price_saturday, double_price_friday, double_price_saturday,
+                    triple_price_friday, triple_price_saturday, breakfast_included, book_direct_with_hotel)
+                    VALUES (:hotel_id, :room_type, :price, :capacity, :quantity_available, 0, 'available',
+                    :single_price_friday, :single_price_saturday, :double_price_friday, :double_price_saturday,
+                    :triple_price_friday, :triple_price_saturday, :breakfast_included, :book_direct_with_hotel)";
             
             $params = [
                 'hotel_id' => (int)$data['hotel_id'],
                 'room_type' => $data['room_type'],
                 'price' => (float)$data['price'],
                 'capacity' => (int)($data['capacity'] ?? 2),
-                'quantity_available' => (int)($data['quantity_available'] ?? 1)
+                'quantity_available' => (int)($data['quantity_available'] ?? 1),
+                'single_price_friday' => (float)($data['single_price_friday'] ?? 0),
+                'single_price_saturday' => (float)($data['single_price_saturday'] ?? 0),
+                'double_price_friday' => (float)($data['double_price_friday'] ?? 0),
+                'double_price_saturday' => (float)($data['double_price_saturday'] ?? 0),
+                'triple_price_friday' => (float)($data['triple_price_friday'] ?? 0),
+                'triple_price_saturday' => (float)($data['triple_price_saturday'] ?? 0),
+                'breakfast_included' => isset($data['breakfast_included']) ? (int)$data['breakfast_included'] : 0,
+                'book_direct_with_hotel' => isset($data['book_direct_with_hotel']) ? (int)$data['book_direct_with_hotel'] : 0
             ];
             error_log('AdminController::createRoom() - SQL params: ' . json_encode($params));
             
@@ -1239,6 +1275,14 @@ class AdminController {
                     price = :price,
                     capacity = :capacity,
                     quantity_available = :quantity_available,
+                    single_price_friday = :single_price_friday,
+                    single_price_saturday = :single_price_saturday,
+                    double_price_friday = :double_price_friday,
+                    double_price_saturday = :double_price_saturday,
+                    triple_price_friday = :triple_price_friday,
+                    triple_price_saturday = :triple_price_saturday,
+                    breakfast_included = :breakfast_included,
+                    book_direct_with_hotel = :book_direct_with_hotel,
                     updated_at = NOW()
                     WHERE id = :id";
             
@@ -1247,7 +1291,15 @@ class AdminController {
                 'room_type' => $data['room_type'],
                 'price' => (float)$data['price'],
                 'capacity' => (int)($data['capacity'] ?? 2),
-                'quantity_available' => (int)($data['quantity_available'] ?? 1)
+                'quantity_available' => (int)($data['quantity_available'] ?? 1),
+                'single_price_friday' => (float)($data['single_price_friday'] ?? 0),
+                'single_price_saturday' => (float)($data['single_price_saturday'] ?? 0),
+                'double_price_friday' => (float)($data['double_price_friday'] ?? 0),
+                'double_price_saturday' => (float)($data['double_price_saturday'] ?? 0),
+                'triple_price_friday' => (float)($data['triple_price_friday'] ?? 0),
+                'triple_price_saturday' => (float)($data['triple_price_saturday'] ?? 0),
+                'breakfast_included' => isset($data['breakfast_included']) ? (int)$data['breakfast_included'] : 0,
+                'book_direct_with_hotel' => isset($data['book_direct_with_hotel']) ? (int)$data['book_direct_with_hotel'] : 0
             ];
             error_log('AdminController::updateRoom() - SQL params: ' . json_encode($params));
             
@@ -1577,6 +1629,126 @@ class AdminController {
         } catch (Exception $e) {
             error_log('Error resetting PIN: ' . $e->getMessage());
             jsonResponse(['success' => false, 'message' => 'Failed to reset PIN'], 500);
+        }
+    }
+
+    // ========================================================================
+    // PAYMENT MANAGEMENT
+    // ========================================================================
+
+    /**
+     * Show payments admin page
+     */
+    public function showPaymentsManager() {
+        $event = $this->getActiveEvent();
+        $db = getDbConnection();
+
+        // Get all users with activity and meal bookings, including payment info
+        $sql = "SELECT u.id as user_id, u.discord_name, u.name,
+                    ab.id as booking_id, 'activity' as booking_type,
+                    a.title as item_title, a.day, a.price as item_price,
+                    ab.payment_status, ab.amount_due, ab.amount_paid, ab.payment_notes
+                FROM activity_bookings ab
+                JOIN users u ON ab.user_id = u.id
+                JOIN activities a ON ab.activity_id = a.id
+                WHERE a.event_id = :event_id
+                UNION ALL
+                SELECT u.id as user_id, u.discord_name, u.name,
+                    mb.id as booking_id, 'meal' as booking_type,
+                    m.title as item_title, m.day, m.price as item_price,
+                    mb.payment_status, mb.amount_due, mb.amount_paid, mb.payment_notes
+                FROM meal_bookings mb
+                JOIN users u ON mb.user_id = u.id
+                JOIN meals m ON mb.meal_id = m.id
+                WHERE m.event_id = :event_id
+                ORDER BY user_id, day";
+
+        $stmt = $db->prepare($sql);
+        $stmt->execute(['event_id' => $event['id']]);
+        $allBookings = $stmt->fetchAll();
+
+        // Group by user
+        $userPayments = [];
+        foreach ($allBookings as $booking) {
+            $uid = $booking['user_id'];
+            if (!isset($userPayments[$uid])) {
+                $userPayments[$uid] = [
+                    'user_id' => $uid,
+                    'discord_name' => $booking['discord_name'],
+                    'name' => $booking['name'],
+                    'bookings' => [],
+                    'total_due' => 0,
+                    'total_paid' => 0,
+                ];
+            }
+            $userPayments[$uid]['bookings'][] = $booking;
+            $userPayments[$uid]['total_due'] += (float)($booking['amount_due'] ?: $booking['item_price']);
+            $userPayments[$uid]['total_paid'] += (float)($booking['amount_paid'] ?? 0);
+        }
+
+        $pageTitle = 'Payment Management';
+        $currentPage = 'admin';
+        include BASE_PATH . '/app/views/admin/payments.php';
+    }
+
+    /**
+     * Update payment status for a booking
+     */
+    public function updatePayment() {
+        error_log('AdminController::updatePayment() - Method called');
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            jsonResponse(['success' => false, 'message' => 'Invalid request method'], 405);
+        }
+
+        try {
+            $data = json_decode(file_get_contents('php://input'), true);
+            if ($data === null) {
+                jsonResponse(['success' => false, 'message' => 'Invalid JSON data'], 400);
+            }
+
+            $bookingId = $data['booking_id'] ?? null;
+            $bookingType = $data['booking_type'] ?? null;
+
+            if (!$bookingId || !in_array($bookingType, ['activity', 'meal'])) {
+                jsonResponse(['success' => false, 'message' => 'Invalid booking ID or type'], 400);
+            }
+
+            $db = getDbConnection();
+            $table = $bookingType === 'activity' ? 'activity_bookings' : 'meal_bookings';
+
+            $fields = [];
+            $params = ['id' => (int)$bookingId];
+
+            if (isset($data['payment_status'])) {
+                $fields[] = 'payment_status = :payment_status';
+                $params['payment_status'] = $data['payment_status'];
+            }
+            if (isset($data['amount_due'])) {
+                $fields[] = 'amount_due = :amount_due';
+                $params['amount_due'] = (float)$data['amount_due'];
+            }
+            if (isset($data['amount_paid'])) {
+                $fields[] = 'amount_paid = :amount_paid';
+                $params['amount_paid'] = (float)$data['amount_paid'];
+            }
+            if (isset($data['payment_notes'])) {
+                $fields[] = 'payment_notes = :payment_notes';
+                $params['payment_notes'] = $data['payment_notes'];
+            }
+
+            if (empty($fields)) {
+                jsonResponse(['success' => false, 'message' => 'No fields to update'], 400);
+            }
+
+            $sql = "UPDATE $table SET " . implode(', ', $fields) . " WHERE id = :id";
+            $stmt = $db->prepare($sql);
+            $stmt->execute($params);
+
+            jsonResponse(['success' => true, 'message' => 'Payment updated successfully']);
+        } catch (Exception $e) {
+            error_log('AdminController::updatePayment() - Exception: ' . $e->getMessage());
+            jsonResponse(['success' => false, 'message' => 'Failed to update payment'], 500);
         }
     }
 }

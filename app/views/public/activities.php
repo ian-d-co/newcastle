@@ -85,6 +85,20 @@ if (!empty($activities)) {
                                     <span class="badge badge-warning">Prepayment Required: £<?php echo number_format($activity['price'], 2); ?></span>
                                 </div>
                                 <?php endif; ?>
+                                <?php if (!empty($activity['total_price']) && $activity['total_price'] > 0): ?>
+                                <div class="item-meta-item">
+                                    <strong>Total Price:</strong> £<?php echo number_format($activity['total_price'], 2); ?>
+                                    <?php if (!empty($activity['deposit_amount']) && $activity['deposit_amount'] > 0): ?>
+                                        &bull; <strong>Deposit:</strong> £<?php echo number_format($activity['deposit_amount'], 2); ?>
+                                    <?php endif; ?>
+                                    <?php if (!empty($activity['prepayment_required'])): ?>
+                                        <span class="badge badge-warning" style="margin-left: 0.5rem;">Prepayment Required</span>
+                                    <?php endif; ?>
+                                    <?php if (!empty($activity['pay_on_arrival'])): ?>
+                                        <span class="badge badge-success" style="margin-left: 0.5rem;">Pay on Arrival OK</span>
+                                    <?php endif; ?>
+                                </div>
+                                <?php endif; ?>
                             </div>
                             
                             <?php if ($activity['description']): ?>
