@@ -43,11 +43,11 @@ try {
     $eventModel->registerAttendance($userId, $event['id'], $daysAttending, $travelMethod);
 
     if (in_array('Car', $travelMethod) && !empty($input['carshare_origin']) && !empty($input['carshare_capacity'])) {
-        $carshare->createOffer($userId, $event['id'], $input['carshare_origin'], (int)$input['carshare_capacity']);
+        $carshare->updateOffer($userId, $event['id'], $input['carshare_origin'], (int)$input['carshare_capacity']);
     }
 
     if (!empty($input['hosting_capacity'])) {
-        $hosting->createOffer($userId, $event['id'], (int)$input['hosting_capacity'], $input['hosting_notes'] ?? '');
+        $hosting->updateOffer($userId, $event['id'], (int)$input['hosting_capacity'], $input['hosting_notes'] ?? '');
     }
 
     jsonResponse(['success' => true, 'message' => 'Attendance updated successfully']);

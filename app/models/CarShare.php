@@ -21,6 +21,26 @@ class CarShare {
         return $this->db->lastInsertId();
     }
     
+    public function updateOffer($userId, $eventId, $origin, $capacity) {
+        $existing = $this->getUserOffer($userId, $eventId);
+        if (!$existing) {
+            return $this->createOffer($userId, $eventId, $origin, $capacity);
+        }
+        $booked = $existing['passenger_capacity'] - $existing['available_spaces'];
+        $newAvailable = max(0, $capacity - $booked);
+        $sql = "UPDATE carshare_offers SET origin = :origin, passenger_capacity = :capacity, available_spaces = :available_spaces
+                WHERE user_id = :user_id AND event_id = :event_id";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([
+            'origin' => $origin,
+            'capacity' => $capacity,
+            'available_spaces' => $newAvailable,
+            'user_id' => $userId,
+            'event_id' => $eventId
+        ]);
+        return $existing['id'];
+    }
+    
     public function getAll($eventId) {
         $sql = "SELECT cs.*, u.discord_name, u.name
                 FROM carshare_offers cs

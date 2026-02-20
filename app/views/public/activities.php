@@ -204,7 +204,15 @@ document.querySelectorAll('.interest-selector').forEach(function(container) {
             .then(function(data) {
                 if (data.success) {
                     showAlert('Interest updated!', 'success');
-                    setTimeout(function() { location.reload(); }, 800);
+                    var levels = { interested: '👍', maybe: '🤔', not_interested: '👎' };
+                    var classes = { interested: 'btn-success', maybe: 'btn-warning', not_interested: 'btn-danger' };
+                    container.querySelectorAll('.btn-interest').forEach(function(b) {
+                        var l = b.dataset.level;
+                        b.className = 'btn-interest btn-sm ' + (l === data.user_level ? classes[l] : 'btn-outline-secondary');
+                        b.textContent = levels[l] + ' ' + (data.counts[l] || 0);
+                        b.style.fontSize = '0.75rem';
+                        b.style.padding = '0.2rem 0.5rem';
+                    });
                 } else {
                     showAlert(data.message || 'Failed to update interest', 'danger');
                 }

@@ -46,7 +46,15 @@ try {
         'interest_level' => $data['interest_level']
     ]);
 
-    jsonResponse(['success' => true, 'message' => 'Interest updated']);
+    // Fetch updated counts for this item
+    $stmt = $db->prepare("SELECT interest_level, COUNT(*) as cnt FROM user_interests WHERE item_type = :item_type AND item_id = :item_id GROUP BY interest_level");
+    $stmt->execute(['item_type' => $data['item_type'], 'item_id' => (int)$data['item_id']]);
+    $counts = ['interested' => 0, 'maybe' => 0, 'not_interested' => 0];
+    foreach ($stmt->fetchAll() as $row) {
+        $counts[$row['interest_level']] = (int)$row['cnt'];
+    }
+
+    jsonResponse(['success' => true, 'message' => 'Interest updated', 'counts' => $counts, 'user_level' => $data['interest_level']]);
 } catch (Exception $e) {
     error_log('Error updating interest: ' . $e->getMessage());
     jsonResponse(['success' => false, 'message' => 'Failed to update interest'], 500);
