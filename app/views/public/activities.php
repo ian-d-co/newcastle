@@ -47,8 +47,12 @@ if (!empty($activities)) {
 
             <?php foreach ($days as $day => $dayActivities): ?>
                 <?php if (!empty($dayActivities)): ?>
-                    <h2 class="text-primary mt-4 mb-3"><?php echo e($day); ?></h2>
-                    
+                    <div class="expander" style="margin-bottom: 1.5rem;">
+                        <div class="expander-header" onclick="toggleExpander(this)" style="background: linear-gradient(135deg, #6d4c1f 0%, #8b6331 100%); color: #f5f5dc;">
+                            <h2 style="margin: 0; font-weight: 400;"><?php echo e($day); ?> (<?php echo count($dayActivities); ?>)</h2>
+                            <span class="expander-icon">▶</span>
+                        </div>
+                        <div class="expander-content">
                     <?php foreach ($dayActivities as $activity): ?>
                         <?php
                         $isFull = $activity['current_bookings'] >= $activity['max_capacity'];
@@ -155,6 +159,8 @@ if (!empty($activities)) {
                             </div>
                         </div>
                     <?php endforeach; ?>
+                        </div><!-- /.expander-content -->
+                    </div><!-- /.expander -->
                 <?php endif; ?>
             <?php endforeach; ?>
         <?php endif; ?>
@@ -162,6 +168,19 @@ if (!empty($activities)) {
 </div>
 
 <script>
+function toggleExpander(header) {
+    header.classList.toggle('active');
+    const content = header.nextElementSibling;
+    content.classList.toggle('active');
+    
+    const icon = header.querySelector('.expander-icon');
+    if (header.classList.contains('active')) {
+        icon.textContent = '▼';
+    } else {
+        icon.textContent = '▶';
+    }
+}
+
 function showAttendanceRequired() {
     showAlert('Please register your event attendance first from your Dashboard or My Plans page.', 'warning');
     setTimeout(function() {

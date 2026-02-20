@@ -27,8 +27,8 @@ $hostingOffer = $stmt->fetch();
 $daysAttending = [];
 $travelMethod  = [];
 if ($attendance) {
-    $daysAttending = json_decode($attendance['days_attending'], true) ?: [];
-    $travelMethod  = json_decode($attendance['travel_method'], true)  ?: [];
+    $daysAttending = !empty($attendance['days_attending']) ? explode(',', $attendance['days_attending']) : [];
+    $travelMethod  = !empty($attendance['travel_method'])  ? explode(',', $attendance['travel_method'])  : [];
 }
 ?>
 
@@ -52,17 +52,27 @@ if ($attendance) {
 
         <!-- Attendance Details -->
         <div class="card">
-            <div class="card-header">Event Attendance</div>
+            <div class="card-header">My Details • Travel • Hosting • Where I am staying</div>
             <div class="card-body">
                 <?php if (!$attendance): ?>
                     <p>You haven't registered your attendance details yet.</p>
                     <button class="btn btn-primary" onclick="modalManager.open('attendance-modal')">Register Attendance</button>
                 <?php else: ?>
                     <div style="margin-bottom: 1rem;">
-                        <strong>Days Attending:</strong> <?php echo e(implode(', ', $daysAttending)); ?>
+                        <strong>Days Attending:</strong><br>
+                        <?php foreach ($daysAttending as $day): ?>
+                            <span class="badge" style="background: #6d4c1f; color: white; padding: 0.25rem 0.5rem; margin-right: 0.5rem; border-radius: 4px;">
+                                <?php echo e(trim($day)); ?>
+                            </span>
+                        <?php endforeach; ?>
                     </div>
                     <div style="margin-bottom: 1rem;">
-                        <strong>Travel Method:</strong> <?php echo e(implode(', ', $travelMethod)); ?>
+                        <strong>Travel Method:</strong><br>
+                        <?php foreach ($travelMethod as $method): ?>
+                            <span class="badge" style="background: #6c757d; color: white; padding: 0.25rem 0.5rem; margin-right: 0.5rem; border-radius: 4px;">
+                                <?php echo e(trim($method)); ?>
+                            </span>
+                        <?php endforeach; ?>
                     </div>
 
                     <?php if ($carshareOffer): ?>
