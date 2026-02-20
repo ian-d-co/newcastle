@@ -181,18 +181,6 @@ ob_start();
                 <input type="number" id="price" name="price" class="form-control" 
                        min="0" step="0.01" required>
             </div>
-
-            <div class="form-group">
-                <label for="room_confirmation_deadline">Confirmation Deadline (Optional)</label>
-                <input type="datetime-local" id="room_confirmation_deadline" name="confirmation_deadline" class="form-control">
-                <small class="form-text">Last date to confirm booking</small>
-            </div>
-
-            <div class="form-group">
-                <label for="room_payment_deadline">Payment Deadline (Optional)</label>
-                <input type="datetime-local" id="room_payment_deadline" name="payment_deadline" class="form-control">
-                <small class="form-text">Last date to complete payment</small>
-            </div>
             
             <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
                 <button type="submit" class="btn btn-primary">Save Room</button>
@@ -323,8 +311,6 @@ function editRoom(room) {
     document.getElementById('capacity').value = room.capacity;
     document.getElementById('quantity_available').value = room.quantity_available;
     document.getElementById('price').value = room.price;
-    document.getElementById('room_confirmation_deadline').value = room.confirmation_deadline ? room.confirmation_deadline.replace(' ', 'T').substring(0, 16) : '';
-    document.getElementById('room_payment_deadline').value = room.payment_deadline ? room.payment_deadline.replace(' ', 'T').substring(0, 16) : '';
     modalManager.open('roomModal');
 }
 
@@ -367,9 +353,7 @@ document.getElementById('roomForm').addEventListener('submit', function(e) {
         room_type: this.room_type.value,
         capacity: parseInt(this.capacity.value),
         quantity_available: parseInt(this.quantity_available.value),
-        price: parseFloat(this.price.value),
-        confirmation_deadline: document.getElementById('room_confirmation_deadline').value || null,
-        payment_deadline: document.getElementById('room_payment_deadline').value || null
+        price: parseFloat(this.price.value)
     };
     
     if (editingRoomId) {

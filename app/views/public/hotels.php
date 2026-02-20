@@ -48,16 +48,20 @@ if (!empty($allRoomIds)) {
                         <h3 class="card-title"><?php echo e($hotel['name']); ?></h3>
                     </div>
                     <div class="card-body">
-                        <?php if ($hotel['address']): ?>
-                            <p><strong>Address:</strong> <?php echo e($hotel['address']); ?></p>
+                        <?php if (!empty($hotel['location'])): ?>
+                            <p><strong>Location:</strong> <?php echo e($hotel['location']); ?></p>
                         <?php endif; ?>
-                        
-                        <?php if ($hotel['description']): ?>
+
+                        <?php if (!empty($hotel['contact_phone'])): ?>
+                            <p><strong>Phone:</strong> <?php echo e($hotel['contact_phone']); ?></p>
+                        <?php endif; ?>
+
+                        <?php if (!empty($hotel['contact_email'])): ?>
+                            <p><strong>Email:</strong> <?php echo e($hotel['contact_email']); ?></p>
+                        <?php endif; ?>
+
+                        <?php if (!empty($hotel['description'])): ?>
                             <p><?php echo nl2br(e($hotel['description'])); ?></p>
-                        <?php endif; ?>
-                        
-                        <?php if ($hotel['website']): ?>
-                            <p><strong>Website:</strong> <a href="<?php echo e($hotel['website']); ?>" target="_blank"><?php echo e($hotel['website']); ?></a></p>
                         <?php endif; ?>
 
                         <?php if (!empty($hotel['link'])): ?>
@@ -96,19 +100,6 @@ if (!empty($allRoomIds)) {
                                         </div>
                                     </div>
                                     
-
-                                    <?php if (!empty($room['confirmation_deadline'])): ?>
-                                        <div class="deadline-warning" style="margin: 0.5rem 0; padding: 0.5rem; background: #fff3cd; border-radius: 4px; font-size: 0.875rem;">
-                                            <strong>⏰ Confirmation Deadline:</strong>
-                                            <?php echo e(formatDisplayDate($room['confirmation_deadline']) . ' ' . formatDisplayTime($room['confirmation_deadline'])); ?>
-                                        </div>
-                                    <?php endif; ?>
-                                    <?php if (!empty($room['payment_deadline'])): ?>
-                                        <div class="deadline-warning" style="margin: 0.5rem 0; padding: 0.5rem; background: #fff3cd; border-radius: 4px; font-size: 0.875rem;">
-                                            <strong>⏰ Payment Deadline:</strong>
-                                            <?php echo e(formatDisplayDate($room['payment_deadline']) . ' ' . formatDisplayTime($room['payment_deadline'])); ?>
-                                        </div>
-                                    <?php endif; ?>
 
                                     <?php if (!isGuestMode()): ?>
                                     <div class="interest-selector" data-item-type="hotel_room" data-item-id="<?php echo $room['id']; ?>" style="margin: 0.75rem 0;">

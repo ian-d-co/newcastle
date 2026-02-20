@@ -8,13 +8,14 @@ class Hosting {
     
     public function createOffer($userId, $eventId, $capacity, $notes = '') {
         $sql = "INSERT INTO hosting_offers (user_id, event_id, capacity, available_spaces, notes)
-                VALUES (:user_id, :event_id, :capacity, :capacity, :notes)";
+                VALUES (:user_id, :event_id, :capacity, :available_spaces, :notes)";
         
         $stmt = $this->db->prepare($sql);
         $stmt->execute([
             'user_id' => $userId,
             'event_id' => $eventId,
             'capacity' => $capacity,
+            'available_spaces' => $capacity,
             'notes' => $notes
         ]);
         
