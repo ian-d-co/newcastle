@@ -101,7 +101,8 @@ class Hotel {
         
         foreach (['room_type', 'capacity', 'price', 'quantity_available', 'quantity_reserved', 'status',
                   'single_price_friday', 'single_price_saturday', 'double_price_friday', 'double_price_saturday',
-                  'triple_price_friday', 'triple_price_saturday', 'breakfast_included', 'book_direct_with_hotel'] as $field) {
+                  'triple_price_friday', 'triple_price_saturday', 'breakfast_included', 'book_direct_with_hotel',
+                  'book_with_group', 'group_payment_due'] as $field) {
             if (isset($data[$field])) {
                 $fields[] = "$field = :$field";
                 $params[$field] = $data[$field];

@@ -1198,10 +1198,12 @@ class AdminController {
             
             $sql = "INSERT INTO hotel_rooms (hotel_id, room_type, price, capacity, quantity_available, quantity_reserved, status,
                     single_price_friday, single_price_saturday, double_price_friday, double_price_saturday,
-                    triple_price_friday, triple_price_saturday, breakfast_included, book_direct_with_hotel)
+                    triple_price_friday, triple_price_saturday, breakfast_included, book_direct_with_hotel,
+                    book_with_group, group_payment_due)
                     VALUES (:hotel_id, :room_type, :price, :capacity, :quantity_available, 0, 'available',
                     :single_price_friday, :single_price_saturday, :double_price_friday, :double_price_saturday,
-                    :triple_price_friday, :triple_price_saturday, :breakfast_included, :book_direct_with_hotel)";
+                    :triple_price_friday, :triple_price_saturday, :breakfast_included, :book_direct_with_hotel,
+                    :book_with_group, :group_payment_due)";
             
             $params = [
                 'hotel_id' => (int)$data['hotel_id'],
@@ -1216,7 +1218,9 @@ class AdminController {
                 'triple_price_friday' => (float)($data['triple_price_friday'] ?? 0),
                 'triple_price_saturday' => (float)($data['triple_price_saturday'] ?? 0),
                 'breakfast_included' => isset($data['breakfast_included']) ? (int)$data['breakfast_included'] : 0,
-                'book_direct_with_hotel' => isset($data['book_direct_with_hotel']) ? (int)$data['book_direct_with_hotel'] : 0
+                'book_direct_with_hotel' => isset($data['book_direct_with_hotel']) ? (int)$data['book_direct_with_hotel'] : 0,
+                'book_with_group' => isset($data['book_with_group']) ? (int)$data['book_with_group'] : 0,
+                'group_payment_due' => !empty($data['group_payment_due']) ? $data['group_payment_due'] : null
             ];
             error_log('AdminController::createRoom() - SQL params: ' . json_encode($params));
             
@@ -1283,6 +1287,8 @@ class AdminController {
                     triple_price_saturday = :triple_price_saturday,
                     breakfast_included = :breakfast_included,
                     book_direct_with_hotel = :book_direct_with_hotel,
+                    book_with_group = :book_with_group,
+                    group_payment_due = :group_payment_due,
                     updated_at = NOW()
                     WHERE id = :id";
             
@@ -1299,7 +1305,9 @@ class AdminController {
                 'triple_price_friday' => (float)($data['triple_price_friday'] ?? 0),
                 'triple_price_saturday' => (float)($data['triple_price_saturday'] ?? 0),
                 'breakfast_included' => isset($data['breakfast_included']) ? (int)$data['breakfast_included'] : 0,
-                'book_direct_with_hotel' => isset($data['book_direct_with_hotel']) ? (int)$data['book_direct_with_hotel'] : 0
+                'book_direct_with_hotel' => isset($data['book_direct_with_hotel']) ? (int)$data['book_direct_with_hotel'] : 0,
+                'book_with_group' => isset($data['book_with_group']) ? (int)$data['book_with_group'] : 0,
+                'group_payment_due' => !empty($data['group_payment_due']) ? $data['group_payment_due'] : null
             ];
             error_log('AdminController::updateRoom() - SQL params: ' . json_encode($params));
             

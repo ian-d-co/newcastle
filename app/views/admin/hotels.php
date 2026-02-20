@@ -245,6 +245,23 @@ ob_start();
                     </div>
                 </div>
             </div>
+            <div class="row">
+                <div class="col">
+                    <div class="form-group">
+                        <label style="display: flex; align-items: center; cursor: pointer;">
+                            <input type="checkbox" id="book_with_group" name="book_with_group" value="1" style="margin-right: 0.5rem;">
+                            Book with the Group
+                        </label>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="form-group">
+                        <label for="group_payment_due">Group Payment Due Date</label>
+                        <input type="date" id="group_payment_due" name="group_payment_due" class="form-control">
+                        <small class="form-text">Payment deadline when booking with the group</small>
+                    </div>
+                </div>
+            </div>
             
             <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
                 <button type="submit" class="btn btn-primary">Save Room</button>
@@ -383,6 +400,8 @@ function editRoom(room) {
     document.getElementById('triple_price_saturday').value = room.triple_price_saturday || '0.00';
     document.getElementById('breakfast_included').checked = room.breakfast_included == 1;
     document.getElementById('book_direct_with_hotel').checked = room.book_direct_with_hotel == 1;
+    document.getElementById('book_with_group').checked = room.book_with_group == 1;
+    document.getElementById('group_payment_due').value = room.group_payment_due || '';
     modalManager.open('roomModal');
 }
 
@@ -433,7 +452,9 @@ document.getElementById('roomForm').addEventListener('submit', function(e) {
         triple_price_friday: parseFloat(this.triple_price_friday.value) || 0,
         triple_price_saturday: parseFloat(this.triple_price_saturday.value) || 0,
         breakfast_included: this.breakfast_included.checked ? 1 : 0,
-        book_direct_with_hotel: this.book_direct_with_hotel.checked ? 1 : 0
+        book_direct_with_hotel: this.book_direct_with_hotel.checked ? 1 : 0,
+        book_with_group: this.book_with_group.checked ? 1 : 0,
+        group_payment_due: this.group_payment_due.value || null
     };
     
     if (editingRoomId) {
