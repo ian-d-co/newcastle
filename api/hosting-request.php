@@ -21,15 +21,29 @@ if (!verifyCsrfToken($input['csrf_token'] ?? '')) {
 
 try {
     $offerId = $input['offer_id'] ?? null;
-    
+    $message = $input['message'] ?? '';
+
     if (!$offerId) {
         throw new Exception('Offer ID is required');
     }
-    
+
+    $userId = getCurrentUserId();
     $hostingModel = new Hosting();
-    $hostingModel->cancelBooking($offerId, getCurrentUserId());
-    
-    jsonResponse(['success' => true, 'message' => 'Hosting cancelled successfully']);
+
+    $offer = $hostingModel->getById($offerId);
+    if (!$offer) {
+        throw new Exception('Hosting offer not found');
+    }
+    if ($offer['user_id'] == $userId) {
+        throw new Exception('Cannot request to stay at your own hosting');
+    }
+    if ($offer['available_spaces'] <= 0) {
+        throw new Exception('No available spaces');
+    }
+
+    $hostingModel->createRequest($offerId, $userId, $message);
+
+    jsonResponse(['success' => true, 'message' => 'Request to stay sent successfully']);
 } catch (Exception $e) {
     jsonResponse(['success' => false, 'message' => $e->getMessage()], 400);
 }

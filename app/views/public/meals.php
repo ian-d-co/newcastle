@@ -79,6 +79,20 @@ if (!empty($meals)) {
                                     <span class="badge badge-warning">Prepayment Required: £<?php echo number_format($meal['price'], 2); ?></span>
                                 </div>
                                 <?php endif; ?>
+                                <?php if (!empty($meal['total_price']) && $meal['total_price'] > 0): ?>
+                                <div class="item-meta-item">
+                                    <strong>Total Price:</strong> £<?php echo number_format($meal['total_price'], 2); ?>
+                                    <?php if (!empty($meal['deposit_amount']) && $meal['deposit_amount'] > 0): ?>
+                                        &bull; <strong>Deposit:</strong> £<?php echo number_format($meal['deposit_amount'], 2); ?>
+                                    <?php endif; ?>
+                                    <?php if (!empty($meal['prepayment_required'])): ?>
+                                        <span class="badge badge-warning" style="margin-left: 0.5rem;">Prepayment Required</span>
+                                    <?php endif; ?>
+                                    <?php if (!empty($meal['pay_on_arrival'])): ?>
+                                        <span class="badge badge-success" style="margin-left: 0.5rem;">Pay on Arrival OK</span>
+                                    <?php endif; ?>
+                                </div>
+                                <?php endif; ?>
                             </div>
                             
                             <?php if ($meal['description']): ?>

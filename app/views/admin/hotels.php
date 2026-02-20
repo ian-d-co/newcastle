@@ -180,6 +180,70 @@ ob_start();
                 <label for="price">Price Per Night (£) *</label>
                 <input type="number" id="price" name="price" class="form-control" 
                        min="0" step="0.01" required>
+                <small class="form-text">Default/fallback price per night</small>
+            </div>
+
+            <h4 style="margin: 1rem 0 0.5rem;">Pricing by Occupancy & Night</h4>
+            <p style="font-size: 0.875rem; color: #666; margin-bottom: 0.75rem;">Leave at 0.00 if not applicable for that occupancy type.</p>
+            <div class="row">
+                <div class="col">
+                    <div class="form-group">
+                        <label for="single_price_friday">Single - Friday (£)</label>
+                        <input type="number" id="single_price_friday" name="single_price_friday" class="form-control" min="0" step="0.01" value="0.00">
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="form-group">
+                        <label for="single_price_saturday">Single - Saturday (£)</label>
+                        <input type="number" id="single_price_saturday" name="single_price_saturday" class="form-control" min="0" step="0.01" value="0.00">
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <div class="form-group">
+                        <label for="double_price_friday">Double - Friday (£)</label>
+                        <input type="number" id="double_price_friday" name="double_price_friday" class="form-control" min="0" step="0.01" value="0.00">
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="form-group">
+                        <label for="double_price_saturday">Double - Saturday (£)</label>
+                        <input type="number" id="double_price_saturday" name="double_price_saturday" class="form-control" min="0" step="0.01" value="0.00">
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <div class="form-group">
+                        <label for="triple_price_friday">Triple - Friday (£)</label>
+                        <input type="number" id="triple_price_friday" name="triple_price_friday" class="form-control" min="0" step="0.01" value="0.00">
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="form-group">
+                        <label for="triple_price_saturday">Triple - Saturday (£)</label>
+                        <input type="number" id="triple_price_saturday" name="triple_price_saturday" class="form-control" min="0" step="0.01" value="0.00">
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <div class="form-group">
+                        <label style="display: flex; align-items: center; cursor: pointer;">
+                            <input type="checkbox" id="breakfast_included" name="breakfast_included" value="1" style="margin-right: 0.5rem;">
+                            Breakfast Included
+                        </label>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="form-group">
+                        <label style="display: flex; align-items: center; cursor: pointer;">
+                            <input type="checkbox" id="book_direct_with_hotel" name="book_direct_with_hotel" value="1" style="margin-right: 0.5rem;">
+                            Book Direct with Hotel
+                        </label>
+                    </div>
+                </div>
             </div>
             
             <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
@@ -311,6 +375,14 @@ function editRoom(room) {
     document.getElementById('capacity').value = room.capacity;
     document.getElementById('quantity_available').value = room.quantity_available;
     document.getElementById('price').value = room.price;
+    document.getElementById('single_price_friday').value = room.single_price_friday || '0.00';
+    document.getElementById('single_price_saturday').value = room.single_price_saturday || '0.00';
+    document.getElementById('double_price_friday').value = room.double_price_friday || '0.00';
+    document.getElementById('double_price_saturday').value = room.double_price_saturday || '0.00';
+    document.getElementById('triple_price_friday').value = room.triple_price_friday || '0.00';
+    document.getElementById('triple_price_saturday').value = room.triple_price_saturday || '0.00';
+    document.getElementById('breakfast_included').checked = room.breakfast_included == 1;
+    document.getElementById('book_direct_with_hotel').checked = room.book_direct_with_hotel == 1;
     modalManager.open('roomModal');
 }
 
@@ -353,7 +425,15 @@ document.getElementById('roomForm').addEventListener('submit', function(e) {
         room_type: this.room_type.value,
         capacity: parseInt(this.capacity.value),
         quantity_available: parseInt(this.quantity_available.value),
-        price: parseFloat(this.price.value)
+        price: parseFloat(this.price.value),
+        single_price_friday: parseFloat(this.single_price_friday.value) || 0,
+        single_price_saturday: parseFloat(this.single_price_saturday.value) || 0,
+        double_price_friday: parseFloat(this.double_price_friday.value) || 0,
+        double_price_saturday: parseFloat(this.double_price_saturday.value) || 0,
+        triple_price_friday: parseFloat(this.triple_price_friday.value) || 0,
+        triple_price_saturday: parseFloat(this.triple_price_saturday.value) || 0,
+        breakfast_included: this.breakfast_included.checked ? 1 : 0,
+        book_direct_with_hotel: this.book_direct_with_hotel.checked ? 1 : 0
     };
     
     if (editingRoomId) {

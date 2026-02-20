@@ -102,6 +102,16 @@ ob_start();
                     </div>
                 </div>
             </div>
+
+            <div class="col">
+                <div class="card">
+                    <div class="card-header">Payments</div>
+                    <div class="card-body">
+                        <p>Track and manage payments for activities and meals.</p>
+                        <a href="/index.php?page=admin_payments" class="btn btn-primary btn-block">Manage Payments</a>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <h2 class="text-primary mt-4 mb-3">Recent Attendees</h2>

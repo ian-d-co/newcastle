@@ -7,8 +7,8 @@ class Meal {
     }
     
     public function create($data) {
-        $sql = "INSERT INTO meals (event_id, title, description, day, start_time, end_time, max_capacity, requires_prepayment, price)
-                VALUES (:event_id, :title, :description, :day, :start_time, :end_time, :max_capacity, :requires_prepayment, :price)";
+        $sql = "INSERT INTO meals (event_id, title, description, day, start_time, end_time, max_capacity, requires_prepayment, price, total_price, deposit_amount, prepayment_required, pay_on_arrival)
+                VALUES (:event_id, :title, :description, :day, :start_time, :end_time, :max_capacity, :requires_prepayment, :price, :total_price, :deposit_amount, :prepayment_required, :pay_on_arrival)";
         
         $stmt = $this->db->prepare($sql);
         $stmt->execute($data);
@@ -34,7 +34,7 @@ class Meal {
         $fields = [];
         $params = ['id' => $id];
         
-        foreach (['title', 'description', 'day', 'start_time', 'end_time', 'max_capacity', 'requires_prepayment', 'price'] as $field) {
+        foreach (['title', 'description', 'day', 'start_time', 'end_time', 'max_capacity', 'requires_prepayment', 'price', 'total_price', 'deposit_amount', 'prepayment_required', 'pay_on_arrival'] as $field) {
             if (isset($data[$field])) {
                 $fields[] = "$field = :$field";
                 $params[$field] = $data[$field];

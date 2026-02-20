@@ -120,6 +120,12 @@ ob_start();
                     <?php if ($hostingOffer['notes']): ?>
                         <p>Notes: <?php echo nl2br(e($hostingOffer['notes'])); ?></p>
                     <?php endif; ?>
+                    <?php if (!empty($hostingPendingRequests)): ?>
+                        <div style="background: #fff3cd; border: 1px solid #ffc107; border-radius: 6px; padding: 0.75rem; margin-top: 0.5rem;">
+                            <strong>⚠ <?php echo count($hostingPendingRequests); ?> pending request<?php echo count($hostingPendingRequests) !== 1 ? 's' : ''; ?> to stay</strong>
+                            <a href="/index.php?page=hosting" class="btn btn-sm btn-warning" style="margin-left: 0.75rem;">View & Respond</a>
+                        </div>
+                    <?php endif; ?>
                 <?php endif; ?>
 
                 <?php if ($hostingBooking): ?>
@@ -128,6 +134,19 @@ ob_start();
                     <?php if ($hostingBooking['notes']): ?>
                         <p>Notes: <?php echo nl2br(e($hostingBooking['notes'])); ?></p>
                     <?php endif; ?>
+                <?php endif; ?>
+
+                <?php if (!empty($userHostingRequest) && !$hostingBooking): ?>
+                    <hr>
+                    <p>🏠 <strong>Hosting request:</strong>
+                        <?php if ($userHostingRequest['status'] === 'pending'): ?>
+                            <span class="badge badge-warning">Pending response from host</span>
+                        <?php elseif ($userHostingRequest['status'] === 'accepted'): ?>
+                            <span class="badge badge-success">✓ Accepted</span>
+                        <?php elseif ($userHostingRequest['status'] === 'declined'): ?>
+                            <span class="badge badge-danger">Declined</span>
+                        <?php endif; ?>
+                    </p>
                 <?php endif; ?>
 
                 <?php if (!empty($hotelReservations)): ?>
@@ -227,6 +246,81 @@ ob_start();
                 <?php endif; ?>
             </div>
         </div>
+
+        <!-- My Payments Section -->
+        <?php
+        $db2 = getDbConnection();
+        $paymentStmt = $db2->prepare("
+            SELECT 'activity' as type, a.title, a.day, a.price, ab.payment_status, ab.amount_due, ab.amount_paid
+            FROM activity_bookings ab
+            JOIN activities a ON ab.activity_id = a.id
+            WHERE ab.user_id = :user_id AND a.event_id = :event_id AND a.price > 0
+            UNION ALL
+            SELECT 'meal' as type, m.title, m.day, m.price, mb.payment_status, mb.amount_due, mb.amount_paid
+            FROM meal_bookings mb
+            JOIN meals m ON mb.meal_id = m.id
+            WHERE mb.user_id = :user_id AND m.event_id = :event_id AND m.price > 0
+            ORDER BY day
+        ");
+        $paymentStmt->execute(['user_id' => $userId, 'event_id' => $event['id']]);
+        $myPayments = $paymentStmt->fetchAll();
+        $totalDue = array_sum(array_column($myPayments, 'amount_due')) ?: array_sum(array_column($myPayments, 'price'));
+        $totalPaid = array_sum(array_column($myPayments, 'amount_paid') ?? []);
+        ?>
+        <?php if (!empty($myPayments)): ?>
+        <div class="dashboard-section">
+            <div class="dashboard-section-header" onclick="toggleSection(this)">
+                <h3><span class="toggle-icon">▶</span>My Payments</h3>
+                <div class="section-action">
+                    <?php
+                    $outstanding = 0;
+                    foreach ($myPayments as $p) {
+                        $due = (float)($p['amount_due'] ?: $p['price']);
+                        $paid = (float)($p['amount_paid'] ?? 0);
+                        $outstanding += $due - $paid;
+                    }
+                    ?>
+                    <?php if ($outstanding > 0): ?>
+                        <span class="badge badge-warning">£<?php echo number_format($outstanding, 2); ?> outstanding</span>
+                    <?php else: ?>
+                        <span class="badge badge-success">All paid</span>
+                    <?php endif; ?>
+                </div>
+            </div>
+            <div class="dashboard-section-content" style="display: none;">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="border-bottom: 2px solid #dee2e6;">
+                            <th style="padding: 0.5rem; text-align: left;">Item</th>
+                            <th style="padding: 0.5rem; text-align: left;">Day</th>
+                            <th style="padding: 0.5rem; text-align: center;">Amount Due</th>
+                            <th style="padding: 0.5rem; text-align: center;">Amount Paid</th>
+                            <th style="padding: 0.5rem; text-align: center;">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($myPayments as $p): ?>
+                            <tr style="border-bottom: 1px solid #dee2e6;">
+                                <td style="padding: 0.5rem;"><?php echo e($p['title']); ?> <small style="color: #666;">(<?php echo ucfirst($p['type']); ?>)</small></td>
+                                <td style="padding: 0.5rem;"><?php echo e($p['day']); ?></td>
+                                <td style="padding: 0.5rem; text-align: center;">£<?php echo number_format($p['amount_due'] ?: $p['price'], 2); ?></td>
+                                <td style="padding: 0.5rem; text-align: center;">£<?php echo number_format($p['amount_paid'] ?? 0, 2); ?></td>
+                                <td style="padding: 0.5rem; text-align: center;">
+                                    <?php if ($p['payment_status'] === 'paid'): ?>
+                                        <span class="badge badge-success">✓ Paid</span>
+                                    <?php elseif ($p['payment_status'] === 'not_required'): ?>
+                                        <span class="badge badge-secondary">N/A</span>
+                                    <?php else: ?>
+                                        <span class="badge badge-warning">Pending</span>
+                                    <?php endif; ?>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <?php endif; ?>
     </div>
 </div>
 
