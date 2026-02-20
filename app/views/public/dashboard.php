@@ -254,15 +254,20 @@ ob_start();
             SELECT 'activity' as type, a.title, a.day, a.price, ab.payment_status, ab.amount_due, ab.amount_paid
             FROM activity_bookings ab
             JOIN activities a ON ab.activity_id = a.id
-            WHERE ab.user_id = :user_id AND a.event_id = :event_id AND a.price > 0
+            WHERE ab.user_id = :user_id1 AND a.event_id = :event_id1 AND a.price > 0
             UNION ALL
             SELECT 'meal' as type, m.title, m.day, m.price, mb.payment_status, mb.amount_due, mb.amount_paid
             FROM meal_bookings mb
             JOIN meals m ON mb.meal_id = m.id
-            WHERE mb.user_id = :user_id AND m.event_id = :event_id AND m.price > 0
+            WHERE mb.user_id = :user_id2 AND m.event_id = :event_id2 AND m.price > 0
             ORDER BY day
         ");
-        $paymentStmt->execute(['user_id' => $userId, 'event_id' => $event['id']]);
+        $paymentStmt->execute([
+            'user_id1' => $userId,
+            'event_id1' => $event['id'],
+            'user_id2' => $userId,
+            'event_id2' => $event['id']
+        ]);
         $myPayments = $paymentStmt->fetchAll();
         $totalDue = array_sum(array_column($myPayments, 'amount_due')) ?: array_sum(array_column($myPayments, 'price'));
         $totalPaid = array_sum(array_column($myPayments, 'amount_paid') ?? []);
