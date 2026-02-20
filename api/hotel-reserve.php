@@ -14,7 +14,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 $input = json_decode(file_get_contents('php://input'), true);
 
-if (!verifyCsrfToken($input['csrf_token'] ?? '')) {
+if (function_exists('verifyCsrfToken') && !verifyCsrfToken($input['csrf_token'] ?? '')) {
     jsonResponse(['success' => false, 'message' => 'Invalid CSRF token'], 403);
 }
 

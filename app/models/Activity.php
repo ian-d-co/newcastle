@@ -16,11 +16,22 @@ class Activity {
     }
     
     public function getAll($eventId) {
-        $sql = "SELECT * FROM activities WHERE event_id = :event_id ORDER BY 
-                FIELD(day, 'Friday', 'Saturday', 'Sunday'), start_time";
+        $sql = "SELECT DISTINCT a.* FROM activities a WHERE a.event_id = :event_id ORDER BY 
+                FIELD(a.day, 'Friday', 'Saturday', 'Sunday'), a.start_time";
         $stmt = $this->db->prepare($sql);
         $stmt->execute(['event_id' => $eventId]);
-        return $stmt->fetchAll();
+        $activities = $stmt->fetchAll();
+
+        // Deduplicate by ID as fallback
+        $seenIds = [];
+        $uniqueActivities = [];
+        foreach ($activities as $activity) {
+            if (!isset($seenIds[$activity['id']])) {
+                $uniqueActivities[] = $activity;
+                $seenIds[$activity['id']] = true;
+            }
+        }
+        return $uniqueActivities;
     }
     
     public function getById($id) {
