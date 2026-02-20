@@ -332,6 +332,25 @@
         });
     };
 
+    window.markAttending = function(itemType, itemId) {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+
+        apiCall('/api/mark-attending.php', 'POST', {
+            item_type: itemType,
+            item_id: itemId,
+            csrf_token: csrfToken
+        }, function(err, response) {
+            if (err) {
+                showAlert(err.message || 'Failed to mark attendance', 'danger');
+            } else {
+                showAlert('Marked as attending!', 'success');
+                setTimeout(function() {
+                    window.location.reload();
+                }, 1500);
+            }
+        });
+    };
+
     // Initialize
     document.addEventListener('DOMContentLoaded', function() {
         initAttendanceForm();

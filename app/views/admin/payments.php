@@ -17,26 +17,36 @@ ob_start();
                 </div>
             </div>
         <?php else: ?>
-            <?php foreach ($userPayments as $user): ?>
+            <?php foreach ($userPayments as $index => $user): ?>
                 <?php $outstanding = $user['total_due'] - $user['total_paid']; ?>
-                <div class="card" style="margin-bottom: 1.5rem;">
-                    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
-                        <div>
-                            <strong><?php echo e($user['discord_name']); ?></strong>
-                            <?php if ($user['name'] !== $user['discord_name']): ?>
-                                <span style="color: #666; font-size: 0.9rem;"> (<?php echo e($user['name']); ?>)</span>
-                            <?php endif; ?>
+                <div class="card" style="margin-bottom: 1rem; border: 1px solid #dee2e6;">
+                    <div class="card-header"
+                         style="cursor: pointer; display: flex; justify-content: space-between; align-items: center; background: #f8f9fa;"
+                         onclick="togglePaymentUser(<?php echo $index; ?>)"
+                         tabindex="0" role="button"
+                         aria-expanded="false" id="payment-header-<?php echo $index; ?>"
+                         aria-controls="payment-user-<?php echo $index; ?>"
+                         onkeydown="if(event.key==='Enter'||event.key===' '){togglePaymentUser(<?php echo $index; ?>);}">
+                        <div style="display: flex; align-items: center; gap: 1rem;">
+                            <span class="toggle-icon" id="toggle-icon-<?php echo $index; ?>" style="font-size: 0.8rem; transition: transform 0.3s;">▶</span>
+                            <div>
+                                <strong><?php echo e($user['discord_name']); ?></strong>
+                                <?php if ($user['name'] !== $user['discord_name']): ?>
+                                    <span style="color: #666; font-size: 0.9rem;"> (<?php echo e($user['name']); ?>)</span>
+                                <?php endif; ?>
+                            </div>
                         </div>
-                        <div>
-                            <span style="margin-right: 1rem;">Due: <strong>£<?php echo number_format($user['total_due'], 2); ?></strong></span>
-                            <span style="margin-right: 1rem;">Paid: <strong>£<?php echo number_format($user['total_paid'], 2); ?></strong></span>
+                        <div style="display: flex; gap: 1rem; align-items: center;">
+                            <span style="font-size: 0.9rem;">Due: <strong>£<?php echo number_format($user['total_due'], 2); ?></strong></span>
+                            <span style="font-size: 0.9rem;">Paid: <strong>£<?php echo number_format($user['total_paid'], 2); ?></strong></span>
                             <?php if ($outstanding > 0): ?>
                                 <span class="badge badge-warning">Outstanding: £<?php echo number_format($outstanding, 2); ?></span>
                             <?php elseif ($outstanding == 0 && $user['total_due'] > 0): ?>
-                                <span class="badge badge-success">Fully Paid</span>
+                                <span class="badge badge-success">✓ Paid</span>
                             <?php endif; ?>
                         </div>
                     </div>
+                    <div id="payment-user-<?php echo $index; ?>" style="display: none;">
                     <div class="card-body">
                         <table style="width: 100%; border-collapse: collapse;">
                             <thead>
@@ -94,6 +104,7 @@ ob_start();
                             </tbody>
                         </table>
                     </div>
+                    </div>
                 </div>
             <?php endforeach; ?>
         <?php endif; ?>
@@ -101,6 +112,22 @@ ob_start();
 </div>
 
 <script>
+function togglePaymentUser(index) {
+    const content = document.getElementById('payment-user-' + index);
+    const icon = document.getElementById('toggle-icon-' + index);
+    const header = document.getElementById('payment-header-' + index);
+
+    if (content.style.display === 'none') {
+        content.style.display = 'block';
+        icon.style.transform = 'rotate(90deg)';
+        header.setAttribute('aria-expanded', 'true');
+    } else {
+        content.style.display = 'none';
+        icon.style.transform = 'rotate(0deg)';
+        header.setAttribute('aria-expanded', 'false');
+    }
+}
+
 function savePayment(bookingType, bookingId) {
     var key = bookingType + '-' + bookingId;
     var amountDue = document.getElementById('amount_due-' + key).value;

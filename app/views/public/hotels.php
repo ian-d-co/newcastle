@@ -199,7 +199,9 @@ if (!empty($allRoomIds)) {
                                     <?php endif; ?>
 
                                     <div class="item-footer">
-                                        <?php if (isGuestMode()): ?>
+                                        <?php if (empty($room['booking_open'])): ?>
+                                            <button class="btn btn-secondary" disabled>Booking Closed</button>
+                                        <?php elseif (isGuestMode()): ?>
                                             <button class="btn btn-primary" disabled>Reserve (Login Required)</button>
                                         <?php elseif (!hasRegisteredAttendance()): ?>
                                             <button class="btn btn-warning" onclick="showAttendanceRequired()">Register Attendance First</button>
