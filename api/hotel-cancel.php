@@ -26,8 +26,24 @@ try {
         throw new Exception('Reservation ID is required');
     }
     
-    $userId = getCurrentUserId();
     $hotelModel = new Hotel();
+    
+    // CRITICAL: Verify the reservation belongs to the logged-in user
+    $userId = $_SESSION['user_id'];
+    $db = getDbConnection();
+    $stmt = $db->prepare("SELECT user_id FROM room_reservations WHERE id = ?");
+    $stmt->execute([$reservationId]);
+    $reservation = $stmt->fetch();
+    
+    if (!$reservation) {
+        throw new Exception('Reservation not found');
+    }
+    
+    if ($reservation['user_id'] !== (int)$userId) {
+        throw new Exception('You can only cancel your own reservations');
+    }
+    
+    // Now actually cancel it
     $hotelModel->cancelReservation($reservationId, $userId);
     
     jsonResponse(['success' => true, 'message' => 'Reservation cancelled successfully']);

@@ -99,7 +99,7 @@ class Hotel {
         $fields = [];
         $params = ['id' => $id];
         
-        foreach (['room_type', 'capacity', 'price', 'quantity_available', 'quantity_reserved', 'status',
+        foreach (['room_type', 'capacity', 'price', 'simple_price_type', 'quantity_available', 'quantity_reserved', 'status',
                   'single_price_friday', 'single_price_saturday', 'double_price_friday', 'double_price_saturday',
                   'triple_price_friday', 'triple_price_saturday', 'breakfast_included', 'book_direct_with_hotel',
                   'book_with_group', 'group_payment_due'] as $field) {

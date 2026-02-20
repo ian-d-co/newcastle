@@ -183,6 +183,14 @@ ob_start();
                 <small class="form-text">Default/fallback price per night (optional if using occupancy pricing)</small>
             </div>
 
+            <div id="simple-price-type-group" class="form-group">
+                <label class="form-label">Price Type</label>
+                <select class="form-control" name="simple_price_type" id="simple_price_type">
+                    <option value="per_night">Per Night (Friday OR Saturday)</option>
+                    <option value="both_nights">Both Nights (Friday AND Saturday)</option>
+                </select>
+            </div>
+
             <h4 style="margin: 1rem 0 0.5rem;">Pricing by Occupancy & Night</h4>
             <p style="font-size: 0.875rem; color: #666; margin-bottom: 0.75rem;">Leave at 0.00 if not applicable for that occupancy type.</p>
             <div class="row">
@@ -380,6 +388,7 @@ function addRoom(hotelId) {
     document.getElementById('roomForm').reset();
     document.getElementById('room_id').value = '';
     document.getElementById('room_hotel_id').value = hotelId;
+    updatePriceTypeVisibility();
     modalManager.open('roomModal');
 }
 
@@ -402,6 +411,8 @@ function editRoom(room) {
     document.getElementById('book_direct_with_hotel').checked = room.book_direct_with_hotel == 1;
     document.getElementById('book_with_group').checked = room.book_with_group == 1;
     document.getElementById('group_payment_due').value = room.group_payment_due || '';
+    document.getElementById('simple_price_type').value = room.simple_price_type || 'per_night';
+    updatePriceTypeVisibility();
     modalManager.open('roomModal');
 }
 
@@ -454,7 +465,8 @@ document.getElementById('roomForm').addEventListener('submit', function(e) {
         breakfast_included: this.breakfast_included.checked ? 1 : 0,
         book_direct_with_hotel: this.book_direct_with_hotel.checked ? 1 : 0,
         book_with_group: this.book_with_group.checked ? 1 : 0,
-        group_payment_due: this.group_payment_due.value || null
+        group_payment_due: this.group_payment_due.value || null,
+        simple_price_type: this.simple_price_type.value || 'per_night'
     };
     
     if (editingRoomId) {
@@ -488,6 +500,30 @@ document.getElementById('roomForm').addEventListener('submit', function(e) {
         console.error('Error:', error);
         showAlert('An error occurred', 'danger');
     });
+});
+
+// Show/hide simple price type based on whether we're using simple or occupancy pricing
+function updatePriceTypeVisibility() {
+    const hasSingleFri = parseFloat(document.getElementById('single_price_friday').value) > 0;
+    const hasSingleSat = parseFloat(document.getElementById('single_price_saturday').value) > 0;
+    const hasDoubleFri = parseFloat(document.getElementById('double_price_friday').value) > 0;
+    const hasDoubleSat = parseFloat(document.getElementById('double_price_saturday').value) > 0;
+    const hasTripleFri = parseFloat(document.getElementById('triple_price_friday').value) > 0;
+    const hasTripleSat = parseFloat(document.getElementById('triple_price_saturday').value) > 0;
+    
+    const hasOccupancyPricing = hasSingleFri || hasSingleSat || hasDoubleFri || hasDoubleSat || hasTripleFri || hasTripleSat;
+    
+    const simplePriceGroup = document.getElementById('simple-price-type-group');
+    if (hasOccupancyPricing) {
+        simplePriceGroup.style.display = 'none';
+    } else {
+        simplePriceGroup.style.display = 'block';
+    }
+}
+
+// Call this when any occupancy price field changes
+document.querySelectorAll('#single_price_friday, #single_price_saturday, #double_price_friday, #double_price_saturday, #triple_price_friday, #triple_price_saturday').forEach(input => {
+    input.addEventListener('change', updatePriceTypeVisibility);
 });
 </script>
 
