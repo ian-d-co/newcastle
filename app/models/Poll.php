@@ -6,7 +6,7 @@ class Poll {
         $this->db = getDbConnection();
     }
     
-    public function create($eventId, $question, $options, $isAnonymous = 0, $isMultipleChoice = 0, $expiresAt = null, $createdBy) {
+    public function create($eventId, $question, $options, $createdBy, $isAnonymous = 0, $isMultipleChoice = 0, $expiresAt = null) {
         $this->db->beginTransaction();
         
         try {
