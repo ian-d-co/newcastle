@@ -16,7 +16,7 @@ class Activity {
     }
     
     public function getAll($eventId) {
-        $sql = "SELECT DISTINCT a.* FROM activities a WHERE a.event_id = :event_id ORDER BY 
+        $sql = "SELECT a.* FROM activities a WHERE a.event_id = :event_id GROUP BY a.id ORDER BY 
                 FIELD(a.day, 'Friday', 'Saturday', 'Sunday'), a.start_time";
         $stmt = $this->db->prepare($sql);
         $stmt->execute(['event_id' => $eventId]);
