@@ -45,6 +45,24 @@ class Poll {
         $stmt->execute(['event_id' => $eventId]);
         return $stmt->fetchAll();
     }
+
+    public function getAllWithCategories($eventId) {
+        $sql = "SELECT p.*,
+                       pc.name as category_name,
+                       pc.display_order as category_display_order
+                FROM polls p
+                LEFT JOIN poll_categories pc ON p.category_id = pc.id
+                WHERE p.event_id = :event_id
+                ORDER BY
+                    COALESCE(pc.display_order, 999),
+                    pc.name ASC,
+                    CASE WHEN p.expires_at IS NULL THEN 1 ELSE 0 END,
+                    p.expires_at ASC,
+                    p.created_at DESC";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute(['event_id' => $eventId]);
+        return $stmt->fetchAll();
+    }
     
     public function getActive($eventId) {
         $sql = "SELECT p.*, 
