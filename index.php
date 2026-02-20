@@ -372,18 +372,6 @@ try {
             $pageTitle = 'Activities';
             $activities = $activityModel->getAll($event['id']);
             
-            // Deduplicate by ID before processing (safety net)
-            $seenActivityIds = [];
-            $uniqueActivities = [];
-            foreach ($activities as $act) {
-                if (!isset($seenActivityIds[$act['id']])) {
-                    $uniqueActivities[] = $act;
-                    $seenActivityIds[$act['id']] = true;
-                }
-            }
-            $activities = $uniqueActivities;
-            unset($seenActivityIds, $uniqueActivities, $act);
-            
             // Check which activities user has booked
             foreach ($activities as &$activity) {
                 $activity['is_booked'] = $activityModel->isBooked($activity['id'], $userId);
