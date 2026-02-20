@@ -198,22 +198,27 @@ class Hotel {
         }
     }
     
-    public function cancelReservation($reservationId, $userId) {
+    public function cancelReservation($reservationId, $userId = null) {
         $this->db->beginTransaction();
         
         try {
-            $sql = "SELECT * FROM room_reservations WHERE id = :id AND user_id = :user_id";
+            $sql = "SELECT * FROM room_reservations WHERE id = :id";
             $stmt = $this->db->prepare($sql);
-            $stmt->execute(['id' => $reservationId, 'user_id' => $userId]);
+            $stmt->execute(['id' => $reservationId]);
             $reservation = $stmt->fetch();
             
             if (!$reservation) {
                 throw new Exception('Reservation not found');
             }
             
-            $sql = "UPDATE room_reservations SET payment_status = 'cancelled' WHERE id = :id AND user_id = :user_id";
+            // Verify ownership if userId provided
+            if ($userId !== null && $reservation['user_id'] != $userId) {
+                throw new Exception('You can only cancel your own reservations');
+            }
+            
+            $sql = "UPDATE room_reservations SET payment_status = 'cancelled' WHERE id = :id";
             $stmt = $this->db->prepare($sql);
-            $stmt->execute(['id' => $reservationId, 'user_id' => $userId]);
+            $stmt->execute(['id' => $reservationId]);
             
             $sql = "UPDATE hotel_rooms 
                     SET quantity_available = quantity_available + 1, 

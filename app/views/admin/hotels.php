@@ -389,6 +389,7 @@ function addRoom(hotelId) {
     document.getElementById('room_id').value = '';
     document.getElementById('room_hotel_id').value = hotelId;
     updatePriceTypeVisibility();
+    updateBookingFieldVisibility();
     modalManager.open('roomModal');
 }
 
@@ -413,6 +414,7 @@ function editRoom(room) {
     document.getElementById('group_payment_due').value = room.group_payment_due || '';
     document.getElementById('simple_price_type').value = room.simple_price_type || 'per_night';
     updatePriceTypeVisibility();
+    updateBookingFieldVisibility();
     modalManager.open('roomModal');
 }
 
@@ -525,6 +527,30 @@ function updatePriceTypeVisibility() {
 document.querySelectorAll('#single_price_friday, #single_price_saturday, #double_price_friday, #double_price_saturday, #triple_price_friday, #triple_price_saturday').forEach(input => {
     input.addEventListener('change', updatePriceTypeVisibility);
 });
+
+// Apply booking field enabled/disabled state based on checkbox values
+function updateBookingFieldVisibility() {
+    const bookDirect = document.getElementById('book_direct_with_hotel');
+    const bookWithGroup = document.getElementById('book_with_group');
+    const groupPaymentField = document.getElementById('group_payment_due');
+
+    if (bookDirect.checked) {
+        groupPaymentField.disabled = true;
+        groupPaymentField.style.backgroundColor = '#e9ecef';
+        bookWithGroup.disabled = true;
+        bookWithGroup.checked = false;
+    } else if (bookWithGroup.checked) {
+        bookDirect.disabled = true;
+    } else {
+        bookDirect.disabled = false;
+        bookWithGroup.disabled = false;
+        groupPaymentField.disabled = false;
+        groupPaymentField.style.backgroundColor = '';
+    }
+}
+
+document.getElementById('book_direct_with_hotel').addEventListener('change', updateBookingFieldVisibility);
+document.getElementById('book_with_group').addEventListener('change', updateBookingFieldVisibility);
 </script>
 
 <style>
