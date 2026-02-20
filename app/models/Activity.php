@@ -3,6 +3,10 @@
 class Activity {
     private $db;
 
+    private static function normalizeDay($day) {
+        return ucfirst(strtolower(trim($day)));
+    }
+
     public function __construct() {
         $this->db = getDbConnection();
     }
@@ -15,11 +19,12 @@ class Activity {
         $stmt->execute(['event_id' => $eventId]);
         $activities = $stmt->fetchAll();
 
-        // Deduplicate by ID
+        // Deduplicate by ID and normalize day value
         $seenIds = [];
         $uniqueActivities = [];
         foreach ($activities as $activity) {
             if (!isset($seenIds[$activity['id']])) {
+                $activity['day'] = self::normalizeDay($activity['day']);
                 $uniqueActivities[] = $activity;
                 $seenIds[$activity['id']] = true;
             }
@@ -43,6 +48,10 @@ class Activity {
                 ORDER BY FIELD(TRIM(a.day), 'Friday', 'Saturday', 'Sunday'), a.start_time";
         $stmt = $this->db->prepare($sql);
         $stmt->execute(['user_id' => $userId, 'event_id' => $eventId]);
-        return $stmt->fetchAll();
+        $rows = $stmt->fetchAll();
+        foreach ($rows as &$row) {
+            $row['day'] = self::normalizeDay($row['day']);
+        }
+        return $rows;
     }
 }

@@ -45,7 +45,7 @@ ob_start();
                             ?>
                                 <tr style="border-bottom: 1px solid #dee2e6;">
                                     <td style="padding: 0.75rem;"><?php echo e($activity['title']); ?></td>
-                                    <td style="padding: 0.75rem;"><?php echo e($activity['day']); ?></td>
+                                    <td style="padding: 0.75rem;"><?php echo e(ucfirst(strtolower(trim($activity['day'])))); ?></td>
                                     <td style="padding: 0.75rem;">
                                         <?php echo formatDisplayTime($activity['start_time']); ?> - 
                                         <?php echo formatDisplayTime($activity['end_time']); ?>

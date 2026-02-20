@@ -45,8 +45,9 @@ if (!empty($activities)) {
                 // Only add each activity once based on its ID
                 if (!isset($seenActivityIds[$activity['id']])) {
                     $seenActivityIds[$activity['id']] = true;
-                    if (isset($days[$activity['day']])) {
-                        $days[$activity['day']][] = $activity;
+                    $dayKey = ucfirst(strtolower(trim($activity['day'])));
+                    if (isset($days[$dayKey])) {
+                        $days[$dayKey][] = $activity;
                     }
                 }
             }
