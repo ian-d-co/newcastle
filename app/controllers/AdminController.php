@@ -96,6 +96,7 @@ class AdminController {
             $stmt->execute(['activity_id' => $activity['id']]);
             $activity['booking_count'] = $stmt->fetch()['count'];
         }
+        unset($activity);
         
         $pageTitle = 'Manage Activities';
         $currentPage = 'admin';
@@ -349,6 +350,7 @@ class AdminController {
             $stmt->execute(['meal_id' => $meal['id']]);
             $meal['booking_count'] = $stmt->fetch()['count'];
         }
+        unset($meal);
         
         $pageTitle = 'Manage Meals';
         $currentPage = 'admin';
@@ -590,6 +592,7 @@ class AdminController {
             
             $poll['options'] = $pollModel->getOptions($poll['id']);
         }
+        unset($poll);
         
         // Get categories for dropdown
         $stmt = $db->query("SELECT * FROM poll_categories ORDER BY display_order, name");
@@ -976,7 +979,9 @@ class AdminController {
                 $stmt->execute(['hotel_room_id' => $room['id']]);
                 $room['reservation_count'] = $stmt->fetch()['count'];
             }
+            unset($room);
         }
+        unset($hotel);
         
         $pageTitle = 'Manage Hotels';
         $currentPage = 'admin';
