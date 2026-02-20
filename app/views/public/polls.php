@@ -177,19 +177,28 @@ ob_start();
 
 <script>
 function toggleExpander(header) {
-    header.classList.toggle('active');
-    const content = header.nextElementSibling;
-    content.classList.toggle('active');
-    
     const icon = header.querySelector('.expander-icon');
-    if (header.classList.contains('active')) {
-        icon.textContent = '▼'; // Down when open
+    const content = header.nextElementSibling;
+
+    if (content.style.display === 'none' || !content.style.display) {
+        content.style.display = 'block';
+        icon.textContent = '▼';
+        header.classList.add('active');
     } else {
-        icon.textContent = '▶'; // Right when closed
+        content.style.display = 'none';
+        icon.textContent = '▶';
+        header.classList.remove('active');
     }
 }
 
 document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.expander-content').forEach(function(content) {
+        content.style.display = 'none';
+    });
+    document.querySelectorAll('.expander-icon').forEach(function(icon) {
+        icon.textContent = '▶';
+    });
+
     document.querySelectorAll('.poll-form').forEach(function(form) {
         form.addEventListener('submit', function(e) {
             e.preventDefault();
