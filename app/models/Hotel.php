@@ -199,6 +199,7 @@ class Hotel {
     }
     
     public function cancelReservation($reservationId, $userId = null) {
+        error_log('Hotel::cancelReservation() - Method called, reservationId: ' . $reservationId);
         $this->db->beginTransaction();
         
         try {
@@ -208,29 +209,42 @@ class Hotel {
             $reservation = $stmt->fetch();
             
             if (!$reservation) {
+                error_log('Hotel::cancelReservation() - Reservation not found: ' . $reservationId);
                 throw new Exception('Reservation not found');
+            }
+            
+            if ($reservation['payment_status'] === 'cancelled') {
+                error_log('Hotel::cancelReservation() - Reservation already cancelled: ' . $reservationId);
+                throw new Exception('Reservation is already cancelled');
             }
             
             // Verify ownership if userId provided
             if ($userId !== null && $reservation['user_id'] != $userId) {
+                error_log('Hotel::cancelReservation() - Ownership check failed for user: ' . $userId);
                 throw new Exception('You can only cancel your own reservations');
             }
             
-            $sql = "UPDATE room_reservations SET payment_status = 'cancelled' WHERE id = :id";
+            $sql = "UPDATE room_reservations SET payment_status = 'cancelled' WHERE id = :reservation_id";
             $stmt = $this->db->prepare($sql);
-            $stmt->execute(['id' => $reservationId]);
+            $stmt->execute(['reservation_id' => $reservationId]);
+            error_log('Hotel::cancelReservation() - Reservation status updated to cancelled');
             
             $sql = "UPDATE hotel_rooms 
                     SET quantity_available = quantity_available + 1, 
-                        quantity_reserved = quantity_reserved - 1 
-                    WHERE id = :id AND quantity_reserved > 0";
+                        quantity_reserved = GREATEST(0, quantity_reserved - 1) 
+                    WHERE id = :room_id";
             $stmt = $this->db->prepare($sql);
-            $stmt->execute(['id' => $reservation['hotel_room_id']]);
+            $stmt->execute(['room_id' => $reservation['hotel_room_id']]);
+            error_log('Hotel::cancelReservation() - Hotel room quantities updated');
             
             $this->db->commit();
+            error_log('Hotel::cancelReservation() - Transaction committed successfully');
             return true;
         } catch (Exception $e) {
             $this->db->rollBack();
+            error_log('Hotel::cancelReservation() - Exception: ' . $e->getMessage());
+            error_log('Hotel::cancelReservation() - File: ' . $e->getFile() . ':' . $e->getLine());
+            error_log('Hotel::cancelReservation() - Trace: ' . $e->getTraceAsString());
             throw $e;
         }
     }

@@ -21,7 +21,7 @@ ob_start();
                 <?php $outstanding = $user['total_due'] - $user['total_paid']; ?>
                 <div class="card" style="margin-bottom: 1rem; border: 1px solid #dee2e6;">
                     <div class="card-header"
-                         style="cursor: pointer; display: flex; justify-content: space-between; align-items: center; background: #f8f9fa;"
+                         style="cursor: pointer; display: flex; justify-content: space-between; align-items: center; background: #6d4c1f; color: #fff;"
                          onclick="togglePaymentUser(<?php echo $index; ?>)"
                          tabindex="0" role="button"
                          aria-expanded="false" id="payment-header-<?php echo $index; ?>"
