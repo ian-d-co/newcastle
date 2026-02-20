@@ -264,7 +264,7 @@ ob_start();
         ");
         $paymentStmt->execute(['user_id' => $userId, 'event_id' => $event['id']]);
         $myPayments = $paymentStmt->fetchAll();
-        $totalDue = array_sum(array_column($myPayments, 'amount_due') ?: array_column($myPayments, 'price'));
+        $totalDue = array_sum(array_column($myPayments, 'amount_due')) ?: array_sum(array_column($myPayments, 'price'));
         $totalPaid = array_sum(array_column($myPayments, 'amount_paid') ?? []);
         ?>
         <?php if (!empty($myPayments)): ?>
