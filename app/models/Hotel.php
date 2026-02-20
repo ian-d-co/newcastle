@@ -198,22 +198,22 @@ class Hotel {
         }
     }
     
-    public function cancelReservation($reservationId) {
+    public function cancelReservation($reservationId, $userId) {
         $this->db->beginTransaction();
         
         try {
-            $sql = "SELECT * FROM room_reservations WHERE id = :id";
+            $sql = "SELECT * FROM room_reservations WHERE id = :id AND user_id = :user_id";
             $stmt = $this->db->prepare($sql);
-            $stmt->execute(['id' => $reservationId]);
+            $stmt->execute(['id' => $reservationId, 'user_id' => $userId]);
             $reservation = $stmt->fetch();
             
             if (!$reservation) {
                 throw new Exception('Reservation not found');
             }
             
-            $sql = "UPDATE room_reservations SET payment_status = 'cancelled' WHERE id = :id";
+            $sql = "UPDATE room_reservations SET payment_status = 'cancelled' WHERE id = :id AND user_id = :user_id";
             $stmt = $this->db->prepare($sql);
-            $stmt->execute(['id' => $reservationId]);
+            $stmt->execute(['id' => $reservationId, 'user_id' => $userId]);
             
             $sql = "UPDATE hotel_rooms 
                     SET quantity_available = quantity_available + 1, 

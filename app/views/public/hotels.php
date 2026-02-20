@@ -65,7 +65,7 @@ if (!empty($allRoomIds)) {
                         <?php endif; ?>
 
                         <?php if (!empty($hotel['link'])): ?>
-                            <p><a href="<?php echo e($hotel['link']); ?>" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-secondary">More Info 🔗</a></p>
+                            <p><strong>Link:</strong> <a href="<?php echo e($hotel['link']); ?>" target="_blank" rel="noopener noreferrer"><?php echo e($hotel['link']); ?></a></p>
                         <?php endif; ?>
 
                         <?php if (!empty($hotel['rooms'])): ?>
@@ -74,102 +74,104 @@ if (!empty($allRoomIds)) {
                             <?php foreach ($hotel['rooms'] as $room): ?>
                                 <div class="item" style="margin-bottom: 1rem;">
                                     <div class="item-header">
-                                        <h5 class="item-title"><?php echo e($room['room_type']); ?></h5>
+                                        <h5 class="item-title">Room Type: <?php echo e($room['room_type']); ?></h5>
                                     </div>
-                                    
-                                    <div class="item-meta">
-                                        <div class="item-meta-item">
-                                            <strong>Capacity:</strong> <?php echo e($room['capacity']); ?> people
-                                        </div>
-                                        <?php if ($room['breakfast_included']): ?>
-                                        <div class="item-meta-item">
-                                            <span class="badge badge-success">🍳 Breakfast Included</span>
-                                        </div>
-                                        <?php endif; ?>
-                                        <div class="item-meta-item">
-                                            <strong>Available:</strong>
-                                            <?php
-                                            $totalRooms = $room['quantity_available'] + ($room['quantity_reserved'] ?? 0);
-                                            $occupancyPct = $totalRooms > 0 ? (($room['quantity_reserved'] ?? 0) / $totalRooms) * 100 : 0;
-                                            $capacityClass = $occupancyPct >= 95 ? 'capacity-red' : ($occupancyPct >= 71 ? 'capacity-amber' : 'capacity-green');
-                                            ?>
-                                            <span class="<?php echo $capacityClass; ?>">
-                                                <?php echo e($room['quantity_available']); ?> available
-                                                <?php if (isset($room['quantity_reserved']) && $room['quantity_reserved'] > 0): ?>
-                                                    (<?php echo e($room['quantity_reserved']); ?> reserved)
-                                                <?php endif; ?>
-                                            </span>
-                                        </div>
+
+                                    <p style="margin: 0.25rem 0;">
+                                        <strong>Capacity:</strong> <?php echo e($room['capacity']); ?> people
+                                        &nbsp;|&nbsp;
                                         <?php
-                                        // Show pricing breakdown as table
-                                        $hasSingleFri = !empty($room['single_price_friday']) && $room['single_price_friday'] > 0;
-                                        $hasSingleSat = !empty($room['single_price_saturday']) && $room['single_price_saturday'] > 0;
-                                        $hasDoubleFri = !empty($room['double_price_friday']) && $room['double_price_friday'] > 0;
-                                        $hasDoubleSat = !empty($room['double_price_saturday']) && $room['double_price_saturday'] > 0;
-                                        $hasTripleFri = !empty($room['triple_price_friday']) && $room['triple_price_friday'] > 0;
-                                        $hasTripleSat = !empty($room['triple_price_saturday']) && $room['triple_price_saturday'] > 0;
-                                        $hasPricing = $hasSingleFri || $hasSingleSat || $hasDoubleFri || $hasDoubleSat || $hasTripleFri || $hasTripleSat;
-                                        if ($hasPricing): ?>
-                                        <div class="item-meta-item">
-                                            <strong>Pricing:</strong>
-                                            <table style="border-collapse: collapse; margin-top: 0.25rem; font-size: 0.875rem;">
-                                                <thead>
-                                                    <tr>
-                                                        <th style="padding: 0.25rem 0.5rem; border: 1px solid #dee2e6;"></th>
-                                                        <th style="padding: 0.25rem 0.5rem; border: 1px solid #dee2e6;">Friday</th>
-                                                        <th style="padding: 0.25rem 0.5rem; border: 1px solid #dee2e6;">Saturday</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    <?php if ($hasSingleFri || $hasSingleSat): ?>
-                                                    <tr>
-                                                        <td style="padding: 0.25rem 0.5rem; border: 1px solid #dee2e6;">Single</td>
-                                                        <td style="padding: 0.25rem 0.5rem; border: 1px solid #dee2e6;"><?php echo $hasSingleFri ? '£' . number_format($room['single_price_friday'], 2) : '-'; ?></td>
-                                                        <td style="padding: 0.25rem 0.5rem; border: 1px solid #dee2e6;"><?php echo $hasSingleSat ? '£' . number_format($room['single_price_saturday'], 2) : '-'; ?></td>
-                                                    </tr>
-                                                    <?php endif; ?>
-                                                    <?php if ($hasDoubleFri || $hasDoubleSat): ?>
-                                                    <tr>
-                                                        <td style="padding: 0.25rem 0.5rem; border: 1px solid #dee2e6;">Double</td>
-                                                        <td style="padding: 0.25rem 0.5rem; border: 1px solid #dee2e6;"><?php echo $hasDoubleFri ? '£' . number_format($room['double_price_friday'], 2) : '-'; ?></td>
-                                                        <td style="padding: 0.25rem 0.5rem; border: 1px solid #dee2e6;"><?php echo $hasDoubleSat ? '£' . number_format($room['double_price_saturday'], 2) : '-'; ?></td>
-                                                    </tr>
-                                                    <?php endif; ?>
-                                                    <?php if ($hasTripleFri || $hasTripleSat): ?>
-                                                    <tr>
-                                                        <td style="padding: 0.25rem 0.5rem; border: 1px solid #dee2e6;">Triple</td>
-                                                        <td style="padding: 0.25rem 0.5rem; border: 1px solid #dee2e6;"><?php echo $hasTripleFri ? '£' . number_format($room['triple_price_friday'], 2) : '-'; ?></td>
-                                                        <td style="padding: 0.25rem 0.5rem; border: 1px solid #dee2e6;"><?php echo $hasTripleSat ? '£' . number_format($room['triple_price_saturday'], 2) : '-'; ?></td>
-                                                    </tr>
-                                                    <?php endif; ?>
-                                                </tbody>
-                                            </table>
-                                        </div>
+                                        $totalRooms = $room['quantity_available'] + ($room['quantity_reserved'] ?? 0);
+                                        $occupancyPct = $totalRooms > 0 ? (($room['quantity_reserved'] ?? 0) / $totalRooms) * 100 : 0;
+                                        $capacityClass = $occupancyPct >= 95 ? 'capacity-red' : ($occupancyPct >= 71 ? 'capacity-amber' : 'capacity-green');
+                                        ?>
+                                        <span class="<?php echo $capacityClass; ?>">
+                                            <?php echo e($room['quantity_available']); ?> available
+                                            <?php if (isset($room['quantity_reserved']) && $room['quantity_reserved'] > 0): ?>
+                                                (<?php echo e($room['quantity_reserved']); ?> reserved)
+                                            <?php endif; ?>
+                                        </span>
+                                    </p>
+
+                                    <?php
+                                    $hasSingleFri = !empty($room['single_price_friday']) && $room['single_price_friday'] > 0;
+                                    $hasSingleSat = !empty($room['single_price_saturday']) && $room['single_price_saturday'] > 0;
+                                    $hasDoubleFri = !empty($room['double_price_friday']) && $room['double_price_friday'] > 0;
+                                    $hasDoubleSat = !empty($room['double_price_saturday']) && $room['double_price_saturday'] > 0;
+                                    $hasTripleFri = !empty($room['triple_price_friday']) && $room['triple_price_friday'] > 0;
+                                    $hasTripleSat = !empty($room['triple_price_saturday']) && $room['triple_price_saturday'] > 0;
+                                    $hasPricing = $hasSingleFri || $hasSingleSat || $hasDoubleFri || $hasDoubleSat || $hasTripleFri || $hasTripleSat;
+                                    ?>
+
+                                    <div style="margin: 0.75rem 0;">
+                                        <strong>Pricing:</strong>
+                                        <?php if ($hasPricing): ?>
+                                        <table style="border-collapse: collapse; margin-top: 0.25rem; font-size: 0.875rem;">
+                                            <thead>
+                                                <tr>
+                                                    <th style="padding: 0.25rem 0.5rem; border: 1px solid #dee2e6;"></th>
+                                                    <th style="padding: 0.25rem 0.5rem; border: 1px solid #dee2e6;">Friday</th>
+                                                    <th style="padding: 0.25rem 0.5rem; border: 1px solid #dee2e6;">Saturday</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <?php if ($hasSingleFri || $hasSingleSat): ?>
+                                                <tr>
+                                                    <td style="padding: 0.25rem 0.5rem; border: 1px solid #dee2e6;">Single</td>
+                                                    <td style="padding: 0.25rem 0.5rem; border: 1px solid #dee2e6;"><?php echo $hasSingleFri ? '£' . number_format($room['single_price_friday'], 2) : '-'; ?></td>
+                                                    <td style="padding: 0.25rem 0.5rem; border: 1px solid #dee2e6;"><?php echo $hasSingleSat ? '£' . number_format($room['single_price_saturday'], 2) : '-'; ?></td>
+                                                </tr>
+                                                <?php endif; ?>
+                                                <?php if ($hasDoubleFri || $hasDoubleSat): ?>
+                                                <tr>
+                                                    <td style="padding: 0.25rem 0.5rem; border: 1px solid #dee2e6;">Double</td>
+                                                    <td style="padding: 0.25rem 0.5rem; border: 1px solid #dee2e6;"><?php echo $hasDoubleFri ? '£' . number_format($room['double_price_friday'], 2) : '-'; ?></td>
+                                                    <td style="padding: 0.25rem 0.5rem; border: 1px solid #dee2e6;"><?php echo $hasDoubleSat ? '£' . number_format($room['double_price_saturday'], 2) : '-'; ?></td>
+                                                </tr>
+                                                <?php endif; ?>
+                                                <?php if ($hasTripleFri || $hasTripleSat): ?>
+                                                <tr>
+                                                    <td style="padding: 0.25rem 0.5rem; border: 1px solid #dee2e6;">Triple</td>
+                                                    <td style="padding: 0.25rem 0.5rem; border: 1px solid #dee2e6;"><?php echo $hasTripleFri ? '£' . number_format($room['triple_price_friday'], 2) : '-'; ?></td>
+                                                    <td style="padding: 0.25rem 0.5rem; border: 1px solid #dee2e6;"><?php echo $hasTripleSat ? '£' . number_format($room['triple_price_saturday'], 2) : '-'; ?></td>
+                                                </tr>
+                                                <?php endif; ?>
+                                            </tbody>
+                                        </table>
                                         <?php else: ?>
-                                        <div class="item-meta-item">
-                                            <strong>Price:</strong> £<?php echo number_format($room['price'], 2); ?> per night
-                                        </div>
+                                        <span style="margin-left: 0.25rem;">£<?php echo number_format($room['price'], 2); ?> per night</span>
                                         <?php endif; ?>
-                                        <?php if (!empty($room['book_direct_with_hotel'])): ?>
-                                        <div class="item-meta-item">
-                                            <span class="badge badge-info">Book Direct with Hotel</span>
-                                        </div>
-                                        <?php endif; ?>
-                                        <?php if (!empty($room['book_with_group'])): ?>
-                                        <div class="item-meta-item">
-                                            <span class="badge badge-success">Book with the Group available</span>
-                                            <?php if (!empty($room['group_payment_due'])): ?>
-                                                <small style="margin-left: 0.5rem;">Payment due by: <?php echo e(formatDisplayDate($room['group_payment_due'])); ?></small>
+                                    </div>
+
+                                    <div style="margin: 0.75rem 0;">
+                                        <strong>Booking information:</strong>
+                                        <div style="margin-top: 0.35rem;">
+                                            <?php if (!empty($room['book_with_group'])): ?>
+                                            <div>&#9745; Book with group
+                                                <?php if (!empty($room['group_payment_due'])): ?>
+                                                    <small style="margin-left: 0.5rem;">(Payment due by: <?php echo e(formatDisplayDate($room['group_payment_due'])); ?>)</small>
+                                                <?php endif; ?>
+                                            </div>
+                                            <?php else: ?>
+                                            <div style="color: #999;">&#9744; Book with group</div>
+                                            <?php endif; ?>
+                                            <?php if (!empty($room['book_direct_with_hotel'])): ?>
+                                            <div>&#9745; Book direct with hotel (no payment tracking)</div>
+                                            <?php else: ?>
+                                            <div style="color: #999;">&#9744; Book direct with hotel (no payment tracking)</div>
+                                            <?php endif; ?>
+                                            <?php if ($room['breakfast_included']): ?>
+                                            <div>&#9745; Breakfast included</div>
+                                            <?php else: ?>
+                                            <div style="color: #999;">&#9744; Breakfast included</div>
                                             <?php endif; ?>
                                         </div>
-                                        <?php endif; ?>
                                     </div>
-                                    
 
                                     <?php if (!isGuestMode()): ?>
                                     <div class="interest-selector" data-item-type="hotel_room" data-item-id="<?php echo $room['id']; ?>" style="margin: 0.75rem 0;">
                                         <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
-                                            <small style="color: #666;">Your interest:</small>
+                                            <small style="color: #666;">Interested?</small>
                                             <?php
                                             $userLevel = $userInterestsMap[$room['id']] ?? null;
                                             $stats = $interestStatsMap[$room['id']] ?? [];
@@ -189,7 +191,7 @@ if (!empty($allRoomIds)) {
                                         </div>
                                     </div>
                                     <?php endif; ?>
-                                    
+
                                     <div class="item-footer">
                                         <?php if (isGuestMode()): ?>
                                             <button class="btn btn-primary" disabled>Reserve (Login Required)</button>

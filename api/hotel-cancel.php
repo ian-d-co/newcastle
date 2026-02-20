@@ -26,8 +26,9 @@ try {
         throw new Exception('Reservation ID is required');
     }
     
+    $userId = getCurrentUserId();
     $hotelModel = new Hotel();
-    $hotelModel->cancelReservation($reservationId);
+    $hotelModel->cancelReservation($reservationId, $userId);
     
     jsonResponse(['success' => true, 'message' => 'Reservation cancelled successfully']);
 } catch (Exception $e) {
