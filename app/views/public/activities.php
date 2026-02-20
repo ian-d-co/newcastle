@@ -40,9 +40,14 @@ if (!empty($activities)) {
         <?php else: ?>
             <?php
             $days = ['Friday' => [], 'Saturday' => [], 'Sunday' => []];
+            $seenActivityIds = [];
             foreach ($activities as $activity) {
-                if (array_key_exists($activity['day'], $days)) {
-                    $days[$activity['day']][] = $activity;
+                // Only add each activity once based on its ID
+                if (!isset($seenActivityIds[$activity['id']])) {
+                    $seenActivityIds[$activity['id']] = true;
+                    if (isset($days[$activity['day']])) {
+                        $days[$activity['day']][] = $activity;
+                    }
                 }
             }
             ?>
