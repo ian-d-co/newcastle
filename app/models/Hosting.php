@@ -170,7 +170,7 @@ class Hosting {
     public function createRequest($offerId, $userId, $message = '') {
         $sql = "INSERT INTO hosting_requests (hosting_offer_id, user_id, message)
                 VALUES (:offer_id, :user_id, :message)
-                ON DUPLICATE KEY UPDATE message = :message, status = 'pending', updated_at = NOW()";
+                ON DUPLICATE KEY UPDATE message = VALUES(message), status = 'pending', updated_at = NOW()";
         $stmt = $this->db->prepare($sql);
         $stmt->execute(['offer_id' => $offerId, 'user_id' => $userId, 'message' => $message]);
         return $this->db->lastInsertId() ?: true;

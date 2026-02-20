@@ -74,11 +74,6 @@ if (!empty($meals)) {
                                         <?php endif; ?>
                                     </span>
                                 </div>
-                                <?php if ($meal['requires_prepayment']): ?>
-                                <div class="item-meta-item">
-                                    <span class="badge badge-warning">Prepayment Required: £<?php echo number_format($meal['price'], 2); ?></span>
-                                </div>
-                                <?php endif; ?>
                                 <?php if (!empty($meal['total_price']) && $meal['total_price'] > 0): ?>
                                 <div class="item-meta-item">
                                     <strong>Total Price:</strong> £<?php echo number_format($meal['total_price'], 2); ?>

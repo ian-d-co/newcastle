@@ -101,19 +101,49 @@ if (!empty($allRoomIds)) {
                                             </span>
                                         </div>
                                         <?php
-                                        // Show pricing breakdown
-                                        $hasPricing = false;
-                                        $pricingLines = [];
-                                        if (!empty($room['single_price_friday']) && $room['single_price_friday'] > 0) { $pricingLines[] = 'Single Fri: £' . number_format($room['single_price_friday'], 2); $hasPricing = true; }
-                                        if (!empty($room['single_price_saturday']) && $room['single_price_saturday'] > 0) { $pricingLines[] = 'Single Sat: £' . number_format($room['single_price_saturday'], 2); $hasPricing = true; }
-                                        if (!empty($room['double_price_friday']) && $room['double_price_friday'] > 0) { $pricingLines[] = 'Double Fri: £' . number_format($room['double_price_friday'], 2); $hasPricing = true; }
-                                        if (!empty($room['double_price_saturday']) && $room['double_price_saturday'] > 0) { $pricingLines[] = 'Double Sat: £' . number_format($room['double_price_saturday'], 2); $hasPricing = true; }
-                                        if (!empty($room['triple_price_friday']) && $room['triple_price_friday'] > 0) { $pricingLines[] = 'Triple Fri: £' . number_format($room['triple_price_friday'], 2); $hasPricing = true; }
-                                        if (!empty($room['triple_price_saturday']) && $room['triple_price_saturday'] > 0) { $pricingLines[] = 'Triple Sat: £' . number_format($room['triple_price_saturday'], 2); $hasPricing = true; }
+                                        // Show pricing breakdown as table
+                                        $hasSingleFri = !empty($room['single_price_friday']) && $room['single_price_friday'] > 0;
+                                        $hasSingleSat = !empty($room['single_price_saturday']) && $room['single_price_saturday'] > 0;
+                                        $hasDoubleFri = !empty($room['double_price_friday']) && $room['double_price_friday'] > 0;
+                                        $hasDoubleSat = !empty($room['double_price_saturday']) && $room['double_price_saturday'] > 0;
+                                        $hasTripleFri = !empty($room['triple_price_friday']) && $room['triple_price_friday'] > 0;
+                                        $hasTripleSat = !empty($room['triple_price_saturday']) && $room['triple_price_saturday'] > 0;
+                                        $hasPricing = $hasSingleFri || $hasSingleSat || $hasDoubleFri || $hasDoubleSat || $hasTripleFri || $hasTripleSat;
                                         if ($hasPricing): ?>
                                         <div class="item-meta-item">
                                             <strong>Pricing:</strong>
-                                            <?php echo implode(' &bull; ', $pricingLines); ?>
+                                            <table style="border-collapse: collapse; margin-top: 0.25rem; font-size: 0.875rem;">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="padding: 0.25rem 0.5rem; border: 1px solid #dee2e6;"></th>
+                                                        <th style="padding: 0.25rem 0.5rem; border: 1px solid #dee2e6;">Friday</th>
+                                                        <th style="padding: 0.25rem 0.5rem; border: 1px solid #dee2e6;">Saturday</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <?php if ($hasSingleFri || $hasSingleSat): ?>
+                                                    <tr>
+                                                        <td style="padding: 0.25rem 0.5rem; border: 1px solid #dee2e6;">Single</td>
+                                                        <td style="padding: 0.25rem 0.5rem; border: 1px solid #dee2e6;"><?php echo $hasSingleFri ? '£' . number_format($room['single_price_friday'], 2) : '-'; ?></td>
+                                                        <td style="padding: 0.25rem 0.5rem; border: 1px solid #dee2e6;"><?php echo $hasSingleSat ? '£' . number_format($room['single_price_saturday'], 2) : '-'; ?></td>
+                                                    </tr>
+                                                    <?php endif; ?>
+                                                    <?php if ($hasDoubleFri || $hasDoubleSat): ?>
+                                                    <tr>
+                                                        <td style="padding: 0.25rem 0.5rem; border: 1px solid #dee2e6;">Double</td>
+                                                        <td style="padding: 0.25rem 0.5rem; border: 1px solid #dee2e6;"><?php echo $hasDoubleFri ? '£' . number_format($room['double_price_friday'], 2) : '-'; ?></td>
+                                                        <td style="padding: 0.25rem 0.5rem; border: 1px solid #dee2e6;"><?php echo $hasDoubleSat ? '£' . number_format($room['double_price_saturday'], 2) : '-'; ?></td>
+                                                    </tr>
+                                                    <?php endif; ?>
+                                                    <?php if ($hasTripleFri || $hasTripleSat): ?>
+                                                    <tr>
+                                                        <td style="padding: 0.25rem 0.5rem; border: 1px solid #dee2e6;">Triple</td>
+                                                        <td style="padding: 0.25rem 0.5rem; border: 1px solid #dee2e6;"><?php echo $hasTripleFri ? '£' . number_format($room['triple_price_friday'], 2) : '-'; ?></td>
+                                                        <td style="padding: 0.25rem 0.5rem; border: 1px solid #dee2e6;"><?php echo $hasTripleSat ? '£' . number_format($room['triple_price_saturday'], 2) : '-'; ?></td>
+                                                    </tr>
+                                                    <?php endif; ?>
+                                                </tbody>
+                                            </table>
                                         </div>
                                         <?php else: ?>
                                         <div class="item-meta-item">
@@ -123,6 +153,14 @@ if (!empty($allRoomIds)) {
                                         <?php if (!empty($room['book_direct_with_hotel'])): ?>
                                         <div class="item-meta-item">
                                             <span class="badge badge-info">Book Direct with Hotel</span>
+                                        </div>
+                                        <?php endif; ?>
+                                        <?php if (!empty($room['book_with_group'])): ?>
+                                        <div class="item-meta-item">
+                                            <span class="badge badge-success">Book with the Group available</span>
+                                            <?php if (!empty($room['group_payment_due'])): ?>
+                                                <small style="margin-left: 0.5rem;">Payment due by: <?php echo e(formatDisplayDate($room['group_payment_due'])); ?></small>
+                                            <?php endif; ?>
                                         </div>
                                         <?php endif; ?>
                                     </div>
@@ -219,6 +257,20 @@ if (!empty($allRoomIds)) {
                                                 </div>
                                                 <?php endif; ?>
 
+                                                <?php if (!empty($room['book_with_group'])): ?>
+                                                <div class="form-group" style="margin-top: 0.5rem;">
+                                                    <label style="display: flex; align-items: center; cursor: pointer;">
+                                                        <input type="checkbox" id="book-with-group-<?php echo $room['id']; ?>" style="margin-right: 0.5rem;" onchange="toggleGroupPaymentInfo(<?php echo $room['id']; ?>)">
+                                                        Book with the Group
+                                                    </label>
+                                                    <?php if (!empty($room['group_payment_due'])): ?>
+                                                    <div id="group-payment-info-<?php echo $room['id']; ?>" style="display: none; margin-top: 0.25rem; padding: 0.4rem 0.75rem; background: #d4edda; border-radius: 4px; font-size: 0.875rem;">
+                                                        <strong>Payment due by:</strong> <?php echo e(formatDisplayDate($room['group_payment_due'])); ?>
+                                                    </div>
+                                                    <?php endif; ?>
+                                                </div>
+                                                <?php endif; ?>
+
                                                 <script>
                                                 var roomPrices_<?php echo $room['id']; ?> = {
                                                     single_friday: <?php echo (float)($room['single_price_friday'] ?? 0); ?>,
@@ -311,6 +363,14 @@ function showAttendanceRequired() {
     setTimeout(function() {
         window.location.href = '/index.php?page=dashboard';
     }, 2000);
+}
+
+function toggleGroupPaymentInfo(roomId) {
+    var cb = document.getElementById('book-with-group-' + roomId);
+    var info = document.getElementById('group-payment-info-' + roomId);
+    if (info) {
+        info.style.display = cb.checked ? 'block' : 'none';
+    }
 }
 
 function submitReservation(roomId) {
