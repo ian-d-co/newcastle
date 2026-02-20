@@ -407,7 +407,7 @@ try {
 
         case 'polls':
             $pageTitle = 'Polls';
-            $polls = $pollModel->getActive($event['id']);
+            $polls = $pollModel->getAllWithCategories($event['id']);
             
             // Check which polls user has voted on and get options
             foreach ($polls as &$poll) {
