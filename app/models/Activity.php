@@ -7,18 +7,24 @@ class Activity {
         $this->db = getDbConnection();
     }
 
-    public function getAll($event_id) {
+    public function getAll($eventId) {
         $sql = "SELECT a.* FROM activities a 
                 WHERE a.event_id = :event_id 
-                AND a.id IN (
-                    SELECT MIN(id) FROM activities 
-                    WHERE event_id = :event_id 
-                    GROUP BY id
-                )
                 ORDER BY FIELD(a.day, 'Friday', 'Saturday', 'Sunday'), a.start_time";
         $stmt = $this->db->prepare($sql);
-        $stmt->execute(['event_id' => $event_id]);
-        return $stmt->fetchAll();
+        $stmt->execute(['event_id' => $eventId]);
+        $activities = $stmt->fetchAll();
+
+        // Deduplicate by ID
+        $seenIds = [];
+        $uniqueActivities = [];
+        foreach ($activities as $activity) {
+            if (!isset($seenIds[$activity['id']])) {
+                $uniqueActivities[] = $activity;
+                $seenIds[$activity['id']] = true;
+            }
+        }
+        return $uniqueActivities;
     }
 
     public function isBooked($activityId, $userId) {
