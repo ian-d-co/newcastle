@@ -1051,11 +1051,6 @@ select.form-control {
 
 .expander-icon {
     font-size: 1.2rem;
-    transition: transform 0.3s ease;
-}
-
-.expander-header.active .expander-icon {
-    transform: rotate(180deg);
 }
 
 .expander-content {

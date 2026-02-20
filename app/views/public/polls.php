@@ -133,7 +133,7 @@ ob_start();
             <div class="expander" style="margin-top: 2rem;">
                 <div class="expander-header" onclick="toggleExpander(this)" style="background: linear-gradient(135deg, #6d4c1f 0%, #8b6331 100%);">
                     <h2>Closed Polls (<?php echo count($closedPolls); ?>)</h2>
-                    <span class="expander-icon">▼</span>
+                    <span class="expander-icon">▶</span>
                 </div>
                 <div class="expander-content">
                     <?php foreach ($closedPolls as $poll): ?>
@@ -180,6 +180,13 @@ function toggleExpander(header) {
     header.classList.toggle('active');
     const content = header.nextElementSibling;
     content.classList.toggle('active');
+
+    const icon = header.querySelector('.expander-icon');
+    if (header.classList.contains('active')) {
+        icon.textContent = '▼';
+    } else {
+        icon.textContent = '▶';
+    }
 }
 
 document.addEventListener('DOMContentLoaded', function() {

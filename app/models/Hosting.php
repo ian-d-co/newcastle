@@ -22,6 +22,26 @@ class Hosting {
         return $this->db->lastInsertId();
     }
     
+    public function updateOffer($userId, $eventId, $capacity, $notes = '') {
+        $existing = $this->getUserOffer($userId, $eventId);
+        if (!$existing) {
+            return $this->createOffer($userId, $eventId, $capacity, $notes);
+        }
+        $booked = $existing['capacity'] - $existing['available_spaces'];
+        $newAvailable = max(0, $capacity - $booked);
+        $sql = "UPDATE hosting_offers SET capacity = :capacity, available_spaces = :available_spaces, notes = :notes
+                WHERE user_id = :user_id AND event_id = :event_id";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([
+            'capacity' => $capacity,
+            'available_spaces' => $newAvailable,
+            'notes' => $notes,
+            'user_id' => $userId,
+            'event_id' => $eventId
+        ]);
+        return $existing['id'];
+    }
+    
     public function getAll($eventId) {
         $sql = "SELECT h.*, u.discord_name, u.name
                 FROM hosting_offers h
