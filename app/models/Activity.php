@@ -10,7 +10,11 @@ class Activity {
     public function getAll($event_id) {
         $sql = "SELECT a.* FROM activities a 
                 WHERE a.event_id = :event_id 
-                GROUP BY a.id 
+                AND a.id IN (
+                    SELECT MIN(id) FROM activities 
+                    WHERE event_id = :event_id 
+                    GROUP BY id
+                )
                 ORDER BY FIELD(a.day, 'Friday', 'Saturday', 'Sunday'), a.start_time";
         $stmt = $this->db->prepare($sql);
         $stmt->execute(['event_id' => $event_id]);
