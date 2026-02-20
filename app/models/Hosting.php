@@ -124,6 +124,39 @@ class Hosting {
         }
     }
     
+    public function cancelBookingAsHost($offerId, $hostUserId, $guestUserId) {
+        $this->db->beginTransaction();
+        
+        try {
+            $offer = $this->getById($offerId);
+            if (!$offer) {
+                throw new Exception('Hosting offer not found');
+            }
+            
+            if ($offer['user_id'] !== (int)$hostUserId) {
+                throw new Exception('You can only cancel bookings for your own hosting offer');
+            }
+            
+            $sql = "DELETE FROM hosting_bookings WHERE hosting_offer_id = :offer_id AND user_id = :guest_id";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute(['offer_id' => $offerId, 'guest_id' => $guestUserId]);
+            
+            if ($stmt->rowCount() === 0) {
+                throw new Exception('Booking not found');
+            }
+            
+            $sql = "UPDATE hosting_offers SET available_spaces = available_spaces + 1 WHERE id = :id";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute(['id' => $offerId]);
+            
+            $this->db->commit();
+            return true;
+        } catch (Exception $e) {
+            $this->db->rollBack();
+            throw $e;
+        }
+    }
+    
     public function getUserBooking($userId, $eventId) {
         $sql = "SELECT hb.*, h.notes, u.discord_name as host_name
                 FROM hosting_bookings hb

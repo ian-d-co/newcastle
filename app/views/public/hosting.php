@@ -20,7 +20,10 @@ ob_start();
                         <p><strong>Guests:</strong></p>
                         <ul>
                             <?php foreach ($offerBookings as $booking): ?>
-                                <li><?php echo displayName($booking['discord_name']); ?> (<?php echo displayName($booking['name']); ?>)</li>
+                                <li style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
+                                    <?php echo displayName($booking['discord_name']); ?> (<?php echo displayName($booking['name']); ?>)
+                                    <button class="btn btn-danger btn-sm" onclick="cancelGuestBooking(<?php echo (int)$userOffer['id']; ?>, <?php echo (int)$booking['user_id']; ?>)">Cancel</button>
+                                </li>
                             <?php endforeach; ?>
                         </ul>
                     <?php endif; ?>
@@ -196,6 +199,24 @@ function cancelRequest(requestId) {
         } else {
             showAlert('Request cancelled', 'success');
             setTimeout(function() { location.reload(); }, 1000);
+        }
+    });
+}
+
+function cancelGuestBooking(offerId, guestId) {
+    if (!confirm('Are you sure you want to cancel this booking?')) return;
+
+    var csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+    apiCall('/api/hosting-cancel.php', 'POST', {
+        offer_id: offerId,
+        guest_id: guestId,
+        csrf_token: csrfToken
+    }, function(err, response) {
+        if (err) {
+            showAlert(err.message || 'Failed to cancel booking', 'danger');
+        } else {
+            showAlert('Booking cancelled successfully!', 'success');
+            setTimeout(function() { location.reload(); }, 1500);
         }
     });
 }

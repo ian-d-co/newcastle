@@ -21,13 +21,19 @@ if (!verifyCsrfToken($input['csrf_token'] ?? '')) {
 
 try {
     $offerId = $input['offer_id'] ?? null;
+    $guestId = $input['guest_id'] ?? null;
     
     if (!$offerId) {
         throw new Exception('Offer ID is required');
     }
     
     $hostingModel = new Hosting();
-    $hostingModel->cancelBooking($offerId, getCurrentUserId());
+    
+    if ($guestId === null) {
+        $hostingModel->cancelBooking($offerId, getCurrentUserId());
+    } else {
+        $hostingModel->cancelBookingAsHost($offerId, getCurrentUserId(), $guestId);
+    }
     
     jsonResponse(['success' => true, 'message' => 'Hosting cancelled successfully']);
 } catch (Exception $e) {

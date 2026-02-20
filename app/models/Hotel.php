@@ -235,6 +235,12 @@ class Hotel {
                     WHERE id = :room_id";
             $stmt = $this->db->prepare($sql);
             $stmt->execute(['room_id' => $reservation['hotel_room_id']]);
+            $rowsAffected = $stmt->rowCount();
+            error_log('Hotel::cancelReservation() - Rows affected by inventory update: ' . $rowsAffected);
+
+            if ($rowsAffected === 0) {
+                throw new Exception('Failed to update hotel room inventory - room may not exist');
+            }
             error_log('Hotel::cancelReservation() - Hotel room quantities updated');
             
             $this->db->commit();
