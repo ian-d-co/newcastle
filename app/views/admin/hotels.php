@@ -177,10 +177,10 @@ ob_start();
             </div>
             
             <div class="form-group">
-                <label for="price">Price Per Night (£) *</label>
+                <label for="price">Price Per Night (£)</label>
                 <input type="number" id="price" name="price" class="form-control" 
-                       min="0" step="0.01" required>
-                <small class="form-text">Default/fallback price per night</small>
+                       min="0" step="0.01">
+                <small class="form-text">Default/fallback price per night (optional if using occupancy pricing)</small>
             </div>
 
             <h4 style="margin: 1rem 0 0.5rem;">Pricing by Occupancy & Night</h4>
@@ -444,7 +444,7 @@ document.getElementById('roomForm').addEventListener('submit', function(e) {
         room_type: this.room_type.value,
         capacity: parseInt(this.capacity.value),
         quantity_available: parseInt(this.quantity_available.value),
-        price: parseFloat(this.price.value),
+        price: parseFloat(this.price.value) || 0,
         single_price_friday: parseFloat(this.single_price_friday.value) || 0,
         single_price_saturday: parseFloat(this.single_price_saturday.value) || 0,
         double_price_friday: parseFloat(this.double_price_friday.value) || 0,
