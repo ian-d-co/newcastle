@@ -1252,9 +1252,9 @@ class AdminController {
                 'double_price_saturday' => (float)($data['double_price_saturday'] ?? 0),
                 'triple_price_friday' => (float)($data['triple_price_friday'] ?? 0),
                 'triple_price_saturday' => (float)($data['triple_price_saturday'] ?? 0),
-                'breakfast_included' => isset($data['breakfast_included']) ? (int)$data['breakfast_included'] : 0,
-                'book_direct_with_hotel' => isset($data['book_direct_with_hotel']) ? (int)$data['book_direct_with_hotel'] : 0,
-                'book_with_group' => isset($data['book_with_group']) ? (int)$data['book_with_group'] : 0,
+                'breakfast_included' => !empty($data['breakfast_included']) ? (int)$data['breakfast_included'] : 0,
+                'book_direct_with_hotel' => !empty($data['book_direct_with_hotel']) ? (int)$data['book_direct_with_hotel'] : 0,
+                'book_with_group' => !empty($data['book_with_group']) ? (int)$data['book_with_group'] : 0,
                 'group_payment_due' => !empty($data['group_payment_due']) ? $data['group_payment_due'] : null
             ];
             error_log('AdminController::createRoom() - SQL params: ' . json_encode($params));
