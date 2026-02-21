@@ -18,6 +18,7 @@ $attendees = $stmt->fetchAll();
 
 // Get activity bookings for all users
 $activityBookingsByUser = [];
+$mealBookingsByUser     = [];
 if (!empty($attendees)) {
     $userIds = array_column($attendees, 'user_id');
     $placeholders = implode(',', array_fill(0, count($userIds), '?'));
@@ -46,7 +47,7 @@ if (!empty($attendees)) {
         $mealBookingsByUser[$row['user_id']][] = $row;
     }
 }
-$mealBookingsByUser = $mealBookingsByUser ?? [];
+
 ?>
 
 <div class="section">

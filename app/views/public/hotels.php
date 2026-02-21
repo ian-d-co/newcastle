@@ -7,6 +7,17 @@ $db = getDbConnection();
 $userInterestsMap = [];
 $interestStatsMap = [];
 
+// Load event attendees for occupant invite dropdown
+$stmt = $db->prepare("
+    SELECT ea.user_id, u.discord_name
+    FROM event_attendees ea
+    JOIN users u ON ea.user_id = u.id
+    WHERE ea.event_id = :event_id AND ea.user_id != :current_user
+    ORDER BY u.discord_name
+");
+$stmt->execute(['event_id' => $event['id'], 'current_user' => $userId]);
+$eventAttendeesList = $stmt->fetchAll();
+
 $allRoomIds = [];
 foreach ($hotels as $hotel) {
     foreach ($hotel['rooms'] as $room) {
@@ -560,30 +571,28 @@ function submitReservation(roomId) {
 }
 
 document.querySelectorAll('.interest-selector').forEach(function(container) {
-    container.querySelectorAll('.btn-interest').forEach(function(btn) {
-        if (btn.dataset.level) {
-            btn.addEventListener('click', function() {
-                var itemType = container.dataset.itemType;
-                var itemId = container.dataset.itemId;
-                var level = this.dataset.level;
+    container.querySelectorAll('.btn-interest[data-level]').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var itemType = container.dataset.itemType;
+            var itemId = container.dataset.itemId;
+            var level = this.dataset.level;
 
-                fetch('/api/interest.php', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ item_type: itemType, item_id: itemId, interest_level: level })
-                })
-                .then(function(r) { return r.json(); })
-                .then(function(data) {
-                    if (data.success) {
-                        showAlert('Interest updated!', 'success');
-                        setTimeout(function() { location.reload(); }, 800);
-                    } else {
-                        showAlert(data.message || 'Failed to update interest', 'danger');
-                    }
-                })
-                .catch(function() { showAlert('An error occurred', 'danger'); });
-            });
-        }
+            fetch('/api/interest.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ item_type: itemType, item_id: itemId, interest_level: level })
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.success) {
+                    showAlert('Interest updated!', 'success');
+                    setTimeout(function() { location.reload(); }, 800);
+                } else {
+                    showAlert(data.message || 'Failed to update interest', 'danger');
+                }
+            })
+            .catch(function() { showAlert('An error occurred', 'danger'); });
+        });
     });
 });
 
@@ -658,9 +667,13 @@ if (inviteOccForm) {
                 <input type="hidden" id="invite-occ-res-id">
                 <input type="hidden" id="invite-occ-num">
                 <div class="form-group">
-                    <label class="form-label">Attendee User ID *</label>
-                    <input type="number" class="form-control" id="invite-occ-user" placeholder="Enter user ID" required min="1">
-                    <small style="color: #666;">Ask the person for their user ID (visible on admin panel) or invite by Discord name lookup.</small>
+                    <label class="form-label">Select Attendee *</label>
+                    <select class="form-control" id="invite-occ-user" required>
+                        <option value="">Select an attendee...</option>
+                        <?php foreach ($eventAttendeesList as $att): ?>
+                        <option value="<?php echo $att['user_id']; ?>"><?php echo e($att['discord_name']); ?></option>
+                        <?php endforeach; ?>
+                    </select>
                 </div>
                 <div class="form-group">
                     <label class="form-label">Message (optional)</label>
