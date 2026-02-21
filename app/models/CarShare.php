@@ -146,6 +146,12 @@ class CarShare {
         $stmt->execute(['user_id' => $userId, 'event_id' => $eventId]);
         return $stmt->fetch();
     }
+
+    public function removeOffer($userId, $eventId) {
+        $sql = "DELETE FROM carshare_offers WHERE user_id = :user_id AND event_id = :event_id";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute(['user_id' => $userId, 'event_id' => $eventId]);
+    }
     
     public function getOfferBookings($offerId) {
         $sql = "SELECT cb.*, u.discord_name, u.name

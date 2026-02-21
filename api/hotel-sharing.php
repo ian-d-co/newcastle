@@ -61,6 +61,14 @@ try {
         $model->cancelRequest($requestId, $userId);
         jsonResponse(['success' => true, 'message' => 'Request cancelled']);
 
+    } elseif ($action === 'cancel_match') {
+        $requestId = (int)($input['request_id'] ?? 0);
+        if (!$requestId) {
+            jsonResponse(['success' => false, 'message' => 'Invalid request ID'], 400);
+        }
+        $model->cancelMatch($requestId, $userId);
+        jsonResponse(['success' => true, 'message' => 'Match cancelled']);
+
     } else {
         jsonResponse(['success' => false, 'message' => 'Invalid action'], 400);
     }

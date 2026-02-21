@@ -48,14 +48,19 @@ foreach ($sentRequests as $req) {
             <div class="card-header" style="background: linear-gradient(135deg, #28a745, #20c997);">Confirmed Sharing Partners</div>
             <div class="card-body">
                 <?php foreach ($matches as $match): ?>
-                <div style="padding: 0.5rem 0; border-bottom: 1px solid #f0f0f0;">
+                <div style="padding: 0.5rem 0; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
                     <?php
                     $partnerName = $match['requester_id'] == $userId
                         ? $match['target_discord_name']
                         : $match['requester_discord_name'];
                     ?>
-                    <span class="badge badge-success">✓ Matched</span>
-                    <strong style="margin-left: 0.5rem;"><?php echo displayName($partnerName); ?></strong>
+                    <div>
+                        <span class="badge badge-success">✓ Matched</span>
+                        <strong style="margin-left: 0.5rem;"><?php echo displayName($partnerName); ?></strong>
+                    </div>
+                    <button class="btn btn-sm btn-danger"
+                            data-id="<?php echo $match['id']; ?>"
+                            onclick="cancelMatch(this.dataset.id)">Cancel Match</button>
                 </div>
                 <?php endforeach; ?>
             </div>
@@ -223,6 +228,19 @@ function cancelSharingRequest(requestId) {
     }, function(err, res) {
         if (err) { showAlert(err.message || 'Failed', 'danger'); return; }
         showAlert('Request cancelled', 'success');
+        setTimeout(function() { location.reload(); }, 600);
+    });
+}
+
+function cancelMatch(requestId) {
+    if (!confirm('Cancel this hotel sharing arrangement? Both you and your partner will be free to make new requests.')) return;
+    apiCall('/api/hotel-sharing.php', 'POST', {
+        csrf_token: hsCsrf,
+        action: 'cancel_match',
+        request_id: requestId
+    }, function(err, res) {
+        if (err) { showAlert(err.message || 'Failed', 'danger'); return; }
+        showAlert('Match cancelled', 'success');
         setTimeout(function() { location.reload(); }, 600);
     });
 }
