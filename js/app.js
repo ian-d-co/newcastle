@@ -4,7 +4,6 @@
 
     // Initialize app
     document.addEventListener('DOMContentLoaded', function() {
-        initNavigation();
         initAlerts();
         
         // Auto-close expired polls
@@ -14,28 +13,6 @@
             }, 60000); // Check every minute
         }
     });
-
-    // Navigation Toggle
-    function initNavigation() {
-        const navToggle = document.querySelector('.nav-toggle');
-        const nav = document.querySelector('.nav');
-
-        if (navToggle && nav) {
-            navToggle.addEventListener('click', function() {
-                nav.classList.toggle('active');
-            });
-
-            // Close nav on link click (mobile)
-            const navLinks = nav.querySelectorAll('a');
-            navLinks.forEach(function(link) {
-                link.addEventListener('click', function() {
-                    if (window.innerWidth < 768) {
-                        nav.classList.remove('active');
-                    }
-                });
-            });
-        }
-    }
 
     // Auto-dismiss alerts
     function initAlerts() {
