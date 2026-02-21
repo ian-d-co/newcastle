@@ -287,20 +287,22 @@ if (!empty($allRoomIds)) {
                                                 <?php endif; ?>
 
                                                 <?php if (!empty($room['book_with_group'])): ?>
-                                                <div class="form-group" style="margin-top: 0.5rem;">
-                                                    <label style="display: flex; align-items: center; cursor: pointer;">
-                                                        <input type="checkbox" id="book-with-group-<?php echo $room['id']; ?>" style="margin-right: 0.5rem;" onchange="toggleGroupPaymentInfo(<?php echo $room['id']; ?>)">
-                                                        Book with the Group
-                                                    </label>
-                                                    <?php if (!empty($room['group_payment_due'])): ?>
-                                                    <div id="group-payment-info-<?php echo $room['id']; ?>" style="display: none; margin-top: 0.25rem; padding: 0.4rem 0.75rem; background: #d4edda; border-radius: 4px; font-size: 0.875rem;">
-                                                        <strong>Payment due by:</strong> <?php echo e(formatDisplayDate($room['group_payment_due'])); ?>
-                                                    </div>
-                                                    <?php endif; ?>
+                                                <div style="margin-top: 0.5rem; padding: 0.5rem; background: #d4edda; border-radius: 4px; border-left: 3px solid #28a745;">
+                                                    <strong>ℹ️ Group Booking</strong>
+                                                    <p style="margin: 0.25rem 0 0; font-size: 0.875rem;">
+                                                        This room is booked with the group.
+                                                        <?php if (!empty($room['group_payment_due'])): ?>
+                                                        Payment due by: <strong><?php echo e(formatDisplayDate($room['group_payment_due'])); ?></strong>
+                                                        <?php endif; ?>
+                                                    </p>
                                                 </div>
                                                 <?php endif; ?>
 
                                                 <script>
+                                                window.roomData_<?php echo $room['id']; ?> = {
+                                                    book_with_group: <?php echo !empty($room['book_with_group']) ? 'true' : 'false'; ?>,
+                                                    book_direct_with_hotel: <?php echo !empty($room['book_direct_with_hotel']) ? 'true' : 'false'; ?>
+                                                };
                                                 var roomPrices_<?php echo $room['id']; ?> = {
                                                     single_friday: <?php echo (float)($room['single_price_friday'] ?? 0); ?>,
                                                     single_saturday: <?php echo (float)($room['single_price_saturday'] ?? 0); ?>,
@@ -514,14 +516,6 @@ function showAttendanceRequired() {
     }, 2000);
 }
 
-function toggleGroupPaymentInfo(roomId) {
-    var cb = document.getElementById('book-with-group-' + roomId);
-    var info = document.getElementById('group-payment-info-' + roomId);
-    if (info) {
-        info.style.display = cb.checked ? 'block' : 'none';
-    }
-}
-
 function submitReservation(roomId) {
     const occupancyEl = document.getElementById('occupancy-' + roomId);
     if (occupancyEl) {
@@ -544,13 +538,14 @@ function submitReservation(roomId) {
         if (saturdayNight) nights.push('saturday');
 
         const bookDirectEl = document.getElementById('book-direct-' + roomId);
-        const bookWithGroupEl = document.getElementById('book-with-group-' + roomId);
+        const roomData = window['roomData_' + roomId];
+        const hasGroupBooking = roomData && roomData.book_with_group;
 
         reserveRoom(roomId, null, null, {
             occupancy_type: occupancyType,
             nights: nights,
             book_direct: bookDirectEl ? bookDirectEl.checked : false,
-            book_with_group: bookWithGroupEl ? bookWithGroupEl.checked : false
+            book_with_group: !!hasGroupBooking
         });
     } else {
         // Date-based pricing mode
