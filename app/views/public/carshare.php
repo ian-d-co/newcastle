@@ -114,7 +114,7 @@ ob_start();
                         <?php elseif ($userBooking): ?>
                             <span class="badge badge-success">Already booked</span>
                         <?php elseif ($offer['available_spaces'] > 0): ?>
-                            <button class="btn btn-primary" onclick="openRequestModal(<?php echo (int)$offer['id']; ?>, <?php echo json_encode(displayName($offer['discord_name']), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP); ?>)">Request to Join</button>
+                            <button class="btn btn-primary" onclick="openRequestModal(<?php echo (int)$offer['id']; ?>, <?php echo json_encode(mb_convert_encoding(displayName($offer['discord_name']), 'UTF-8', 'UTF-8'), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?: '""'; ?>)">Request to Join</button>
                         <?php else: ?>
                             <span class="badge badge-danger">Full</span>
                         <?php endif; ?>
