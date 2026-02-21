@@ -90,40 +90,6 @@
     };
 
     // ========================================================================
-    // NAVIGATION TOGGLE
-    // ========================================================================
-    
-    function initNavigation() {
-        const navToggle = document.querySelector('.nav-toggle');
-        const nav = document.querySelector('.nav');
-
-        if (navToggle && nav) {
-            navToggle.addEventListener('click', function(e) {
-                e.stopPropagation();
-                const isActive = nav.classList.toggle('active');
-                navToggle.setAttribute('aria-expanded', isActive ? 'true' : 'false');
-            });
-
-            // Close nav when clicking a link
-            const navLinks = nav.querySelectorAll('a');
-            navLinks.forEach(function(link) {
-                link.addEventListener('click', function() {
-                    nav.classList.remove('active');
-                    navToggle.setAttribute('aria-expanded', 'false');
-                });
-            });
-
-            // Close nav when clicking outside
-            document.addEventListener('click', function(e) {
-                if (!nav.contains(e.target) && !navToggle.contains(e.target)) {
-                    nav.classList.remove('active');
-                    navToggle.setAttribute('aria-expanded', 'false');
-                }
-            });
-        }
-    }
-
-    // ========================================================================
     // ALERTS
     // ========================================================================
     
@@ -218,7 +184,6 @@
     // Initialize everything when DOM is ready
     document.addEventListener('DOMContentLoaded', function() {
         initModals();
-        initNavigation();
         initAlerts();
     });
 
