@@ -5,8 +5,6 @@ require_once __DIR__ . '/../app/middleware/Auth.php';
 require_once __DIR__ . '/../app/middleware/CSRF.php';
 require_once __DIR__ . '/../app/controllers/AuthController.php';
 require_once __DIR__ . '/../app/models/Event.php';
-require_once __DIR__ . '/../app/models/CarShare.php';
-require_once __DIR__ . '/../app/models/Hosting.php';
 
 initSession();
 Auth::check();
@@ -45,8 +43,6 @@ try {
     
     $authController = new AuthController();
     $eventModel = new Event();
-    $carshareModel = new CarShare();
-    $hostingModel = new Hosting();
     
     // Register user if new
     $userId = null;
@@ -62,17 +58,6 @@ try {
     
     // Register attendance
     $eventModel->registerAttendance($userId, $event['id'], $daysAttending, $travelMethod);
-    
-    // Handle carshare offer
-    if (in_array('Car', $travelMethod) && isset($input['carshare_origin']) && isset($input['carshare_capacity'])) {
-        $carshareModel->createOffer($userId, $event['id'], $input['carshare_origin'], $input['carshare_capacity']);
-    }
-    
-    // Handle hosting offer
-    if (isset($input['hosting_capacity'])) {
-        $notes = $input['hosting_notes'] ?? '';
-        $hostingModel->createOffer($userId, $event['id'], $input['hosting_capacity'], $notes);
-    }
     
     jsonResponse(['success' => true, 'message' => 'Attendance registered successfully']);
 } catch (Exception $e) {

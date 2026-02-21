@@ -1,6 +1,6 @@
 <?php
 /**
- * Dicksord Fest 2026 - Newcastle Event Management System
+ * Dickscord Fest 2026 - Newcastle Event Management System
  * Admin Controller
  * 
  * Handles all admin operations for managing events, activities, meals, polls, hotels, and users.
@@ -984,12 +984,23 @@ class AdminController {
         foreach ($hotels as &$hotel) {
             $hotel['rooms'] = $hotelModel->getRoomsByHotel($hotel['id']);
             
-            // Get reservation count for each room
+            // Get reservation count and occupants for each room
             $db = getDbConnection();
             foreach ($hotel['rooms'] as &$room) {
-                $stmt = $db->prepare("SELECT COUNT(*) as count FROM room_reservations WHERE hotel_room_id = :hotel_room_id");
+                $stmt = $db->prepare("SELECT COUNT(*) as count FROM room_reservations WHERE hotel_room_id = :hotel_room_id AND booking_status != 'cancelled'");
                 $stmt->execute(['hotel_room_id' => $room['id']]);
                 $room['reservation_count'] = $stmt->fetch()['count'];
+
+                $stmt = $db->prepare("
+                    SELECT u.discord_name, u.name as user_name, rr.occupancy_type, rr.friday_night, rr.saturday_night,
+                           rr.total_price, rr.book_direct, rr.book_with_group, rr.booking_status, rr.created_at
+                    FROM room_reservations rr
+                    JOIN users u ON rr.user_id = u.id
+                    WHERE rr.hotel_room_id = :hotel_room_id AND rr.booking_status != 'cancelled'
+                    ORDER BY rr.created_at ASC
+                ");
+                $stmt->execute(['hotel_room_id' => $room['id']]);
+                $room['occupants'] = $stmt->fetchAll();
             }
             unset($room);
         }

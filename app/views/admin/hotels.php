@@ -74,7 +74,14 @@ ob_start();
                                             <td style="padding: 0.5rem;"><?php echo e($room['room_type']); ?></td>
                                             <td style="padding: 0.5rem; text-align: center;"><?php echo e($room['capacity']); ?></td>
                                             <td style="padding: 0.5rem; text-align: center;"><?php echo e($room['quantity_available']); ?></td>
-                                            <td style="padding: 0.5rem; text-align: center;"><?php echo e($room['reservation_count']); ?></td>
+                                            <td style="padding: 0.5rem; text-align: center;">
+                                                <?php if ($room['reservation_count'] > 0): ?>
+                                                    <button onclick='viewOccupants(<?php echo json_encode($room['occupants']); ?>, <?php echo json_encode($room['room_type'] . ' — ' . $hotel['name']); ?>)'
+                                                            class="btn btn-xs btn-info"><?php echo $room['reservation_count']; ?> booked</button>
+                                                <?php else: ?>
+                                                    0
+                                                <?php endif; ?>
+                                            </td>
                                             <td style="padding: 0.5rem; text-align: center;">£<?php echo number_format($room['price'], 2); ?></td>
                                             <td style="padding: 0.5rem; text-align: right;">
                                                 <button onclick='editRoom(<?php echo json_encode($room); ?>)' 
@@ -286,8 +293,53 @@ ob_start();
     </div>
 </div>
 
+<!-- Occupants Modal -->
+<div id="occupantsModal" class="modal">
+    <div class="modal-content" style="max-width: 650px;">
+        <span class="modal-close">&times;</span>
+        <h2 id="occupantsModalTitle">Room Occupants</h2>
+        <div id="occupantsModalBody"></div>
+    </div>
+</div>
+
 <script>
-let editingHotelId = null;
+function viewOccupants(occupants, roomLabel) {
+    document.getElementById('occupantsModalTitle').textContent = 'Occupants — ' + roomLabel;
+    var body = document.getElementById('occupantsModalBody');
+    if (!occupants || occupants.length === 0) {
+        body.innerHTML = '<p>No current bookings for this room.</p>';
+    } else {
+        var rows = occupants.map(function(o) {
+            var nights = [];
+            if (o.friday_night === 1 || o.friday_night === true) nights.push('Fri');
+            if (o.saturday_night === 1 || o.saturday_night === true) nights.push('Sat');
+            var nightStr = nights.length ? nights.join(' + ') : '—';
+            var occupancy = o.occupancy_type ? (o.occupancy_type.charAt(0).toUpperCase() + o.occupancy_type.slice(1)) : '—';
+            var booking = o.book_direct === 1 ? 'Direct' : (o.book_with_group === 1 ? 'Group' : '—');
+            var price = o.total_price !== null ? '£' + parseFloat(o.total_price).toFixed(2) : '—';
+            return '<tr style="border-bottom:1px solid #dee2e6;">' +
+                '<td style="padding:0.4rem 0.5rem;">' + (o.discord_name || '—') + '</td>' +
+                '<td style="padding:0.4rem 0.5rem;">' + (o.user_name || '—') + '</td>' +
+                '<td style="padding:0.4rem 0.5rem;text-align:center;">' + occupancy + '</td>' +
+                '<td style="padding:0.4rem 0.5rem;text-align:center;">' + nightStr + '</td>' +
+                '<td style="padding:0.4rem 0.5rem;text-align:center;">' + booking + '</td>' +
+                '<td style="padding:0.4rem 0.5rem;text-align:right;">' + price + '</td>' +
+                '</tr>';
+        }).join('');
+        body.innerHTML = '<table style="width:100%;border-collapse:collapse;">' +
+            '<thead><tr style="border-bottom:2px solid #dee2e6;">' +
+            '<th style="padding:0.4rem 0.5rem;text-align:left;">Discord</th>' +
+            '<th style="padding:0.4rem 0.5rem;text-align:left;">Name</th>' +
+            '<th style="padding:0.4rem 0.5rem;text-align:center;">Occupancy</th>' +
+            '<th style="padding:0.4rem 0.5rem;text-align:center;">Nights</th>' +
+            '<th style="padding:0.4rem 0.5rem;text-align:center;">Booking</th>' +
+            '<th style="padding:0.4rem 0.5rem;text-align:right;">Price</th>' +
+            '</tr></thead><tbody>' + rows + '</tbody></table>';
+    }
+    modalManager.open('occupantsModal');
+}
+
+
 let editingRoomId = null;
 
 // Hotel functions
@@ -568,6 +620,15 @@ document.getElementById('book_with_group').addEventListener('change', updateBook
     font-size: 0.75rem;
     line-height: 1.5;
     border-radius: 0.2rem;
+}
+.btn-info {
+    background-color: #17a2b8;
+    color: #fff;
+    border: 1px solid #17a2b8;
+}
+.btn-info:hover {
+    background-color: #138496;
+    border-color: #117a8b;
 }
 </style>
 

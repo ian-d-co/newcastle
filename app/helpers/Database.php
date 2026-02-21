@@ -1,6 +1,6 @@
 <?php
 /**
- * Dicksord Fest 2026 - Newcastle Event Management System
+ * Dickscord Fest 2026 - Newcastle Event Management System
  * Database Helper Class
  * 
  * Static helper class for database operations using PDO

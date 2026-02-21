@@ -1,6 +1,6 @@
 <?php
 /**
- * Dicksord Fest 2026 - Newcastle Event Management System
+ * Dickscord Fest 2026 - Newcastle Event Management System
  * Main Entry Point
  * 
  * This file serves as the front controller for the application,
@@ -8,7 +8,7 @@
  */
 
 // Enable error logging for debugging
-error_log('=== Dicksord Fest 2026 Request Start ===');
+error_log('=== Dickscord Fest 2026 Request Start ===');
 error_log('Request URI: ' . ($_SERVER['REQUEST_URI'] ?? 'N/A'));
 error_log('Request Method: ' . ($_SERVER['REQUEST_METHOD'] ?? 'N/A'));
 
@@ -181,12 +181,12 @@ if ($page === 'home') {
         // Create fallback event data in case of database failure
         $event = [
             'id' => 1,
-            'title' => 'Dicksord Fest 2026 - Newcastle',
+            'title' => 'Dickscord Fest 2026 - Newcastle',
             'description' => '',
             'start_date' => '2026-11-20',
             'end_date' => '2026-11-22',
             'location' => 'Newcastle',
-            'content' => '<p>Welcome to Dicksord Fest 2026! More details coming soon.</p>'
+            'content' => '<p>Welcome to Dickscord Fest 2026! More details coming soon.</p>'
         ];
         $isAttending = false;
         
@@ -281,12 +281,12 @@ try {
         error_log('Warning: No active event found for authenticated page request: ' . $page . ', using fallback data');
         $event = [
             'id' => 1,
-            'title' => 'Dicksord Fest 2026 - Newcastle',
+            'title' => 'Dickscord Fest 2026 - Newcastle',
             'description' => '',
             'start_date' => '2026-11-20',
             'end_date' => '2026-11-22',
             'location' => 'Newcastle',
-            'content' => '<p>Welcome to Dicksord Fest 2026! More details coming soon.</p>'
+            'content' => '<p>Welcome to Dickscord Fest 2026! More details coming soon.</p>'
         ];
     }
     

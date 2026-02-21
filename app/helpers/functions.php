@@ -1,6 +1,6 @@
 <?php
 /**
- * Dicksord Fest 2026 - Newcastle Event Management System
+ * Dickscord Fest 2026 - Newcastle Event Management System
  * Helper Functions
  * 
  * This file contains global helper functions used throughout the application.
