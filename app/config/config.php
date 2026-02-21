@@ -1,6 +1,6 @@
 <?php
 /**
- * Dicksord Fest 2026 - Newcastle Event Management System
+ * Dickscord Fest 2026 - Newcastle Event Management System
  * Main Configuration File
  * 
  * This file contains all application configuration including:
@@ -86,7 +86,7 @@ define('VIEWS_PATH', APP_PATH . '/views');
 
 // Event Configuration
 define('EVENT_ID', 1);
-define('EVENT_NAME', 'Dicksord Fest 2026 - Newcastle');
+define('EVENT_NAME', 'Dickscord Fest 2026 - Newcastle');
 define('EVENT_START_DATE', '2026-11-20');
 define('EVENT_END_DATE', '2026-11-22');
 define('EVENT_LOCATION', 'Newcastle');

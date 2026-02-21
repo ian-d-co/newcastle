@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <meta name="csrf-token" content="<?php echo e(generateCsrfToken()); ?>">
-    <title><?php echo isset($pageTitle) ? e($pageTitle) . ' - ' : ''; ?>Dicksord Fest 2026 - Newcastle</title>
-    <meta name="description" content="Dicksord Fest 2026 - Newcastle event management platform">
+    <title><?php echo isset($pageTitle) ? e($pageTitle) . ' - ' : ''; ?>Dickscord Fest 2026 - Newcastle</title>
+    <meta name="description" content="Dickscord Fest 2026 - Newcastle event management platform">
     <link rel="stylesheet" href="/css/styles.css?v=<?php echo time(); ?>">
     <script src="/js/scripts.js?v=<?php echo time(); ?>" defer></script>
     <script src="/js/forms.js?v=<?php echo time(); ?>" defer></script>
@@ -16,7 +16,7 @@
     <header class="header">
         <div class="container">
             <div class="header-content">
-                <a href="/index.php" class="logo">Dicksord Fest 2026</a>
+                <a href="/index.php" class="logo">Dickscord Fest 2026</a>
 
                 <?php if (!isLoggedIn() && !isGuestMode()): ?>
                 <!-- Mobile login button (visible without toggle for non-logged-in) -->

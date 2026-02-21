@@ -7,59 +7,6 @@
         const form = document.getElementById('attendance-form');
         if (!form) return;
 
-        const carCheckbox = form.querySelector('input[value="Car"]');
-        const carshareSection = document.getElementById('carshare-section');
-        const canCarshareYes = document.getElementById('can-carshare-yes');
-        const canCarshareNo = document.getElementById('can-carshare-no');
-        const carshareDetails = document.getElementById('carshare-details');
-
-        const hostingSection = document.getElementById('hosting-section');
-        const canHostYes = document.getElementById('can-host-yes');
-        const canHostNo = document.getElementById('can-host-no');
-        const hostingDetails = document.getElementById('hosting-details');
-
-        // Car checkbox logic
-        if (carCheckbox && carshareSection) {
-            carCheckbox.addEventListener('change', function() {
-                if (this.checked) {
-                    carshareSection.style.display = 'block';
-                } else {
-                    carshareSection.style.display = 'none';
-                    if (carshareDetails) carshareDetails.style.display = 'none';
-                }
-            });
-        }
-
-        // Carshare Yes/No logic
-        if (canCarshareYes && canCarshareNo && carshareDetails) {
-            canCarshareYes.addEventListener('change', function() {
-                if (this.checked) {
-                    carshareDetails.style.display = 'block';
-                }
-            });
-
-            canCarshareNo.addEventListener('change', function() {
-                if (this.checked) {
-                    carshareDetails.style.display = 'none';
-                }
-            });
-        }
-
-        // Hosting Yes/No logic
-        if (canHostYes && canHostNo && hostingDetails) {
-            canHostYes.addEventListener('change', function() {
-                if (this.checked) {
-                    hostingDetails.style.display = 'block';
-                }
-            });
-
-            canHostNo.addEventListener('change', function() {
-                if (this.checked) {
-                    hostingDetails.style.display = 'none';
-                }
-            });
-        }
-
         // Form submission
         form.addEventListener('submit', function(e) {
             e.preventDefault();
@@ -73,18 +20,6 @@
                 travel_method: Array.from(form.querySelectorAll('input[name="travel_method[]"]:checked')).map(function(cb) { return cb.value; }),
                 csrf_token: formData.get('csrf_token')
             };
-
-            // Add carshare data if applicable
-            if (carCheckbox && carCheckbox.checked && canCarshareYes && canCarshareYes.checked) {
-                data.carshare_origin = formData.get('carshare_origin');
-                data.carshare_capacity = formData.get('carshare_capacity');
-            }
-
-            // Add hosting data if applicable
-            if (canHostYes && canHostYes.checked) {
-                data.hosting_capacity = formData.get('hosting_capacity');
-                data.hosting_notes = formData.get('hosting_notes');
-            }
 
             // Validate
             if (!data.discord_name || !data.name) {

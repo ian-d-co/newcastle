@@ -201,7 +201,7 @@ ob_start();
 
                 <?php if ($isAttending): ?>
                     <hr>
-                    <button class="btn btn-secondary btn-sm" onclick="modalManager.open('update-attendance-modal')">Update Travel &amp; Hosting Details</button>
+                    <button class="btn btn-secondary btn-sm" onclick="modalManager.open('update-attendance-modal')">Update Attendance</button>
                 <?php endif; ?>
             </div>
         </div>
@@ -417,58 +417,6 @@ ob_start();
                     </div>
                 </div>
 
-                <!-- Carshare Section (Conditional) -->
-                <div id="carshare-section" style="display: none;">
-                    <div class="form-group">
-                        <label class="form-label">Can you offer a car share/lift?</label>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" id="can-carshare-yes" name="can_carshare" value="yes">
-                            <label class="form-check-label" for="can-carshare-yes">Yes</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" id="can-carshare-no" name="can_carshare" value="no">
-                            <label class="form-check-label" for="can-carshare-no">No</label>
-                        </div>
-                    </div>
-
-                    <div id="carshare-details" style="display: none;">
-                        <div class="form-group">
-                            <label class="form-label" for="carshare_origin">Where are you travelling from?</label>
-                            <input type="text" class="form-control" id="carshare_origin" name="carshare_origin">
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label" for="carshare_capacity">How many passengers can you take?</label>
-                            <input type="number" class="form-control" id="carshare_capacity" name="carshare_capacity" min="1" max="8">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Hosting Section -->
-                <div class="form-group">
-                    <label class="form-label">Can you host people?</label>
-                    <div class="form-check">
-                        <input class="form-check-input" type="radio" id="can-host-yes" name="can_host" value="yes">
-                        <label class="form-check-label" for="can-host-yes">Yes</label>
-                    </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="radio" id="can-host-no" name="can_host" value="no">
-                        <label class="form-check-label" for="can-host-no">No</label>
-                    </div>
-                </div>
-
-                <div id="hosting-details" style="display: none;">
-                    <div class="form-group">
-                        <label class="form-label" for="hosting_capacity">How many people can you host?</label>
-                        <input type="number" class="form-control" id="hosting_capacity" name="hosting_capacity" min="1" max="20">
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label" for="hosting_notes">Additional notes (optional)</label>
-                        <textarea class="form-control" id="hosting_notes" name="hosting_notes" rows="3"></textarea>
-                    </div>
-                </div>
-
                 <button type="submit" class="btn btn-primary btn-block btn-lg">Register Attendance</button>
             </form>
         </div>
@@ -487,7 +435,7 @@ $updateTravel = array_map('trim', $updateTravel);
 <div class="modal" id="update-attendance-modal">
     <div class="modal-content">
         <div class="modal-header">
-            <h3 class="modal-title">Update Travel &amp; Hosting Details</h3>
+            <h3 class="modal-title">Update Attendance</h3>
             <button class="modal-close" onclick="modalManager.close('update-attendance-modal')" aria-label="Close">&times;</button>
         </div>
         <div class="modal-body">
@@ -537,60 +485,6 @@ $updateTravel = array_map('trim', $updateTravel);
                     </div>
                 </div>
 
-                <div id="upd-carshare-section" style="display: <?php echo in_array('Car', $updateTravel) ? 'block' : 'none'; ?>;">
-                    <div class="form-group">
-                        <label class="form-label">Can you offer a car share/lift?</label>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" id="upd-can-carshare-yes" name="can_carshare" value="yes"
-                                   <?php echo $carshareOffer ? 'checked' : ''; ?>>
-                            <label class="form-check-label" for="upd-can-carshare-yes">Yes</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" id="upd-can-carshare-no" name="can_carshare" value="no"
-                                   <?php echo (!$carshareOffer && in_array('Car', $updateTravel)) ? 'checked' : ''; ?>>
-                            <label class="form-check-label" for="upd-can-carshare-no">No</label>
-                        </div>
-                    </div>
-                    <div id="upd-carshare-details" style="display: <?php echo $carshareOffer ? 'block' : 'none'; ?>;">
-                        <div class="form-group">
-                            <label class="form-label" for="upd-carshare-origin">Where are you travelling from?</label>
-                            <input type="text" class="form-control" id="upd-carshare-origin" name="carshare_origin"
-                                   value="<?php echo e($carshareOffer['origin'] ?? ''); ?>">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label" for="upd-carshare-capacity">How many passengers can you take?</label>
-                            <input type="number" class="form-control" id="upd-carshare-capacity" name="carshare_capacity"
-                                   min="1" max="8" value="<?php echo (int)($carshareOffer['passenger_capacity'] ?? 0) ?: ''; ?>">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Can you host people?</label>
-                    <div class="form-check">
-                        <input class="form-check-input" type="radio" id="upd-can-host-yes" name="can_host" value="yes"
-                               <?php echo $hostingOffer ? 'checked' : ''; ?>>
-                        <label class="form-check-label" for="upd-can-host-yes">Yes</label>
-                    </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="radio" id="upd-can-host-no" name="can_host" value="no"
-                               <?php echo !$hostingOffer ? 'checked' : ''; ?>>
-                        <label class="form-check-label" for="upd-can-host-no">No</label>
-                    </div>
-                </div>
-
-                <div id="upd-hosting-details" style="display: <?php echo $hostingOffer ? 'block' : 'none'; ?>;">
-                    <div class="form-group">
-                        <label class="form-label" for="upd-hosting-capacity">How many people can you host?</label>
-                        <input type="number" class="form-control" id="upd-hosting-capacity" name="hosting_capacity"
-                               min="1" max="20" value="<?php echo (int)($hostingOffer['capacity'] ?? 0) ?: ''; ?>">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label" for="upd-hosting-notes">Additional notes (optional)</label>
-                        <textarea class="form-control" id="upd-hosting-notes" name="hosting_notes" rows="3"><?php echo e($hostingOffer['notes'] ?? ''); ?></textarea>
-                    </div>
-                </div>
-
                 <button type="submit" class="btn btn-primary btn-block btn-lg">Save Changes</button>
             </form>
         </div>
@@ -615,39 +509,6 @@ document.addEventListener('DOMContentLoaded', function() {
     var attendanceForm = document.getElementById('attendance-form');
     if (!attendanceForm) return;
 
-    var travelCar = document.getElementById('travel-car');
-    if (travelCar) {
-        travelCar.addEventListener('change', function() {
-            document.getElementById('carshare-section').style.display = this.checked ? 'block' : 'none';
-        });
-    }
-
-    var canCarshareYes = document.getElementById('can-carshare-yes');
-    var canCarshareNo = document.getElementById('can-carshare-no');
-    if (canCarshareYes) {
-        canCarshareYes.addEventListener('change', function() {
-            document.getElementById('carshare-details').style.display = this.checked ? 'block' : 'none';
-        });
-    }
-    if (canCarshareNo) {
-        canCarshareNo.addEventListener('change', function() {
-            document.getElementById('carshare-details').style.display = 'none';
-        });
-    }
-
-    var canHostYes = document.getElementById('can-host-yes');
-    var canHostNo = document.getElementById('can-host-no');
-    if (canHostYes) {
-        canHostYes.addEventListener('change', function() {
-            document.getElementById('hosting-details').style.display = this.checked ? 'block' : 'none';
-        });
-    }
-    if (canHostNo) {
-        canHostNo.addEventListener('change', function() {
-            document.getElementById('hosting-details').style.display = 'none';
-        });
-    }
-
     attendanceForm.addEventListener('submit', function(e) {
     e.preventDefault();
 
@@ -666,24 +527,11 @@ document.addEventListener('DOMContentLoaded', function() {
         return;
     }
 
-    var canCarshare = form.querySelector('input[name="can_carshare"]:checked');
-    var canHost = form.querySelector('input[name="can_host"]:checked');
-
     var data = {
         csrf_token: csrfToken,
         days_attending: days,
         travel_method: travel
     };
-
-    if (canCarshare && canCarshare.value === 'yes') {
-        data.carshare_origin = form.carshare_origin.value;
-        data.carshare_capacity = form.carshare_capacity.value;
-    }
-
-    if (canHost && canHost.value === 'yes') {
-        data.hosting_capacity = form.hosting_capacity.value;
-        data.hosting_notes = form.hosting_notes.value;
-    }
 
     apiCall('/api/attendance-update.php', 'POST', data, function(err, response) {
         if (err) {
@@ -716,37 +564,6 @@ function cancelAttendance() {
 
 // Update attendance modal JS (for users already attending)
 document.addEventListener('DOMContentLoaded', function() {
-    var updTravelCar = document.getElementById('upd-travel-car');
-    if (updTravelCar) {
-        updTravelCar.addEventListener('change', function() {
-            document.getElementById('upd-carshare-section').style.display = this.checked ? 'block' : 'none';
-        });
-    }
-    var updCanCarshareYes = document.getElementById('upd-can-carshare-yes');
-    var updCanCarshareNo = document.getElementById('upd-can-carshare-no');
-    if (updCanCarshareYes) {
-        updCanCarshareYes.addEventListener('change', function() {
-            document.getElementById('upd-carshare-details').style.display = this.checked ? 'block' : 'none';
-        });
-    }
-    if (updCanCarshareNo) {
-        updCanCarshareNo.addEventListener('change', function() {
-            document.getElementById('upd-carshare-details').style.display = 'none';
-        });
-    }
-    var updCanHostYes = document.getElementById('upd-can-host-yes');
-    var updCanHostNo = document.getElementById('upd-can-host-no');
-    if (updCanHostYes) {
-        updCanHostYes.addEventListener('change', function() {
-            document.getElementById('upd-hosting-details').style.display = this.checked ? 'block' : 'none';
-        });
-    }
-    if (updCanHostNo) {
-        updCanHostNo.addEventListener('change', function() {
-            document.getElementById('upd-hosting-details').style.display = 'none';
-        });
-    }
-
     var updateForm = document.getElementById('update-attendance-form');
     if (updateForm) {
         updateForm.addEventListener('submit', function(e) {
@@ -757,17 +574,7 @@ document.addEventListener('DOMContentLoaded', function() {
             var travel = Array.from(form.querySelectorAll('input[name="travel_method[]"]:checked')).map(function(el) { return el.value; });
             if (days.length === 0) { showAlert('Please select at least one day', 'danger'); return; }
             if (travel.length === 0) { showAlert('Please select at least one travel method', 'danger'); return; }
-            var canCarshare = form.querySelector('input[name="can_carshare"]:checked');
-            var canHost = form.querySelector('input[name="can_host"]:checked');
             var data = { csrf_token: csrfToken, days_attending: days, travel_method: travel };
-            if (canCarshare && canCarshare.value === 'yes') {
-                data.carshare_origin = form.carshare_origin.value;
-                data.carshare_capacity = form.carshare_capacity.value;
-            }
-            if (canHost && canHost.value === 'yes') {
-                data.hosting_capacity = form.hosting_capacity.value;
-                data.hosting_notes = form.hosting_notes.value;
-            }
             apiCall('/api/attendance-update.php', 'POST', data, function(err, response) {
                 if (err) {
                     showAlert(err.message || 'Failed to update attendance', 'danger');

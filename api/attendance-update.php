@@ -4,8 +4,6 @@ require_once __DIR__ . '/../app/helpers/functions.php';
 require_once __DIR__ . '/../app/middleware/Auth.php';
 require_once __DIR__ . '/../app/middleware/CSRF.php';
 require_once __DIR__ . '/../app/models/Event.php';
-require_once __DIR__ . '/../app/models/CarShare.php';
-require_once __DIR__ . '/../app/models/Hosting.php';
 
 initSession();
 Auth::check();
@@ -36,21 +34,9 @@ try {
 
     $userId      = getCurrentUserId();
     $eventModel  = new Event();
-    $carshare    = new CarShare();
-    $hosting     = new Hosting();
     $event       = $eventModel->getActive();
 
     $eventModel->registerAttendance($userId, $event['id'], $daysAttending, $travelMethod);
-
-    if (in_array('Car', $travelMethod) && !empty($input['carshare_origin']) && !empty($input['carshare_capacity'])) {
-        $carshare->updateOffer($userId, $event['id'], $input['carshare_origin'], (int)$input['carshare_capacity']);
-    }
-
-    if (!empty($input['hosting_capacity'])) {
-        $hosting->updateOffer($userId, $event['id'], (int)$input['hosting_capacity'], $input['hosting_notes'] ?? '');
-    } else {
-        $hosting->removeOffer($userId, $event['id']);
-    }
 
     jsonResponse(['success' => true, 'message' => 'Attendance updated successfully']);
 } catch (Exception $e) {

@@ -1,5 +1,5 @@
 /**
- * Dicksord Fest 2026 - Newcastle Event Management System
+ * Dickscord Fest 2026 - Newcastle Event Management System
  * Scripts for Modal Management and UI Interactions
  */
 
