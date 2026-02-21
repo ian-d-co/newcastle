@@ -98,7 +98,8 @@
         const nav = document.querySelector('.nav');
 
         if (navToggle && nav) {
-            navToggle.addEventListener('click', function() {
+            navToggle.addEventListener('click', function(e) {
+                e.stopPropagation();
                 const isActive = nav.classList.toggle('active');
                 navToggle.setAttribute('aria-expanded', isActive ? 'true' : 'false');
             });
