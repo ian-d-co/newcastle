@@ -128,7 +128,7 @@ ob_start();
 <!-- Request Modal -->
 <div id="requestModal" class="modal">
     <div class="modal-content" style="max-width: 500px;">
-        <span class="modal-close">&times;</span>
+        <span class="modal-close" onclick="modalManager.close('requestModal')">&times;</span>
         <h2>Request to Join</h2>
         <p id="requestDriverName" style="color: #555;"></p>
         <div class="form-group">
