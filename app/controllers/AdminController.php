@@ -1046,14 +1046,13 @@ class AdminController {
                     rr.created_at,
                     u.discord_name,
                     u.name as user_name,
-                    rr.id as reservation_id,
-                    rr.status
+                    rr.id as reservation_id
                 FROM room_reservations rr
                 JOIN hotel_rooms hr ON rr.hotel_room_id = hr.id
                 JOIN hotels h ON hr.hotel_id = h.id
                 JOIN users u ON rr.user_id = u.id
                 WHERE h.event_id = :event_id
-                  AND (rr.status IS NULL OR rr.status != 'cancelled')
+                  AND (rr.booking_status IS NULL OR rr.booking_status != 'cancelled')
                 ORDER BY h.name, hr.room_type, rr.created_at";
         
         $stmt = $db->prepare($sql);
@@ -1858,7 +1857,7 @@ class AdminController {
                 JOIN hotel_rooms hr ON rr.hotel_room_id = hr.id
                 JOIN hotels h ON hr.hotel_id = h.id
                 JOIN users u ON rr.user_id = u.id
-                WHERE h.event_id = :event_id_3 AND rr.payment_status != 'cancelled'
+                WHERE h.event_id = :event_id_3 AND (rr.booking_status IS NULL OR rr.booking_status != 'cancelled')
                 ORDER BY user_id, day";
 
         $stmt = $db->prepare($sql);
