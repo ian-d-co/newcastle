@@ -484,6 +484,18 @@ if (!empty($allRoomIds)) {
                         </div>
                         <?php endif; ?>
 
+                        <?php if ($maxOccupants > 1): ?>
+                        <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #e0e0e0;">
+                            <button type="button" class="btn btn-primary btn-sm"
+                                    onclick="saveAllOccupantNames(<?php echo $reservation['id']; ?>, <?php echo $maxOccupants; ?>)">
+                                💾 Save Occupant Names
+                            </button>
+                            <small style="margin-left: 0.75rem; color: #666;">
+                                Fill in names above and click to save
+                            </small>
+                        </div>
+                        <?php endif; ?>
+
                         <button class="btn btn-danger btn-sm" onclick="cancelReservation(<?php echo $reservation['id']; ?>)">Cancel Reservation</button>
                     </div>
                 </div>
@@ -676,6 +688,39 @@ function saveOccupantName(reservationId, occupantNumber, name) {
         }
         showAlert('Occupant name saved!', 'success');
         setTimeout(function() { location.reload(); }, 800);
+    });
+}
+
+function saveAllOccupantNames(reservationId, maxOccupants) {
+    var names = [];
+
+    for (var oNum = 2; oNum <= maxOccupants; oNum++) {
+        var input = document.getElementById('occupant-name-' + reservationId + '-' + oNum);
+        if (input && input.value.trim() !== '') {
+            names.push({
+                occupant_number: oNum,
+                occupant_name: input.value.trim()
+            });
+        }
+    }
+
+    if (names.length === 0) {
+        showAlert('Please enter at least one occupant name', 'warning');
+        return;
+    }
+
+    apiCall('/api/hotel-occupant.php', 'POST', {
+        csrf_token: hotelCsrf,
+        action: 'save_names_bulk',
+        reservation_id: reservationId,
+        occupants: names
+    }, function(err, res) {
+        if (err) {
+            showAlert(err.message || 'Failed to save names', 'danger');
+            return;
+        }
+        showAlert('✅ Occupant names saved!', 'success');
+        setTimeout(function() { location.reload(); }, 1000);
     });
 }
 

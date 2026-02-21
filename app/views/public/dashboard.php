@@ -176,9 +176,39 @@ ob_start();
 
                 <?php if (!empty($hotelReservations)): ?>
                     <hr>
+                    <?php
+                    require_once BASE_PATH . '/app/models/HotelOccupant.php';
+                    $dashboardOccupantModel = new HotelOccupant();
+                    ?>
                     <?php foreach ($hotelReservations as $reservation): ?>
+                        <?php
+                        $occupancyType = $reservation['occupancy_type'] ?? '';
+                        $maxOccupants = $occupancyType === 'triple' ? 3 : ($occupancyType === 'double' ? 2 : 1);
+                        $occupants = $dashboardOccupantModel->getByReservation($reservation['id']);
+
+                        $missingNames = 0;
+                        if ($maxOccupants > 1) {
+                            for ($oNum = 2; $oNum <= $maxOccupants; $oNum++) {
+                                $found = false;
+                                foreach ($occupants as $o) {
+                                    if ($o['occupant_number'] == $oNum && ($o['status'] === 'accepted' || !empty($o['occupant_name']))) {
+                                        $found = true;
+                                        break;
+                                    }
+                                }
+                                if (!$found) $missingNames++;
+                            }
+                        }
+                        ?>
                         <div class="dashboard-booking-card">
-                            <p><strong><?php echo e($reservation['hotel_name']); ?></strong> — <?php echo e($reservation['room_type']); ?></p>
+                            <p>
+                                <strong><?php echo e($reservation['hotel_name']); ?></strong> — <?php echo e($reservation['room_type']); ?>
+                                <?php if ($missingNames > 0): ?>
+                                    <span class="badge badge-warning" style="margin-left: 0.5rem; background: #ffc107; color: #000;">
+                                        ⚠️ <?php echo $missingNames; ?> Name<?php echo $missingNames > 1 ? 's' : ''; ?> Needed
+                                    </span>
+                                <?php endif; ?>
+                            </p>
                             <p><?php echo formatDisplayDate($reservation['check_in']); ?> – <?php echo formatDisplayDate($reservation['check_out']); ?></p>
                             <p>Total: £<?php echo number_format($reservation['total_price'], 2); ?> &bull; Payment:
                                 <?php if ($reservation['payment_status'] === 'paid'): ?>
