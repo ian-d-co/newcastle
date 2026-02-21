@@ -974,6 +974,12 @@ class AdminController {
      * Show hotel manager
      */
     public function showHotelManager() {
+        // Handle CSV export
+        if (isset($_GET['action']) && $_GET['action'] === 'export_bookings_csv') {
+            $this->exportHotelBookingsCSV();
+            return;
+        }
+
         $event = $this->getActiveEvent();
         
         require_once BASE_PATH . '/app/models/Hotel.php';
@@ -1010,6 +1016,118 @@ class AdminController {
         $currentPage = 'admin';
         
         include BASE_PATH . '/app/views/admin/hotels.php';
+    }
+    
+    /**
+     * Export hotel bookings to CSV
+     */
+    public function exportHotelBookingsCSV() {
+        $event = $this->getActiveEvent();
+        
+        require_once BASE_PATH . '/app/models/Hotel.php';
+        $hotelModel = new Hotel();
+        $db = getDbConnection();
+        
+        // Get all reservations with hotel, room, and user details
+        $sql = "SELECT 
+                    h.name as hotel_name,
+                    hr.room_type,
+                    hr.capacity,
+                    rr.occupancy_type,
+                    rr.friday_night,
+                    rr.saturday_night,
+                    rr.check_in,
+                    rr.check_out,
+                    rr.total_nights,
+                    rr.total_price,
+                    rr.payment_status,
+                    rr.book_direct,
+                    rr.book_with_group,
+                    rr.created_at,
+                    u.discord_name,
+                    u.name as user_name,
+                    rr.id as reservation_id
+                FROM room_reservations rr
+                JOIN hotel_rooms hr ON rr.hotel_room_id = hr.id
+                JOIN hotels h ON hr.hotel_id = h.id
+                JOIN users u ON rr.user_id = u.id
+                WHERE h.event_id = :event_id
+                ORDER BY h.name, hr.room_type, rr.created_at";
+        
+        $stmt = $db->prepare($sql);
+        $stmt->execute(['event_id' => $event['id']]);
+        $reservations = $stmt->fetchAll();
+        
+        // Get room occupants (additional guests in double/triple rooms)
+        require_once BASE_PATH . '/app/models/HotelOccupant.php';
+        $occupantModel = new HotelOccupant();
+        
+        // Prepare CSV
+        $filename = 'hotel_bookings_' . date('Y-m-d_His') . '.csv';
+        
+        header('Content-Type: text/csv');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+        header('Cache-Control: no-cache, must-revalidate');
+        header('Pragma: no-cache');
+        
+        $output = fopen('php://output', 'w');
+        
+        // CSV Headers
+        fputcsv($output, [
+            'Hotel',
+            'Room Type',
+            'Room Capacity',
+            'Occupancy Type',
+            'Primary Guest (Discord)',
+            'Primary Guest (Name)',
+            'Additional Occupants',
+            'Friday Night',
+            'Saturday Night',
+            'Check-in',
+            'Check-out',
+            'Total Nights',
+            'Total Price (£)',
+            'Payment Status',
+            'Book Direct',
+            'Book with Group',
+            'Booking Date'
+        ]);
+        
+        // CSV Data
+        foreach ($reservations as $res) {
+            // Get additional occupants for this reservation
+            $occupants = $occupantModel->getByReservation($res['reservation_id']);
+            $occupantNames = [];
+            foreach ($occupants as $occ) {
+                if ($occ['status'] === 'accepted') {
+                    $occupantNames[] = $occ['discord_name'] . ' (#' . $occ['occupant_number'] . ')';
+                }
+            }
+            $occupantsStr = !empty($occupantNames) ? implode(', ', $occupantNames) : 'None';
+            
+            fputcsv($output, [
+                $res['hotel_name'],
+                $res['room_type'],
+                $res['capacity'],
+                $res['occupancy_type'] ? ucfirst($res['occupancy_type']) : 'N/A',
+                $res['discord_name'],
+                $res['user_name'],
+                $occupantsStr,
+                $res['friday_night'] ? 'Yes' : 'No',
+                $res['saturday_night'] ? 'Yes' : 'No',
+                $res['check_in'] ?: 'N/A',
+                $res['check_out'] ?: 'N/A',
+                $res['total_nights'],
+                number_format($res['total_price'], 2),
+                ucfirst($res['payment_status']),
+                $res['book_direct'] ? 'Yes' : 'No',
+                $res['book_with_group'] ? 'Yes' : 'No',
+                date('Y-m-d H:i', strtotime($res['created_at']))
+            ]);
+        }
+        
+        fclose($output);
+        exit;
     }
     
     /**

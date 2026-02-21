@@ -8,6 +8,7 @@ ob_start();
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
             <h1 class="section-title">Manage Hotels & Rooms</h1>
             <div>
+                <button onclick="exportHotelBookings()" class="btn btn-success" style="margin-right: 1rem;">Export Bookings CSV</button>
                 <button onclick="openCreateHotelModal()" class="btn btn-primary" style="margin-right: 1rem;">Add Hotel</button>
                 <a href="/index.php?page=admin" class="btn btn-secondary">Back to Dashboard</a>
             </div>
@@ -612,6 +613,10 @@ function updateBookingFieldVisibility() {
 
 document.getElementById('book_direct_with_hotel').addEventListener('change', updateBookingFieldVisibility);
 document.getElementById('book_with_group').addEventListener('change', updateBookingFieldVisibility);
+
+function exportHotelBookings() {
+    window.location.href = '/index.php?page=admin_hotels&action=export_bookings_csv';
+}
 </script>
 
 <style>
