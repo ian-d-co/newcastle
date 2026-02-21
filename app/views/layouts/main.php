@@ -7,7 +7,6 @@
     <title><?php echo isset($pageTitle) ? e($pageTitle) . ' - ' : ''; ?>Dicksord Fest 2026 - Newcastle</title>
     <meta name="description" content="Dicksord Fest 2026 - Newcastle event management platform">
     <link rel="stylesheet" href="/css/styles.css?v=<?php echo time(); ?>">
-    <script src="/js/app.js" defer></script>
     <script src="/js/scripts.js" defer></script>
     <script src="/js/forms.js" defer></script>
     <script src="/js/charts.js" defer></script>
@@ -231,6 +230,35 @@
             }
         });
     };
+    </script>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var navToggle = document.querySelector('.nav-toggle');
+        var nav = document.getElementById('main-nav');
+
+        if (navToggle && nav) {
+            navToggle.addEventListener('click', function(e) {
+                e.stopPropagation();
+                var isActive = nav.classList.toggle('active');
+                navToggle.setAttribute('aria-expanded', isActive ? 'true' : 'false');
+            });
+
+            nav.querySelectorAll('a').forEach(function(link) {
+                link.addEventListener('click', function() {
+                    nav.classList.remove('active');
+                    navToggle.setAttribute('aria-expanded', 'false');
+                });
+            });
+
+            document.addEventListener('click', function(e) {
+                if (!nav.contains(e.target) && !navToggle.contains(e.target)) {
+                    nav.classList.remove('active');
+                    navToggle.setAttribute('aria-expanded', 'false');
+                }
+            });
+        }
+    });
     </script>
 
 </body>
