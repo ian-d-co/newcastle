@@ -39,7 +39,7 @@ class HotelOccupant {
     public function getByReservation($reservationId) {
         $sql = "SELECT hro.*, u.discord_name, ub.discord_name as invited_by_name
                 FROM hotel_room_occupants hro
-                JOIN users u ON hro.user_id = u.id
+                LEFT JOIN users u ON hro.user_id = u.id
                 JOIN users ub ON hro.invited_by = ub.id
                 WHERE hro.reservation_id = :reservation_id
                 ORDER BY hro.occupant_number";
