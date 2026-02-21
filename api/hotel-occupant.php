@@ -151,6 +151,49 @@ try {
 
         jsonResponse(['success' => true, 'message' => 'Occupant name saved']);
 
+    } elseif ($action === 'save_names_bulk') {
+        $reservationId = (int)($input['reservation_id'] ?? 0);
+        $occupants = $input['occupants'] ?? [];
+
+        if (!$reservationId || !is_array($occupants) || empty($occupants)) {
+            jsonResponse(['success' => false, 'message' => 'Invalid data'], 400);
+        }
+
+        // Verify ownership
+        $db = getDbConnection();
+        $stmt = $db->prepare("SELECT user_id FROM room_reservations WHERE id = :id");
+        $stmt->execute(['id' => $reservationId]);
+        $reservation = $stmt->fetch();
+
+        if (!$reservation || $reservation['user_id'] != $userId) {
+            jsonResponse(['success' => false, 'message' => 'Not authorised'], 403);
+        }
+
+        // Save all names
+        foreach ($occupants as $occ) {
+            $oNum = (int)($occ['occupant_number'] ?? 0);
+            $oName = trim($occ['occupant_name'] ?? '');
+
+            if ($oNum < 2 || $oNum > 3 || empty($oName)) continue;
+
+            $stmt = $db->prepare("SELECT id FROM hotel_room_occupants WHERE reservation_id = :rid AND occupant_number = :onum");
+            $stmt->execute(['rid' => $reservationId, 'onum' => $oNum]);
+            $exists = $stmt->fetch();
+
+            if ($exists) {
+                $stmt = $db->prepare("UPDATE hotel_room_occupants SET occupant_name = :name, updated_at = NOW() WHERE id = :id");
+                $stmt->execute(['name' => $oName, 'id' => $exists['id']]);
+            } else {
+                $stmt = $db->prepare(
+                    "INSERT INTO hotel_room_occupants (reservation_id, occupant_number, occupant_name, invited_by, status) 
+                     VALUES (:rid, :onum, :name, :by, 'accepted')"
+                );
+                $stmt->execute(['rid' => $reservationId, 'onum' => $oNum, 'name' => $oName, 'by' => $userId]);
+            }
+        }
+
+        jsonResponse(['success' => true, 'message' => 'Names saved']);
+
     } else {
         jsonResponse(['success' => false, 'message' => 'Invalid action'], 400);
     }
