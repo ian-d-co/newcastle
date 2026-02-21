@@ -39,6 +39,11 @@ try {
         $userModel->update($userId, $data);
         jsonResponse(['success' => true, 'message' => 'Profile updated successfully']);
 
+    } elseif ($action === 'update_hotel_sharing') {
+        $val = isset($input['open_to_hotel_sharing']) ? (int)$input['open_to_hotel_sharing'] : 0;
+        $userModel->update($userId, ['open_to_hotel_sharing' => $val]);
+        jsonResponse(['success' => true, 'message' => $val ? 'You are now open to hotel sharing' : 'Hotel sharing preference removed']);
+
     } elseif ($action === 'change_pin') {
         $currentPin = $input['current_pin'] ?? '';
         $newPin     = $input['new_pin']     ?? '';

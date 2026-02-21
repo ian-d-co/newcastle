@@ -490,6 +490,26 @@ try {
             include BASE_PATH . '/app/views/public/hotels.php';
             break;
 
+        case 'travel_advice':
+            $pageTitle = 'Travel Advice';
+            include BASE_PATH . '/app/views/public/travel_advice.php';
+            break;
+
+        case 'whos_going':
+            $pageTitle = "Who's Going";
+            include BASE_PATH . '/app/views/public/whos_going.php';
+            break;
+
+        case 'whos_doing_what':
+            $pageTitle = "Who's Doing What";
+            include BASE_PATH . '/app/views/public/whos_doing_what.php';
+            break;
+
+        case 'hotel_sharing':
+            $pageTitle = 'Hotel Sharing';
+            include BASE_PATH . '/app/views/public/hotel_sharing.php';
+            break;
+
         // ========================================================================
         // ADMIN ROUTES (Require admin privileges)
         // ========================================================================

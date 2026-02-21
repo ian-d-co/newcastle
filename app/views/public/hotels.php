@@ -194,6 +194,14 @@ if (!empty($allRoomIds)) {
                                                     data-level="not_interested" style="font-size:0.75rem; padding: 0.2rem 0.5rem;">
                                                 👎 <?php echo $stats['not_interested'] ?? 0; ?>
                                             </button>
+                                            <button class="btn-interest btn-sm btn-outline-secondary"
+                                                    data-item-type="hotel_room"
+                                                    data-item-id="<?php echo $room['id']; ?>"
+                                                    data-item-name="<?php echo e($hotel['name'] . ' — ' . $room['room_type']); ?>"
+                                                    onclick="openInterestWhoModal(this.dataset.itemType, this.dataset.itemId, this.dataset.itemName)"
+                                                    style="font-size:0.75rem; padding: 0.2rem 0.5rem;">
+                                                👥 Who?
+                                            </button>
                                         </div>
                                     </div>
                                     <?php endif; ?>
@@ -342,7 +350,16 @@ if (!empty($allRoomIds)) {
         <?php if (!empty($userReservations)): ?>
             <h2 class="text-primary mt-4 mb-3">Your Reservations</h2>
             
+            <?php
+            require_once BASE_PATH . '/app/models/HotelOccupant.php';
+            $occupantModel = new HotelOccupant();
+            ?>
             <?php foreach ($userReservations as $reservation): ?>
+                <?php
+                $occupancyType   = $reservation['occupancy_type'] ?? '';
+                $maxOccupants    = $occupancyType === 'triple' ? 3 : ($occupancyType === 'double' ? 2 : 1);
+                $occupants       = $occupantModel->getByReservation($reservation['id']);
+                ?>
                 <div class="card mb-3">
                     <div class="card-header bg-success text-white">
                         <?php echo e($reservation['hotel_name']); ?> - <?php echo e($reservation['room_type']); ?>
@@ -373,10 +390,91 @@ if (!empty($allRoomIds)) {
                                 <span class="badge badge-warning">Pending</span>
                             <?php endif; ?>
                         </p>
+
+                        <?php if ($maxOccupants > 1): ?>
+                        <div style="margin: 0.75rem 0;">
+                            <strong>Room occupants:</strong>
+                            <ul style="margin: 0.5rem 0 0; padding-left: 1.25rem; font-size: 0.875rem;">
+                                <li>Occupant 1 (You)</li>
+                                <?php for ($oNum = 2; $oNum <= $maxOccupants; $oNum++): ?>
+                                    <?php
+                                    $found = null;
+                                    foreach ($occupants as $occ) {
+                                        if ($occ['occupant_number'] == $oNum) { $found = $occ; break; }
+                                    }
+                                    ?>
+                                    <li>
+                                        Occupant <?php echo $oNum; ?>:
+                                        <?php if ($found): ?>
+                                            <?php if ($found['status'] === 'accepted'): ?>
+                                                <span class="badge badge-success"><?php echo displayName($found['discord_name']); ?> ✓</span>
+                                            <?php elseif ($found['status'] === 'pending'): ?>
+                                                <span class="badge badge-warning"><?php echo displayName($found['discord_name']); ?> (pending)</span>
+                                                <button class="btn btn-sm btn-danger" style="margin-left: 0.25rem;"
+                                                        data-id="<?php echo $found['id']; ?>"
+                                                        onclick="cancelOccupantInvite(this.dataset.id)">Cancel</button>
+                                            <?php elseif ($found['status'] === 'declined'): ?>
+                                                <span class="badge badge-danger"><?php echo displayName($found['discord_name']); ?> (declined)</span>
+                                                <button class="btn btn-sm btn-primary" style="margin-left: 0.25rem;"
+                                                        data-res-id="<?php echo $reservation['id']; ?>"
+                                                        data-occ-num="<?php echo $oNum; ?>"
+                                                        onclick="openInviteOccupantModal(this.dataset.resId, this.dataset.occNum)">Invite Someone Else</button>
+                                            <?php else: ?>
+                                                <span style="color: #999;">Slot available</span>
+                                                <button class="btn btn-sm btn-primary" style="margin-left: 0.25rem;"
+                                                        data-res-id="<?php echo $reservation['id']; ?>"
+                                                        data-occ-num="<?php echo $oNum; ?>"
+                                                        onclick="openInviteOccupantModal(this.dataset.resId, this.dataset.occNum)">Invite Occupant <?php echo $oNum; ?></button>
+                                            <?php endif; ?>
+                                        <?php else: ?>
+                                            <span style="color: #999;">Slot available</span>
+                                            <button class="btn btn-sm btn-primary" style="margin-left: 0.25rem;"
+                                                    data-res-id="<?php echo $reservation['id']; ?>"
+                                                    data-occ-num="<?php echo $oNum; ?>"
+                                                    onclick="openInviteOccupantModal(this.dataset.resId, this.dataset.occNum)">Invite Occupant <?php echo $oNum; ?></button>
+                                        <?php endif; ?>
+                                    </li>
+                                <?php endfor; ?>
+                            </ul>
+                        </div>
+                        <?php endif; ?>
+
                         <button class="btn btn-danger btn-sm" onclick="cancelReservation(<?php echo $reservation['id']; ?>)">Cancel Reservation</button>
                     </div>
                 </div>
             <?php endforeach; ?>
+        <?php endif; ?>
+
+        <!-- Pending occupant invitations for current user -->
+        <?php
+        $pendingOccupantInvites = $occupantModel->getPendingInvitesForUser($userId);
+        if (!empty($pendingOccupantInvites)):
+        ?>
+        <div class="card mt-4">
+            <div class="card-header">Room Sharing Invitations</div>
+            <div class="card-body">
+                <?php foreach ($pendingOccupantInvites as $inv): ?>
+                <div style="padding: 0.75rem 0; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 0.5rem;">
+                    <div>
+                        <strong><?php echo displayName($inv['invited_by_name']); ?></strong> has invited you to share their
+                        <strong><?php echo e($inv['room_type']); ?></strong> room at <strong><?php echo e($inv['hotel_name']); ?></strong>
+                        (Occupant <?php echo (int)$inv['occupant_number']; ?>).
+                        <?php if (!empty($inv['message'])): ?>
+                        <p style="margin: 0.25rem 0 0; font-size: 0.875rem; color: #666;">"<?php echo e($inv['message']); ?>"</p>
+                        <?php endif; ?>
+                    </div>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <button class="btn btn-sm btn-success"
+                                data-id="<?php echo $inv['id']; ?>"
+                                onclick="respondOccupantInvite(this.dataset.id, 'accept')">Accept</button>
+                        <button class="btn btn-sm btn-danger"
+                                data-id="<?php echo $inv['id']; ?>"
+                                onclick="respondOccupantInvite(this.dataset.id, 'decline')">Decline</button>
+                    </div>
+                </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
         <?php endif; ?>
     </div>
 </div>
@@ -463,30 +561,116 @@ function submitReservation(roomId) {
 
 document.querySelectorAll('.interest-selector').forEach(function(container) {
     container.querySelectorAll('.btn-interest').forEach(function(btn) {
-        btn.addEventListener('click', function() {
-            var itemType = container.dataset.itemType;
-            var itemId = container.dataset.itemId;
-            var level = this.dataset.level;
+        if (btn.dataset.level) {
+            btn.addEventListener('click', function() {
+                var itemType = container.dataset.itemType;
+                var itemId = container.dataset.itemId;
+                var level = this.dataset.level;
 
-            fetch('/api/interest.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ item_type: itemType, item_id: itemId, interest_level: level })
-            })
-            .then(function(r) { return r.json(); })
-            .then(function(data) {
-                if (data.success) {
-                    showAlert('Interest updated!', 'success');
-                    setTimeout(function() { location.reload(); }, 800);
-                } else {
-                    showAlert(data.message || 'Failed to update interest', 'danger');
-                }
-            })
-            .catch(function() { showAlert('An error occurred', 'danger'); });
-        });
+                fetch('/api/interest.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ item_type: itemType, item_id: itemId, interest_level: level })
+                })
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    if (data.success) {
+                        showAlert('Interest updated!', 'success');
+                        setTimeout(function() { location.reload(); }, 800);
+                    } else {
+                        showAlert(data.message || 'Failed to update interest', 'danger');
+                    }
+                })
+                .catch(function() { showAlert('An error occurred', 'danger'); });
+            });
+        }
     });
 });
+
+var hotelCsrf = document.querySelector('meta[name="csrf-token"]').content;
+
+function openInviteOccupantModal(reservationId, occupantNumber) {
+    document.getElementById('invite-occ-res-id').value = reservationId;
+    document.getElementById('invite-occ-num').value    = occupantNumber;
+    document.getElementById('invite-occ-message').value = '';
+    document.getElementById('invite-occ-user').value   = '';
+    modalManager.open('invite-occupant-modal');
+}
+
+function cancelOccupantInvite(id) {
+    if (!confirm('Cancel this invitation?')) return;
+    apiCall('/api/hotel-occupant.php', 'POST', {
+        csrf_token: hotelCsrf,
+        action: 'cancel',
+        id: id
+    }, function(err, res) {
+        if (err) { showAlert(err.message || 'Failed', 'danger'); return; }
+        showAlert('Invitation cancelled', 'success');
+        setTimeout(function() { location.reload(); }, 600);
+    });
+}
+
+function respondOccupantInvite(id, action) {
+    apiCall('/api/hotel-occupant.php', 'POST', {
+        csrf_token: hotelCsrf,
+        action: action,
+        id: id
+    }, function(err, res) {
+        if (err) { showAlert(err.message || 'Failed', 'danger'); return; }
+        showAlert(res.message || 'Done!', 'success');
+        setTimeout(function() { location.reload(); }, 600);
+    });
+}
+
+var inviteOccForm = document.getElementById('invite-occupant-form');
+if (inviteOccForm) {
+    inviteOccForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        var btn = this.querySelector('[type="submit"]');
+        btn.disabled = true;
+        apiCall('/api/hotel-occupant.php', 'POST', {
+            csrf_token: hotelCsrf,
+            action: 'invite',
+            reservation_id: document.getElementById('invite-occ-res-id').value,
+            user_id: document.getElementById('invite-occ-user').value,
+            occupant_number: document.getElementById('invite-occ-num').value,
+            message: document.getElementById('invite-occ-message').value
+        }, function(err, res) {
+            btn.disabled = false;
+            if (err) { showAlert(err.message || 'Failed to send invitation', 'danger'); return; }
+            showAlert('Invitation sent!', 'success');
+            modalManager.close('invite-occupant-modal');
+            setTimeout(function() { location.reload(); }, 800);
+        });
+    });
+}
 </script>
+
+<!-- Invite Occupant Modal -->
+<div class="modal" id="invite-occupant-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title">Invite Room Occupant</h3>
+            <button class="modal-close" onclick="modalManager.close('invite-occupant-modal')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form id="invite-occupant-form">
+                <input type="hidden" id="invite-occ-res-id">
+                <input type="hidden" id="invite-occ-num">
+                <div class="form-group">
+                    <label class="form-label">Attendee User ID *</label>
+                    <input type="number" class="form-control" id="invite-occ-user" placeholder="Enter user ID" required min="1">
+                    <small style="color: #666;">Ask the person for their user ID (visible on admin panel) or invite by Discord name lookup.</small>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Message (optional)</label>
+                    <textarea class="form-control" id="invite-occ-message" rows="2" placeholder="Add a message..."></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Send Invitation</button>
+            </form>
+        </div>
+    </div>
+</div>
 
 <?php
 $content = ob_get_clean();

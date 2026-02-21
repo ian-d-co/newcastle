@@ -63,6 +63,11 @@ class User {
             $params['is_admin'] = $data['is_admin'];
         }
         
+        if (isset($data['open_to_hotel_sharing'])) {
+            $fields[] = "open_to_hotel_sharing = :open_to_hotel_sharing";
+            $params['open_to_hotel_sharing'] = $data['open_to_hotel_sharing'] ? 1 : 0;
+        }
+
         if (isset($data['pin'])) {
             $fields[] = "pin_hash = :pin_hash";
             $params['pin_hash'] = password_hash($data['pin'], PASSWORD_BCRYPT);

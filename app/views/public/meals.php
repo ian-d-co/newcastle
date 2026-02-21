@@ -135,6 +135,14 @@ if (!empty($meals)) {
                                             data-level="not_interested" style="font-size:0.75rem; padding: 0.2rem 0.5rem;">
                                         👎 <?php echo $stats['not_interested'] ?? 0; ?>
                                     </button>
+                                    <button class="btn-interest btn-sm btn-outline-secondary"
+                                            data-item-type="meal"
+                                            data-item-id="<?php echo $meal['id']; ?>"
+                                            data-item-name="<?php echo e($meal['title']); ?>"
+                                            onclick="openInterestWhoModal(this.dataset.itemType, this.dataset.itemId, this.dataset.itemName)"
+                                            style="font-size:0.75rem; padding: 0.2rem 0.5rem;">
+                                        👥 Who?
+                                    </button>
                                 </div>
                             </div>
                             <?php endif; ?>
