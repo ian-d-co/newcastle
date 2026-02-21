@@ -7,6 +7,11 @@
     <title><?php echo isset($pageTitle) ? e($pageTitle) . ' - ' : ''; ?>Dicksord Fest 2026 - Newcastle</title>
     <meta name="description" content="Dicksord Fest 2026 - Newcastle event management platform">
     <link rel="stylesheet" href="/css/styles.css?v=<?php echo time(); ?>">
+    <script src="/js/app.js" defer></script>
+    <script src="/js/scripts.js" defer></script>
+    <script src="/js/modals.js" defer></script>
+    <script src="/js/forms.js" defer></script>
+    <script src="/js/charts.js" defer></script>
 </head>
 <body>
     <!-- Header -->
@@ -71,10 +76,5 @@
         </div>
     </footer>
 
-    <script src="/js/app.js"></script>
-    <script src="/js/scripts.js"></script>
-    <script src="/js/modals.js"></script>
-    <script src="/js/forms.js"></script>
-    <script src="/js/charts.js"></script>
 </body>
 </html>
