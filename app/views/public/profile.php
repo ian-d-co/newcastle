@@ -35,6 +35,22 @@ $user = $stmt->fetch();
             </div>
         </div>
 
+        <!-- Hotel Sharing Preference -->
+        <div class="card" style="margin-bottom: 1.5rem;">
+            <div class="card-header">Preferences</div>
+            <div class="card-body">
+                <label style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer;">
+                    <input type="checkbox" id="open-to-hotel-sharing"
+                           <?php echo !empty($user['open_to_hotel_sharing']) ? 'checked' : ''; ?>
+                           style="width: 20px; height: 20px; cursor: pointer;">
+                    <span>Open to sharing a hotel room</span>
+                </label>
+                <p style="margin: 0.5rem 0 0; font-size: 0.875rem; color: #666;">
+                    When enabled, your name will appear on the <a href="/index.php?page=hotel_sharing">Hotel Sharing</a> page so others can request to share a room with you.
+                </p>
+            </div>
+        </div>
+
     </div>
 </div>
 
@@ -87,6 +103,21 @@ $user = $stmt->fetch();
 </div>
 
 <script>
+document.getElementById('open-to-hotel-sharing').addEventListener('change', function() {
+    var csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+    apiCall('/api/profile-update.php', 'POST', {
+        csrf_token: csrfToken,
+        action: 'update_hotel_sharing',
+        open_to_hotel_sharing: this.checked ? 1 : 0
+    }, function(err, res) {
+        if (err) {
+            showAlert(err.message || 'Failed to update preference', 'danger');
+        } else {
+            showAlert(res.message || 'Preference updated!', 'success');
+        }
+    });
+});
+
 document.getElementById('edit-profile-form').addEventListener('submit', function(e) {
     e.preventDefault();
     var csrfToken = document.querySelector('meta[name="csrf-token"]').content;
