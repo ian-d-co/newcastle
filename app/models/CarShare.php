@@ -169,8 +169,8 @@ class CarShare {
 
     public function createRequest($offerId, $userId, $message = '') {
         $sql = "INSERT INTO carshare_requests (carshare_offer_id, user_id, message)
-                VALUES (:offer_id, :user_id, :message) AS new_vals
-                ON DUPLICATE KEY UPDATE message = new_vals.message, status = 'pending', updated_at = NOW()";
+                VALUES (:offer_id, :user_id, :message)
+                ON DUPLICATE KEY UPDATE message = VALUES(message), status = 'pending', updated_at = NOW()";
         $stmt = $this->db->prepare($sql);
         $stmt->execute(['offer_id' => $offerId, 'user_id' => $userId, 'message' => $message]);
         return $this->db->lastInsertId() ?: true;
