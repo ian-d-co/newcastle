@@ -92,6 +92,65 @@ try {
         $model->cancel($id, $userId);
         jsonResponse(['success' => true, 'message' => 'Invitation cancelled']);
 
+    } elseif ($action === 'save_name') {
+        $reservationId  = (int)($input['reservation_id'] ?? 0);
+        $occupantNumber = (int)($input['occupant_number'] ?? 2);
+        $occupantName   = trim($input['occupant_name'] ?? '');
+
+        if (!$reservationId || !$occupantNumber || !$occupantName) {
+            jsonResponse(['success' => false, 'message' => 'Missing required fields'], 400);
+        }
+        if ($occupantNumber < 2 || $occupantNumber > 3) {
+            jsonResponse(['success' => false, 'message' => 'Invalid occupant number'], 400);
+        }
+
+        // Verify reservation belongs to current user
+        $db = getDbConnection();
+        $stmt = $db->prepare("SELECT user_id, occupancy_type FROM room_reservations WHERE id = :id");
+        $stmt->execute(['id' => $reservationId]);
+        $reservation = $stmt->fetch();
+
+        if (!$reservation) {
+            jsonResponse(['success' => false, 'message' => 'Reservation not found'], 404);
+        }
+        if ($reservation['user_id'] != $userId) {
+            jsonResponse(['success' => false, 'message' => 'Not authorised'], 403);
+        }
+
+        // Check occupancy type supports this occupant number
+        $occupancyType = $reservation['occupancy_type'] ?? '';
+        if ($occupantNumber === 3 && $occupancyType !== 'triple') {
+            jsonResponse(['success' => false, 'message' => 'This room does not support a third occupant'], 400);
+        }
+        if ($occupantNumber === 2 && !in_array($occupancyType, ['double', 'triple'])) {
+            jsonResponse(['success' => false, 'message' => 'This room does not support a second occupant'], 400);
+        }
+
+        // Check if occupant record already exists
+        $stmt = $db->prepare("SELECT id FROM hotel_room_occupants WHERE reservation_id = :rid AND occupant_number = :onum");
+        $stmt->execute(['rid' => $reservationId, 'onum' => $occupantNumber]);
+        $existing = $stmt->fetch();
+
+        if ($existing) {
+            // Update existing record
+            $stmt = $db->prepare("UPDATE hotel_room_occupants SET occupant_name = :name, updated_at = NOW() WHERE id = :id");
+            $stmt->execute(['name' => $occupantName, 'id' => $existing['id']]);
+        } else {
+            // Create new record with just the name (no user_id)
+            $stmt = $db->prepare(
+                "INSERT INTO hotel_room_occupants (reservation_id, occupant_number, occupant_name, invited_by, status) 
+                 VALUES (:rid, :onum, :name, :invited_by, 'accepted')"
+            );
+            $stmt->execute([
+                'rid'        => $reservationId,
+                'onum'       => $occupantNumber,
+                'name'       => $occupantName,
+                'invited_by' => $userId,
+            ]);
+        }
+
+        jsonResponse(['success' => true, 'message' => 'Occupant name saved']);
+
     } else {
         jsonResponse(['success' => false, 'message' => 'Invalid action'], 400);
     }
