@@ -114,7 +114,7 @@ ob_start();
                         <?php elseif ($userBooking): ?>
                             <span class="badge badge-success">Already booked</span>
                         <?php elseif ($offer['available_spaces'] > 0): ?>
-                            <button class="btn btn-primary" onclick="openRequestModal(<?php echo (int)$offer['id']; ?>, <?php $driverName = displayName($offer['discord_name'] ?? ''); $encoded = json_encode($driverName ?: 'Unknown', JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE); echo $encoded !== false ? $encoded : '&quot;Unknown&quot;'; ?>)">Request to Join</button>
+                            <button class="btn btn-primary btn-request-join" data-offer-id="<?php echo (int)$offer['id']; ?>" data-driver-name="<?php echo e($offer['discord_name'] ?? 'Unknown'); ?>">Request to Join</button>
                         <?php else: ?>
                             <span class="badge badge-danger">Full</span>
                         <?php endif; ?>
@@ -243,6 +243,18 @@ function cancelPassengerBooking(offerId, passengerId) {
         }
     });
 }
+
+// Bind request-to-join buttons using data attributes
+document.addEventListener('DOMContentLoaded', function() {
+    var buttons = document.querySelectorAll('.btn-request-join');
+    buttons.forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var offerId = parseInt(this.getAttribute('data-offer-id'), 10);
+            var driverName = this.getAttribute('data-driver-name') || 'Unknown';
+            openRequestModal(offerId, driverName);
+        });
+    });
+});
 </script>
 
 <?php
