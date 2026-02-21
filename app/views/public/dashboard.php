@@ -128,14 +128,14 @@ ob_start();
 
                 <?php if ($carshareOffer): ?>
                     <hr>
-                    <p><strong>Carshare — Offering a ride</strong></p>
+                    <p><strong>Car Share — Offering a ride</strong></p>
                     <p>From: <?php echo e($carshareOffer['origin']); ?></p>
                     <p>Capacity: <?php echo (int)$carshareOffer['passenger_capacity']; ?> passengers &bull; Available: <?php echo (int)$carshareOffer['available_spaces']; ?> spaces</p>
                 <?php endif; ?>
 
                 <?php if ($carshareBooking): ?>
                     <hr>
-                    <p><strong>Carpooling with:</strong> <?php echo e($carshareBooking['driver_name']); ?> (from <?php echo e($carshareBooking['origin']); ?>)</p>
+                    <p><strong>Car Share with:</strong> <?php echo e($carshareBooking['driver_name']); ?> (from <?php echo e($carshareBooking['origin']); ?>)</p>
                 <?php endif; ?>
 
                 <?php if ($hostingOffer): ?>
@@ -196,7 +196,7 @@ ob_start();
                     <p>No accommodation arranged yet.</p>
                     <a href="/index.php?page=hotels" class="btn btn-primary btn-sm">Browse Hotels</a>
                     <a href="/index.php?page=hosting" class="btn btn-secondary btn-sm">View Hosting Offers</a>
-                    <a href="/index.php?page=carshare" class="btn btn-secondary btn-sm">View Carshare</a>
+                    <a href="/index.php?page=carshare" class="btn btn-secondary btn-sm">View Car Share</a>
                 <?php endif; ?>
 
                 <?php if ($isAttending): ?>
@@ -420,7 +420,7 @@ ob_start();
                 <!-- Carshare Section (Conditional) -->
                 <div id="carshare-section" style="display: none;">
                     <div class="form-group">
-                        <label class="form-label">Can you offer a carshare/lift?</label>
+                        <label class="form-label">Can you offer a car share/lift?</label>
                         <div class="form-check">
                             <input class="form-check-input" type="radio" id="can-carshare-yes" name="can_carshare" value="yes">
                             <label class="form-check-label" for="can-carshare-yes">Yes</label>
@@ -539,7 +539,7 @@ $updateTravel = array_map('trim', $updateTravel);
 
                 <div id="upd-carshare-section" style="display: <?php echo in_array('Car', $updateTravel) ? 'block' : 'none'; ?>;">
                     <div class="form-group">
-                        <label class="form-label">Can you offer a carshare/lift?</label>
+                        <label class="form-label">Can you offer a car share/lift?</label>
                         <div class="form-check">
                             <input class="form-check-input" type="radio" id="upd-can-carshare-yes" name="can_carshare" value="yes"
                                    <?php echo $carshareOffer ? 'checked' : ''; ?>>

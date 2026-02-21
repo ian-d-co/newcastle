@@ -432,11 +432,20 @@ try {
             break;
 
         case 'carshare':
-            $pageTitle = 'Carshare';
+            $pageTitle = 'Car Share';
             $availableOffers = $carshareModel->getAvailable($event['id']);
             $userOffer = $carshareModel->getUserOffer($userId, $event['id']);
-            $userBooking = $carshareModel->getUserBooking($userId, $event['id']);
+            $userBooking = $userOffer ? null : $carshareModel->getUserBooking($userId, $event['id']);
             $offerBookings = $userOffer ? $carshareModel->getOfferBookings($userOffer['id']) : [];
+            $pendingRequests = $userOffer ? $carshareModel->getPendingRequestsForDriver($userId, $event['id']) : [];
+            $passengerRequests = !$userOffer ? $carshareModel->getRequestsForPassenger($userId, $event['id']) : [];
+            $userRequest = null;
+            foreach ($passengerRequests as $req) {
+                if ($req['status'] !== 'cancelled') {
+                    $userRequest = $req;
+                    break;
+                }
+            }
             
             include BASE_PATH . '/app/views/public/carshare.php';
             break;
