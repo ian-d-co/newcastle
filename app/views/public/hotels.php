@@ -358,13 +358,14 @@ if (!empty($allRoomIds)) {
             <?php endforeach; ?>
         <?php endif; ?>
 
+        <?php
+        require_once BASE_PATH . '/app/models/HotelOccupant.php';
+        $occupantModel = new HotelOccupant();
+        ?>
+
         <?php if (!empty($userReservations)): ?>
             <h2 class="text-primary mt-4 mb-3">Your Reservations</h2>
             
-            <?php
-            require_once BASE_PATH . '/app/models/HotelOccupant.php';
-            $occupantModel = new HotelOccupant();
-            ?>
             <?php foreach ($userReservations as $reservation): ?>
                 <?php
                 $occupancyType   = $reservation['occupancy_type'] ?? '';
