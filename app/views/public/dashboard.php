@@ -327,7 +327,7 @@ ob_start();
             FROM room_reservations rr
             JOIN hotel_rooms hr ON rr.hotel_room_id = hr.id
             JOIN hotels h ON hr.hotel_id = h.id
-            WHERE rr.user_id = :user_id3 AND h.event_id = :event_id3 AND rr.payment_status != 'cancelled'
+            WHERE rr.user_id = :user_id3 AND h.event_id = :event_id3 AND (rr.booking_status IS NULL OR rr.booking_status != 'cancelled')
             ORDER BY COALESCE(day, 'zzz'), type
         ");
         $paymentStmt->execute([
