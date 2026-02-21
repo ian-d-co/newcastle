@@ -148,7 +148,13 @@ class Hosting {
             $sql = "UPDATE hosting_offers SET available_spaces = available_spaces + 1 WHERE id = :id";
             $stmt = $this->db->prepare($sql);
             $stmt->execute(['id' => $offerId]);
-            
+
+            // Cancel the accepted request so the guest's view updates correctly
+            $sql = "UPDATE hosting_requests SET status = 'cancelled', updated_at = NOW()
+                    WHERE hosting_offer_id = :offer_id AND user_id = :guest_id AND status = 'accepted'";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute(['offer_id' => $offerId, 'guest_id' => $guestUserId]);
+
             $this->db->commit();
             return true;
         } catch (Exception $e) {
@@ -332,13 +338,16 @@ class Hosting {
                 throw new Exception('Request not found');
             }
 
-            // If it was accepted, restore the space and remove booking
+            // If it was accepted, restore the space ONLY if the booking record still exists
             if ($request['status'] === 'accepted') {
-                $stmt = $this->db->prepare("UPDATE hosting_offers SET available_spaces = available_spaces + 1 WHERE id = :id");
-                $stmt->execute(['id' => $request['hosting_offer_id']]);
-
                 $stmt = $this->db->prepare("DELETE FROM hosting_bookings WHERE hosting_offer_id = :offer_id AND user_id = :user_id");
                 $stmt->execute(['offer_id' => $request['hosting_offer_id'], 'user_id' => $userId]);
+
+                if ($stmt->rowCount() > 0) {
+                    // Only restore space if a booking row was actually removed
+                    $stmt = $this->db->prepare("UPDATE hosting_offers SET available_spaces = available_spaces + 1 WHERE id = :id");
+                    $stmt->execute(['id' => $request['hosting_offer_id']]);
+                }
             }
 
             $stmt = $this->db->prepare("UPDATE hosting_requests SET status = 'cancelled', updated_at = NOW() WHERE id = :id");
