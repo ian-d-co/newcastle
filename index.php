@@ -435,10 +435,16 @@ try {
             $pageTitle = 'Car Share';
             $availableOffers = $carshareModel->getAvailable($event['id']);
             $userOffer = $carshareModel->getUserOffer($userId, $event['id']);
-            $userBooking = $userOffer ? null : $carshareModel->getUserBooking($userId, $event['id']);
+            $userBooking = $carshareModel->getUserBooking($userId, $event['id']);
             $offerBookings = $userOffer ? $carshareModel->getOfferBookings($userOffer['id']) : [];
-            $pendingRequests = $userOffer ? $carshareModel->getPendingRequestsForDriver($userId, $event['id']) : [];
-            $passengerRequests = !$userOffer ? $carshareModel->getRequestsForPassenger($userId, $event['id']) : [];
+            try {
+                $pendingRequests = $userOffer ? $carshareModel->getPendingRequestsForDriver($userId, $event['id']) : [];
+                $passengerRequests = !$userOffer ? $carshareModel->getRequestsForPassenger($userId, $event['id']) : [];
+            } catch (Exception $e) {
+                error_log('CarShare requests table error: ' . $e->getMessage());
+                $pendingRequests = [];
+                $passengerRequests = [];
+            }
             $userRequest = null;
             foreach ($passengerRequests as $req) {
                 if ($req['status'] !== 'cancelled') {

@@ -111,10 +111,19 @@ class Hosting {
             $sql = "DELETE FROM hosting_bookings WHERE hosting_offer_id = :offer_id AND user_id = :user_id";
             $stmt = $this->db->prepare($sql);
             $stmt->execute(['offer_id' => $offerId, 'user_id' => $userId]);
-            
+
+            if ($stmt->rowCount() === 0) {
+                throw new Exception('Booking not found or already cancelled');
+            }
+
             $sql = "UPDATE hosting_offers SET available_spaces = available_spaces + 1 WHERE id = :id";
             $stmt = $this->db->prepare($sql);
             $stmt->execute(['id' => $offerId]);
+
+            $sql = "UPDATE hosting_requests SET status = 'cancelled', updated_at = NOW()
+                    WHERE hosting_offer_id = :offer_id AND user_id = :user_id AND status = 'accepted'";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute(['offer_id' => $offerId, 'user_id' => $userId]);
             
             $this->db->commit();
             return true;
