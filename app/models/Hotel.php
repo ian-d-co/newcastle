@@ -213,7 +213,7 @@ class Hotel {
                 throw new Exception('Reservation not found');
             }
             
-            if ($reservation['payment_status'] === 'cancelled') {
+            if ($reservation['booking_status'] === 'cancelled') {
                 error_log('Hotel::cancelReservation() - Reservation already cancelled: ' . $reservationId);
                 throw new Exception('Reservation is already cancelled');
             }
@@ -224,7 +224,7 @@ class Hotel {
                 throw new Exception('You can only cancel your own reservations');
             }
             
-            $sql = "UPDATE room_reservations SET payment_status = 'cancelled' WHERE id = :reservation_id";
+            $sql = "UPDATE room_reservations SET booking_status = 'cancelled' WHERE id = :reservation_id";
             $stmt = $this->db->prepare($sql);
             $stmt->execute(['reservation_id' => $reservationId]);
             error_log('Hotel::cancelReservation() - Reservation status updated to cancelled');
@@ -254,7 +254,7 @@ class Hotel {
                 FROM room_reservations rr
                 JOIN hotel_rooms hr ON rr.hotel_room_id = hr.id
                 JOIN hotels h ON hr.hotel_id = h.id
-                WHERE rr.user_id = :user_id AND h.event_id = :event_id AND rr.payment_status != 'cancelled'
+                WHERE rr.user_id = :user_id AND h.event_id = :event_id AND rr.booking_status != 'cancelled'
                 ORDER BY rr.created_at";
         
         $stmt = $this->db->prepare($sql);
