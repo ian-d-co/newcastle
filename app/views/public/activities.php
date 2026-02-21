@@ -88,6 +88,14 @@ if (!empty($activities)) {
                                         <?php endif; ?>
                                     </span>
                                 </div>
+                                <div class="item-meta-item">
+                                    <strong>Price:</strong>
+                                    <?php if (!isset($activity['price']) || $activity['price'] == 0): ?>
+                                        <span style="color: #28a745; font-weight: 600;">Free</span>
+                                    <?php else: ?>
+                                        <span style="font-weight: 600;">£<?php echo number_format($activity['price'], 2); ?></span>
+                                    <?php endif; ?>
+                                </div>
                                 <?php if (!empty($activity['total_price']) && $activity['total_price'] > 0): ?>
                                 <div class="item-meta-item">
                                     <strong>Total Price:</strong> £<?php echo number_format($activity['total_price'], 2); ?>
