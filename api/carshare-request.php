@@ -21,21 +21,29 @@ if (!verifyCsrfToken($input['csrf_token'] ?? '')) {
 
 try {
     $offerId = $input['offer_id'] ?? null;
-    $passengerId = $input['passenger_id'] ?? null;
-    
+    $message = $input['message'] ?? '';
+
     if (!$offerId) {
         throw new Exception('Offer ID is required');
     }
-    
+
+    $userId = getCurrentUserId();
     $carshareModel = new CarShare();
-    
-    if ($passengerId !== null) {
-        $carshareModel->cancelBookingAsDriver($offerId, getCurrentUserId(), $passengerId);
-    } else {
-        $carshareModel->cancelBooking($offerId, getCurrentUserId());
+
+    $offer = $carshareModel->getById($offerId);
+    if (!$offer) {
+        throw new Exception('Car share offer not found');
     }
-    
-    jsonResponse(['success' => true, 'message' => 'Car share cancelled successfully']);
+    if ($offer['user_id'] == $userId) {
+        throw new Exception('Cannot request to join your own car share');
+    }
+    if ($offer['available_spaces'] <= 0) {
+        throw new Exception('No available spaces');
+    }
+
+    $carshareModel->createRequest($offerId, $userId, $message);
+
+    jsonResponse(['success' => true, 'message' => 'Request to join sent successfully']);
 } catch (Exception $e) {
     jsonResponse(['success' => false, 'message' => $e->getMessage()], 400);
 }
