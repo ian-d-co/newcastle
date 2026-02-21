@@ -9,7 +9,6 @@
     <link rel="stylesheet" href="/css/styles.css?v=<?php echo time(); ?>">
     <script src="/js/app.js" defer></script>
     <script src="/js/scripts.js" defer></script>
-    <script src="/js/modals.js" defer></script>
     <script src="/js/forms.js" defer></script>
     <script src="/js/charts.js" defer></script>
 </head>
