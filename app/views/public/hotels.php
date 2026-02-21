@@ -225,9 +225,22 @@ if (!empty($allRoomIds)) {
                                         <?php elseif (!hasRegisteredAttendance()): ?>
                                             <button class="btn btn-warning" onclick="showAttendanceRequired()">Register Attendance First</button>
                                         <?php elseif ($room['quantity_available'] > 0): ?>
-                                            <button class="btn btn-primary" onclick="modalManager.open('reserve-modal-<?php echo $room['id']; ?>')">
-                                                Reserve Room
-                                            </button>
+                                            <?php if (!empty($room['book_direct_with_hotel'])): ?>
+                                                <?php $hotelLink = $hotel['link'] ?? ''; ?>
+                                                <?php if (!empty($hotelLink)): ?>
+                                                    <a href="<?php echo e($hotelLink); ?>" target="_blank" rel="noopener noreferrer" class="btn btn-success">
+                                                        🏨 Book Direct with Hotel
+                                                    </a>
+                                                <?php else: ?>
+                                                    <button class="btn btn-success" disabled title="Hotel contact information not available">
+                                                        🏨 Book Direct with Hotel
+                                                    </button>
+                                                <?php endif; ?>
+                                            <?php else: ?>
+                                                <button class="btn btn-primary" onclick="modalManager.open('reserve-modal-<?php echo $room['id']; ?>')">
+                                                    Reserve Room
+                                                </button>
+                                            <?php endif; ?>
                                         <?php else: ?>
                                             <span class="badge badge-danger">Fully Booked</span>
                                         <?php endif; ?>
