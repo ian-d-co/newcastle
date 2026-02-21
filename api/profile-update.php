@@ -4,6 +4,9 @@ require_once __DIR__ . '/../app/helpers/functions.php';
 require_once __DIR__ . '/../app/middleware/Auth.php';
 require_once __DIR__ . '/../app/middleware/CSRF.php';
 require_once __DIR__ . '/../app/models/User.php';
+require_once __DIR__ . '/../app/models/Event.php';
+require_once __DIR__ . '/../app/models/CarShare.php';
+require_once __DIR__ . '/../app/models/Hosting.php';
 
 initSession();
 Auth::check();
@@ -43,6 +46,59 @@ try {
         $val = isset($input['open_to_hotel_sharing']) ? (int)$input['open_to_hotel_sharing'] : 0;
         $userModel->update($userId, ['open_to_hotel_sharing' => $val]);
         jsonResponse(['success' => true, 'message' => $val ? 'You are now open to hotel sharing' : 'Hotel sharing preference removed']);
+
+    } elseif ($action === 'update_carshare') {
+        $origin   = trim($input['carshare_origin'] ?? '');
+        $capacity = (int)($input['carshare_capacity'] ?? 0);
+        if (empty($origin)) {
+            jsonResponse(['success' => false, 'message' => 'Travel origin is required'], 400);
+        }
+        if ($capacity < 1 || $capacity > 8) {
+            jsonResponse(['success' => false, 'message' => 'Passenger capacity must be between 1 and 8'], 400);
+        }
+        $eventModel = new Event();
+        $event = $eventModel->getActive();
+        if (!$event) {
+            jsonResponse(['success' => false, 'message' => 'No active event found'], 400);
+        }
+        $carshareModel = new CarShare();
+        $carshareModel->updateOffer($userId, $event['id'], $origin, $capacity);
+        jsonResponse(['success' => true, 'message' => 'Car share offer saved']);
+
+    } elseif ($action === 'remove_carshare') {
+        $eventModel = new Event();
+        $event = $eventModel->getActive();
+        if (!$event) {
+            jsonResponse(['success' => false, 'message' => 'No active event found'], 400);
+        }
+        $carshareModel = new CarShare();
+        $carshareModel->removeOffer($userId, $event['id']);
+        jsonResponse(['success' => true, 'message' => 'Car share offer removed']);
+
+    } elseif ($action === 'update_hosting') {
+        $capacity = (int)($input['hosting_capacity'] ?? 0);
+        $notes    = trim($input['hosting_notes'] ?? '');
+        if ($capacity < 1) {
+            jsonResponse(['success' => false, 'message' => 'Hosting capacity must be at least 1'], 400);
+        }
+        $eventModel = new Event();
+        $event = $eventModel->getActive();
+        if (!$event) {
+            jsonResponse(['success' => false, 'message' => 'No active event found'], 400);
+        }
+        $hostingModel = new Hosting();
+        $hostingModel->updateOffer($userId, $event['id'], $capacity, $notes);
+        jsonResponse(['success' => true, 'message' => 'Hosting offer saved']);
+
+    } elseif ($action === 'remove_hosting') {
+        $eventModel = new Event();
+        $event = $eventModel->getActive();
+        if (!$event) {
+            jsonResponse(['success' => false, 'message' => 'No active event found'], 400);
+        }
+        $hostingModel = new Hosting();
+        $hostingModel->removeOffer($userId, $event['id']);
+        jsonResponse(['success' => true, 'message' => 'Hosting offer removed']);
 
     } elseif ($action === 'change_pin') {
         $currentPin = $input['current_pin'] ?? '';

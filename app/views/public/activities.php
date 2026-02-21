@@ -228,7 +228,7 @@ function showAttendanceRequired() {
 }
 
 document.querySelectorAll('.interest-selector').forEach(function(container) {
-    container.querySelectorAll('.btn-interest').forEach(function(btn) {
+    container.querySelectorAll('.btn-interest[data-level]').forEach(function(btn) {
         btn.addEventListener('click', function() {
             var itemType = container.dataset.itemType;
             var itemId = container.dataset.itemId;
@@ -245,7 +245,7 @@ document.querySelectorAll('.interest-selector').forEach(function(container) {
                     showAlert('Interest updated!', 'success');
                     var levels = { interested: '👍', maybe: '🤔', not_interested: '👎' };
                     var classes = { interested: 'btn-success', maybe: 'btn-warning', not_interested: 'btn-danger' };
-                    container.querySelectorAll('.btn-interest').forEach(function(b) {
+                    container.querySelectorAll('.btn-interest[data-level]').forEach(function(b) {
                         var l = b.dataset.level;
                         b.className = 'btn-interest btn-sm ' + (l === data.user_level ? classes[l] : 'btn-outline-secondary');
                         b.textContent = levels[l] + ' ' + (data.counts[l] || 0);

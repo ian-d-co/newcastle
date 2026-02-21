@@ -137,6 +137,27 @@ class HotelSharing {
     }
 
     /**
+     * Cancel an accepted match (called by either partner).
+     */
+    public function cancelMatch($requestId, $userId) {
+        $request = $this->getRequestById($requestId);
+
+        if (!$request) {
+            throw new Exception('Request not found');
+        }
+        if ($request['requester_id'] != $userId && $request['target_user_id'] != $userId) {
+            throw new Exception('Not authorised');
+        }
+        if ($request['status'] !== 'accepted') {
+            throw new Exception('Match is not in accepted state');
+        }
+
+        $stmt = $this->db->prepare("UPDATE hotel_sharing_requests SET status = 'cancelled', updated_at = NOW() WHERE id = :id");
+        $stmt->execute(['id' => $requestId]);
+        return true;
+    }
+
+    /**
      * Get accepted matches for a user (as requester or target).
      */
     public function getAcceptedMatches($userId) {

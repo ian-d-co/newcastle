@@ -867,6 +867,10 @@ select.form-control {
 .bg-accent { background-color: var(--accent); }
 .bg-light { background-color: var(--accent); }
 .bg-white { background-color: var(--white); }
+.bg-success { background-color: #28a745; color: #fff; }
+.bg-warning { background-color: #ffc107; color: #212529; }
+.bg-danger  { background-color: #dc3545; color: #fff; }
+.bg-info    { background-color: #17a2b8; color: #fff; }
 
 .mt-1 { margin-top: 0.5rem; }
 .mt-2 { margin-top: 1rem; }
