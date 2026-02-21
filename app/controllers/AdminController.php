@@ -1046,12 +1046,14 @@ class AdminController {
                     rr.created_at,
                     u.discord_name,
                     u.name as user_name,
-                    rr.id as reservation_id
+                    rr.id as reservation_id,
+                    rr.status
                 FROM room_reservations rr
                 JOIN hotel_rooms hr ON rr.hotel_room_id = hr.id
                 JOIN hotels h ON hr.hotel_id = h.id
                 JOIN users u ON rr.user_id = u.id
                 WHERE h.event_id = :event_id
+                  AND (rr.status IS NULL OR rr.status != 'cancelled')
                 ORDER BY h.name, hr.room_type, rr.created_at";
         
         $stmt = $db->prepare($sql);
@@ -1099,8 +1101,17 @@ class AdminController {
             $occupants = $occupantModel->getByReservation($res['reservation_id']);
             $occupantNames = [];
             foreach ($occupants as $occ) {
-                if ($occ['status'] === 'accepted') {
-                    $occupantNames[] = $occ['discord_name'] . ' (#' . $occ['occupant_number'] . ')';
+                if ($occ['status'] === 'accepted' || !empty($occ['occupant_name'])) {
+                    $slotNum = '#' . $occ['occupant_number'];
+                    
+                    // Prioritize actual name over discord name
+                    if (!empty($occ['occupant_name'])) {
+                        $occupantNames[] = $occ['occupant_name'] . ' (' . $slotNum . ')';
+                    } elseif (!empty($occ['discord_name'])) {
+                        $occupantNames[] = $occ['discord_name'] . ' (' . $slotNum . ')';
+                    } else {
+                        $occupantNames[] = 'Occupant ' . $slotNum;
+                    }
                 }
             }
             $occupantsStr = !empty($occupantNames) ? implode(', ', $occupantNames) : 'None';
