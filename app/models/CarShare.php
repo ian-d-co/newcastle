@@ -8,14 +8,15 @@ class CarShare {
     
     public function createOffer($userId, $eventId, $origin, $capacity) {
         $sql = "INSERT INTO carshare_offers (user_id, event_id, origin, passenger_capacity, available_spaces)
-                VALUES (:user_id, :event_id, :origin, :capacity, :capacity)";
+                VALUES (:user_id, :event_id, :origin, :capacity, :available_spaces)";
         
         $stmt = $this->db->prepare($sql);
         $stmt->execute([
-            'user_id' => $userId,
-            'event_id' => $eventId,
-            'origin' => $origin,
-            'capacity' => $capacity
+            'user_id'          => $userId,
+            'event_id'         => $eventId,
+            'origin'           => $origin,
+            'capacity'         => $capacity,
+            'available_spaces' => $capacity,
         ]);
         
         return $this->db->lastInsertId();
